@@ -15,8 +15,8 @@ describe('Certificados', () => {
     expect(screen.getByText(/openai api - coding with javascript/i)).toBeInTheDocument();
     expect(screen.getByText(/^prompt engineering$/i)).toBeInTheDocument();
     expect(screen.getByText(/hallucinations, inaccuracies, and bias/i)).toBeInTheDocument();
-    expect(screen.getByText(/owasp top 10/i)).toBeInTheDocument();
-    expect(screen.getByText(/becoming a secure coder/i)).toBeInTheDocument();
+    expect(screen.queryByText(/owasp top 10/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/becoming a secure coder/i)).not.toBeInTheDocument();
     expect(screen.getByText(/frontend engineer/i)).toBeInTheDocument();
     expect(screen.getByText(/ux designer/i)).toBeInTheDocument();
     expect(screen.getByText(/green digital certificate program/i)).toBeInTheDocument();
@@ -27,7 +27,7 @@ describe('Certificados', () => {
   it('cada certificado tiene enlace accesible a su PDF local', () => {
     render(<Certificados />);
     const enlaces = screen.getAllByRole('link', { name: /ver certificado/i });
-    expect(enlaces).toHaveLength(10);
+    expect(enlaces).toHaveLength(8);
     for (const enlace of enlaces) {
       expect(enlace).toHaveAttribute('href', expect.stringContaining('/certificados/'));
       expect(enlace).toHaveAttribute('target', '_blank');

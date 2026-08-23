@@ -1,33 +1,13 @@
 const certificados = [
   {
-    titulo: 'OpenAI API - Coding with JavaScript',
+    titulo: 'FrontEnd Engineer',
     emisor: 'CodeCademy',
-    link: '/certificados/certificado-openai-api-javascript.pdf',
+    link: '/certificados/Certificado Front End Engineer.pdf',
   },
   {
     titulo: 'Prompt Engineering',
     emisor: 'CodeCademy',
     link: '/certificados/certificado-prompt-engineering.pdf',
-  },
-  {
-    titulo: 'Recognizing Hallucinations, Inaccuracies, and Bias in AI',
-    emisor: 'CodeCademy',
-    link: '/certificados/certificado-hallucinations-bias-ia.pdf',
-  },
-  {
-    titulo: 'OWASP Top 10: Identification and Authentication Failures',
-    emisor: 'CodeCademy',
-    link: '/certificados/certificado-owasp-top10-auth-failures.pdf',
-  },
-  {
-    titulo: 'Becoming a Secure Coder',
-    emisor: 'CodeCademy',
-    link: '/certificados/certificado-secure-coder.pdf',
-  },
-  {
-    titulo: 'FrontEnd Engineer',
-    emisor: 'CodeCademy',
-    link: '/certificados/Certificado Front End Engineer.pdf',
   },
   {
     titulo: 'UX Designer',
@@ -38,6 +18,16 @@ const certificados = [
     titulo: 'Green Digital Certificate Program',
     emisor: 'Inco / LinkedIn',
     link: '/certificados/Certificado Green Digital Certificate Program.pdf',
+  },
+  {
+    titulo: 'OpenAI API - Coding with JavaScript',
+    emisor: 'CodeCademy',
+    link: '/certificados/certificado-openai-api-javascript.pdf',
+  },
+  {
+    titulo: 'Recognizing Hallucinations, Inaccuracies, and Bias in AI',
+    emisor: 'CodeCademy',
+    link: '/certificados/certificado-hallucinations-bias-ia.pdf',
   },
   {
     titulo: 'Habilidades humanas en la era de la IA',

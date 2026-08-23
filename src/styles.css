@@ -1,0 +1,46 @@
+@import 'tailwindcss';
+
+/* WCAG 1.4.12 / 2.3.3 — Respeta la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  cursor: default;
+}
+
+html {
+  height: 100%;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* tipografía */
+@font-face {
+  font-family: 'Lexend_Mega';
+  src:
+    local('Lexend_Mega'),
+    url(/tipografias/Lexend_Mega/Lexend_Mega.woff2) format('woff2');
+  font-display: swap;
+}
+
+@theme {
+  --font-lexend-mega: 'Lexend_Mega', sans-serif;
+
+  --color-gris-claro: rgb(175, 175, 175);
+  --color-fondo: rgb(10, 10, 12);
+}

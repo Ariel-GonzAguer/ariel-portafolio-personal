@@ -8,12 +8,12 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', '*.gen.ts'],
+    ignores: ['dist/**', 'node_modules/**', '**/*.gen.ts', 'serve.js'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{js,ts,tsx}'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
@@ -30,5 +30,5 @@ export default tseslint.config(
       ],
     },
   },
-  prettier
+  prettier,
 );

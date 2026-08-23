@@ -11,7 +11,9 @@ describe('OpenSource', () => {
 
   it('explica por qué solo hay código público acá', () => {
     render(<OpenSource />);
-    expect(screen.getByText(/la mayoría de mi trabajo de producto es privado/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/la mayoría de mi trabajo de producto es privado/i),
+    ).toBeInTheDocument();
   });
 
   it('muestra los cuatro repos públicos', () => {

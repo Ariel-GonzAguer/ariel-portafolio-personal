@@ -1,5 +1,3 @@
-import { focusClassName } from '../../utils/a11y/a11y';
-
 const fortalezas = [
   'Frontend moderno con React, TypeScript, Waku y backend serverless',
   'Desarrollo asistido por agentes: skills propias, workflows y dirección de LLMs',
@@ -50,12 +48,12 @@ export default function SobreMi() {
               forma clara, accesible y sostenible.
             </p>
             <p className="mt-4 text-lg leading-8 text-gris-claro">
-              Fuera del código, disfruto cocinar, ver series animadas con mi esposa,
-              cultivar chiles picantes y tomar buen café.
+              Fuera del código, disfruto cocinar, ver series animadas con mi esposa, cultivar chiles
+              picantes y tomar buen café.
             </p>
             <p className="mt-6 font-semibold">Stack que uso a diario:</p>
             <ul className="mt-3 flex flex-wrap gap-2">
-              {stack.map(tech => (
+              {stack.map((tech) => (
                 <li key={tech} className="bg-white/5 px-3 py-1 text-sm">
                   {tech}
                 </li>
@@ -64,12 +62,11 @@ export default function SobreMi() {
           </div>
 
           <ul className="grid content-start gap-3" aria-label="Fortalezas profesionales">
-            {fortalezas.map(fortaleza => (
+            {fortalezas.map((fortaleza) => (
               <li key={fortaleza} className="border border-white/10 bg-white/3 p-4">
                 {fortaleza}
               </li>
             ))}
-
           </ul>
         </div>
       </div>

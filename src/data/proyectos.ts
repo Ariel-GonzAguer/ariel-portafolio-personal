@@ -82,7 +82,7 @@ export interface ProyectoIA {
   descripcion: string;
   tecnologias: string[];
   enlace?: string;
-}/**
+} /**
  * Experiencia con IA/LLMs para la sección dedicada.
  * Incluye productos privados: solo se enlaza lo que es público.
  */
@@ -118,11 +118,7 @@ export const proyectosIA: ProyectoIA[] = [
 export interface RepoOpenSource {
   id: string;
   nombre: string;
-  tipo:
-    | 'Librería npm'
-    | 'Aplicación open source'
-    | 'Laboratorio de IA'
-    | 'Skills y agentes';
+  tipo: 'Librería npm' | 'Aplicación open source' | 'Laboratorio de IA' | 'Skills y agentes';
   descripcion: string;
   tecnologias: string[];
   enlace: string;

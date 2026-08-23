@@ -1,4 +1,3 @@
- 
 import type { ReactNode } from 'react';
 
 /**
@@ -16,7 +15,10 @@ export default async function Layout({ children }: { children: ReactNode }) {
       >
         Saltar al contenido principal
       </a>
-      <nav aria-label="Navegación principal" className="sticky top-0 z-40 border-b border-white/10 bg-fondo/90 px-6 py-3 backdrop-blur">
+      <nav
+        aria-label="Navegación principal"
+        className="sticky top-0 z-40 border-b border-white/10 bg-fondo/90 px-6 py-3 backdrop-blur"
+      >
         <ul className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 text-sm">
           <li>
             <a href="/" className="font-lexend-mega font-bold hover:text-red-400 cursor-pointer!">

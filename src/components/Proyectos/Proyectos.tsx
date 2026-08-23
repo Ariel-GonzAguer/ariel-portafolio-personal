@@ -24,7 +24,7 @@ function ProyectoCard({ proyecto }: { proyecto: Proyecto }) {
       </div>
 
       <ul className="mt-4 flex flex-wrap gap-2" aria-label={`Tecnologías de ${proyecto.nombre}`}>
-        {proyecto.tecnologias.map(tech => (
+        {proyecto.tecnologias.map((tech) => (
           <li key={tech} className="border border-white/15 px-2 py-1 text-xs text-white/90">
             {tech}
           </li>
@@ -67,7 +67,7 @@ export default function Proyectos() {
         </p>
       </div>
       <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
-        {proyectos.map(proyecto => (
+        {proyectos.map((proyecto) => (
           <ProyectoCard key={proyecto.id} proyecto={proyecto} />
         ))}
       </div>

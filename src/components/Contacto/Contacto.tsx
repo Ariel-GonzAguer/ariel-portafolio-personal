@@ -27,17 +27,22 @@ const canales = [
  */
 export default function Contacto() {
   return (
-    <section id="contacto" className="scroll-mt-8 border-t border-white/10 px-6 py-20" aria-labelledby="seccion-contacto">
+    <section
+      id="contacto"
+      className="scroll-mt-8 border-t border-white/10 px-6 py-20"
+      aria-labelledby="seccion-contacto"
+    >
       <div className="mx-auto max-w-3xl text-center">
         <p className="font-semibold uppercase tracking-[0.18em] text-red-400">Contacto</p>
         <h2 id="seccion-contacto" className="mt-3 text-3xl font-bold md:text-4xl">
           Hablemos
         </h2>
         <p className="mx-auto mt-4 text-lg text-gris-claro">
-          Busco roles de Frontend/Product Engineer donde la IA sume al producto, así como puestos de Prompt Engineer. Si tu equipo construye eso, me interesa.
+          Busco roles de Frontend/Product Engineer donde la IA sume al producto, así como puestos de
+          Prompt Engineer. Si tu equipo construye eso, me interesa.
         </p>
         <ul className="mt-8 flex flex-wrap justify-center gap-4">
-          {canales.map(canal => (
+          {canales.map((canal) => (
             <li key={canal.label}>
               <a
                 href={canal.href}

@@ -54,16 +54,17 @@ export default function Certificados() {
       aria-labelledby="seccion-certificaciones"
     >
       <div className="mx-auto max-w-5xl text-center">
-        <p className="font-semibold uppercase tracking-[0.18em] text-red-400">
-          Formación continua
-        </p>
+        <p className="font-semibold uppercase tracking-[0.18em] text-red-400">Formación continua</p>
         <h2 id="seccion-certificaciones" className="mt-3 text-3xl font-bold md:text-4xl">
           Certificaciones y cursos
         </h2>
       </div>
       <div className="mx-auto mt-10 grid max-w-5xl gap-5 sm:grid-cols-2 md:grid-cols-4">
-        {certificados.map(certificado => (
-          <article key={certificado.titulo} className="flex flex-col border border-white/10 bg-white/3 p-5">
+        {certificados.map((certificado) => (
+          <article
+            key={certificado.titulo}
+            className="flex flex-col border border-white/10 bg-white/3 p-5"
+          >
             <h3 className="font-bold text-red-400">{certificado.titulo}</h3>
             <p className="mt-1 text-sm text-gris-claro">{certificado.emisor}</p>
             <a

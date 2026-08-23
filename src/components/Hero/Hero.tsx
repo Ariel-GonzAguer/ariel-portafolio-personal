@@ -11,9 +11,7 @@ const stackRapido = ['React', 'TypeScript', 'OpenCode', 'Waku', 'Firebase', 'Com
 export default function Hero() {
   return (
     <section className="flex min-h-[85vh] flex-col items-center justify-center px-6 text-center">
-      <h1 className="mt-4 text-[clamp(2.5rem,8vw,6rem)] font-bold leading-none">
-        Ariel GonzAgüer
-      </h1>
+      <h1 className="mt-4 text-[clamp(2.5rem,8vw,6rem)] font-bold leading-none">Ariel GonzAgüer</h1>
       <p className="mt-4 text-xl font-semibold text-gris-claro md:text-2xl">
         Frontend / Product Engineer + IA
       </p>
@@ -37,7 +35,7 @@ export default function Hero() {
         </a>
       </div>
       <ul className="mt-10 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm text-gris-claro">
-        {stackRapido.map(tech => (
+        {stackRapido.map((tech) => (
           <li key={tech} className="border border-white/15 px-3 py-1">
             {tech}
           </li>

@@ -6,9 +6,7 @@ import Proyectos from './Proyectos';
 describe('Proyectos', () => {
   it('renderiza la sección con heading', () => {
     render(<Proyectos />);
-    expect(
-      screen.getByRole('heading', { level: 2, name: /^proyectos$/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: /^proyectos$/i })).toBeInTheDocument();
   });
 
   it('muestra todos los proyectos destacados', () => {
@@ -36,9 +34,10 @@ describe('Proyectos', () => {
   it('los enlaces de demo apuntan al sitio real de cada proyecto', () => {
     render(<Proyectos />);
     for (const proyecto of proyectos) {
-      expect(
-        screen.getByLabelText(new RegExp(`abrir ${proyecto.nombre}`, 'i')),
-      ).toHaveAttribute('href', proyecto.enlace);
+      expect(screen.getByLabelText(new RegExp(`abrir ${proyecto.nombre}`, 'i'))).toHaveAttribute(
+        'href',
+        proyecto.enlace,
+      );
     }
   });
 });

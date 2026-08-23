@@ -15,14 +15,14 @@ Sitio de una sola página, estático y accesible, con secciones de proyectos des
 
 ## Secciones
 
-| Sección | Contenido |
-|---------|-----------|
-| Hero | Nombre, posicionamiento y stack rápido |
-| Proyectos | 4 productos reales (SaaS, ecommerce, SEO local, QR para eventos) |
-| IA | Chatbot con OpenAI, producto con predicciones por LLM y workflows de agentes |
-| Open Source | Repos públicos verificables: michi-router, ComidaEmergencia, comparación de modelos, skills-and-agents |
-| Sobre mí | Bio, fortalezas y stack diario |
-| Certificaciones y cursos | Certificados de IA, seguridad, UX y sostenibilidad con PDF verificable |
+| Sección                  | Contenido                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Hero                     | Nombre, posicionamiento y stack rápido                                                                 |
+| Proyectos                | 4 productos reales (SaaS, ecommerce, SEO local, QR para eventos)                                       |
+| IA                       | Chatbot con OpenAI, producto con predicciones por LLM y workflows de agentes                           |
+| Open Source              | Repos públicos verificables: michi-router, ComidaEmergencia, comparación de modelos, skills-and-agents |
+| Sobre mí                 | Bio, fortalezas y stack diario                                                                         |
+| Certificaciones y cursos | Certificados de IA, seguridad, UX y sostenibilidad con PDF verificable                                 |
 
 ## Scripts
 

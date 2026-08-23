@@ -28,7 +28,7 @@ describe('proyectos (destacados)', () => {
   });
 
   it('los ids son únicos', () => {
-    const ids = proyectos.map(proyecto => proyecto.id);
+    const ids = proyectos.map((proyecto) => proyecto.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
@@ -41,7 +41,7 @@ describe('proyectos (destacados)', () => {
 
 describe('proyectosIA', () => {
   it('incluye Monthly Cat Friend, Mandarino y skills/agentes', () => {
-    const ids = proyectosIA.map(proyecto => proyecto.id);
+    const ids = proyectosIA.map((proyecto) => proyecto.id);
     expect(ids).toContain('monthly-cat-friend');
     expect(ids).toContain('mandarino');
     expect(ids).toContain('skills-agentes');
@@ -72,7 +72,7 @@ describe('proyectosIA', () => {
 
 describe('openSource', () => {
   it('incluye michi-router, ComidaEmergencia, comparación de modelos y skills-and-agents', () => {
-    const ids = openSource.map(repo => repo.id);
+    const ids = openSource.map((repo) => repo.id);
     expect(ids).toContain('michi-router');
     expect(ids).toContain('comida-emergencia');
     expect(ids).toContain('comparacion-de-modelos');
@@ -91,7 +91,7 @@ describe('openSource', () => {
   });
 
   it('los tipos corresponden a las cuatro categorías', () => {
-    const tipos = openSource.map(repo => repo.tipo);
+    const tipos = openSource.map((repo) => repo.tipo);
     expect(tipos).toContain('Librería npm');
     expect(tipos).toContain('Aplicación open source');
     expect(tipos).toContain('Laboratorio de IA');

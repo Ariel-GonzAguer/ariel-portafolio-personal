@@ -23,14 +23,16 @@ describe('IA', () => {
     render(<IA />);
     for (const proyecto of proyectosIA) {
       expect(
-        screen.getByRole('heading', { name: new RegExp(proyecto.nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }),
+        screen.getByRole('heading', {
+          name: new RegExp(proyecto.nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+        }),
       ).toBeInTheDocument();
     }
   });
 
   it('solo muestra enlaces en las entradas con enlace público', () => {
     render(<IA />);
-    const conEnlace = proyectosIA.filter(proyecto => Boolean(proyecto.enlace));
+    const conEnlace = proyectosIA.filter((proyecto) => Boolean(proyecto.enlace));
     const demos = screen.getAllByRole('link', { name: /^abrir /i });
     expect(demos).toHaveLength(conEnlace.length);
     for (const enlace of demos) {
@@ -41,7 +43,7 @@ describe('IA', () => {
 
   it('Mandarino enlaza al sitio del estudio', () => {
     render(<IA />);
-    const mandarino = proyectosIA.find(proyecto => proyecto.id === 'mandarino');
+    const mandarino = proyectosIA.find((proyecto) => proyecto.id === 'mandarino');
     expect(mandarino?.enlace).toBe('https://gatorojolab.com');
     expect(screen.getByRole('link', { name: /abrir mandarino/i })).toHaveAttribute(
       'href',

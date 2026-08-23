@@ -1,0 +1,27 @@
+[build]
+  command = "pnpm build"
+  publish = "dist/public"
+
+# Deshabilitar trailing slashes para evitar errores en rutas dinámicas
+[build.processing]
+  skip_processing = false
+
+[build.processing.html]
+  pretty_urls = false
+
+[functions]
+  included_files = ["private/**"]
+  directory = "netlify-functions"
+
+[[edge_functions]]
+  function = "csp-nonce"
+  path = "/*"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self)"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"

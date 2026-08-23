@@ -5,9 +5,7 @@ import Certificados from './Certificados';
 describe('Certificados', () => {
   it('renderiza la sección con heading', () => {
     render(<Certificados />);
-    expect(
-      screen.getByRole('heading', { level: 2, name: /certificaciones/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: /certificaciones/i })).toBeInTheDocument();
   });
 
   it('muestra todos los certificados', () => {

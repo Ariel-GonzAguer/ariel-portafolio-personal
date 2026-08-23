@@ -93,7 +93,7 @@ export const proyectosIA: ProyectoIA[] = [
     tipo: 'Producto con IA',
     descripcion:
       'PWA privada para registrar el ciclo menstrual con predicciones generadas por IA: próximos días, siguiente periodo y patrones personalizados a partir del historial registrado.',
-    tecnologias: ['Vercel AI SDK', 'OpenAI', 'Waku', 'Firebase', 'PWA'],
+    tecnologias: ['OpenAI SDK', 'Waku', 'Firebase', 'PWA'],
   },
   {
     id: 'mandarino',

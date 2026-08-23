@@ -58,7 +58,7 @@ export default function Certificados() {
           Formación continua
         </p>
         <h2 id="seccion-certificaciones" className="mt-3 text-3xl font-bold md:text-4xl">
-          Certificaciones
+          Certificaciones y cursos
         </h2>
       </div>
       <div className="mx-auto mt-10 grid max-w-5xl gap-5 sm:grid-cols-2 md:grid-cols-4">

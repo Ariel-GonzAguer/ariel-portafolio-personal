@@ -71,11 +71,12 @@ describe('proyectosIA', () => {
 });
 
 describe('openSource', () => {
-  it('incluye michi-router, ComidaEmergencia y comparación de modelos', () => {
+  it('incluye michi-router, ComidaEmergencia, comparación de modelos y skills-and-agents', () => {
     const ids = openSource.map(repo => repo.id);
     expect(ids).toContain('michi-router');
     expect(ids).toContain('comida-emergencia');
     expect(ids).toContain('comparacion-de-modelos');
+    expect(ids).toContain('skills-and-agents');
   });
 
   it('todos los repos tienen enlace público real y descripción', () => {
@@ -83,16 +84,17 @@ describe('openSource', () => {
       expect(repo.nombre).toBeTruthy();
       expect(repo.descripcion).toBeTruthy();
       expect(repo.enlace).toMatch(
-        /^https:\/\/github\.com\/Ariel-GonzAguer\/(michi-router|comidaEmergencia|comparacion-de-modelos)$/,
+        /^https:\/\/github\.com\/Ariel-GonzAguer\/(michi-router|comidaEmergencia|comparacion-de-modelos|skills-and-agents)$/,
       );
       expect(repo.tecnologias.length).toBeGreaterThan(0);
     }
   });
 
-  it('los tipos corresponden a las tres categorías', () => {
+  it('los tipos corresponden a las cuatro categorías', () => {
     const tipos = openSource.map(repo => repo.tipo);
     expect(tipos).toContain('Librería npm');
     expect(tipos).toContain('Aplicación open source');
     expect(tipos).toContain('Laboratorio de IA');
+    expect(tipos).toContain('Skills y agentes');
   });
 });

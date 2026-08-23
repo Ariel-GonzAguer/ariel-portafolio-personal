@@ -3,9 +3,9 @@
  * Cumple con WCAG 2.4.7 (foco visible).
  *
  * @example
- * focusClassName('emerald'); // 'focus-visible:outline-emerald-300 ...'
+ * focusClassName('red'); // 'focus-visible:outline-red-400 ...'
  */
-export function focusClassName(color: 'emerald' | 'white' = 'emerald'): string {
-  const ringColor = color === 'emerald' ? 'outline-emerald-300' : 'outline-white';
+export function focusClassName(color: 'red' | 'white' = 'red'): string {
+  const ringColor = color === 'red' ? 'outline-red-400' : 'outline-white';
   return `focus-visible:outline-2 focus-visible:outline-offset-2 ${ringColor}`;
 }

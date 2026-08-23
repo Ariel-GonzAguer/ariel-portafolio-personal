@@ -49,6 +49,13 @@ describe('IA', () => {
     );
   });
 
+  it('Skills y workflows de agentes enlaza al repo público', () => {
+    render(<IA />);
+    expect(
+      screen.getByRole('link', { name: /abrir skills y workflows de agentes/i }),
+    ).toHaveAttribute('href', 'https://github.com/Ariel-GonzAguer/skills-and-agents');
+  });
+
   it('los productos privados no tienen botones de demo ni código', () => {
     render(<IA />);
     expect(screen.queryByRole('link', { name: /monthly cat friend/i })).not.toBeInTheDocument();

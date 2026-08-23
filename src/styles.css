@@ -14,7 +14,13 @@
 
 * {
   box-sizing: border-box;
-  cursor: default;
+}
+
+/* Tailwind v4 quita el cursor pointer de interactivos por defecto */
+a,
+button,
+[role='button'] {
+  cursor: pointer;
 }
 
 html {
@@ -24,9 +30,23 @@ html {
 }
 
 body {
-  line-height: 1.5;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* Tipografía display: Lexend solo en lugares estratégicos */
+h1,
+h2,
+h3 {
+  font-family: var(--font-lexend-mega);
+  line-height: 1.15;
 }
 
 /* tipografía */
@@ -41,6 +61,6 @@ body {
 @theme {
   --font-lexend-mega: 'Lexend_Mega', sans-serif;
 
-  --color-gris-claro: rgb(175, 175, 175);
+  --color-gris-claro: rgb(206, 208, 213);
   --color-fondo: rgb(10, 10, 12);
 }

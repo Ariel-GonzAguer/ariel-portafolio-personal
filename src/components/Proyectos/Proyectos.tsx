@@ -11,7 +11,7 @@ import { focusClassName } from '../../utils/a11y/a11y';
 function ProyectoCard({ proyecto }: { proyecto: Proyecto }) {
   return (
     <article className="flex h-full flex-col border border-white/12 bg-white/3 p-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-400">
         {proyecto.rol}
       </p>
       <h3 className="mt-2 text-2xl font-bold" lang={proyecto.lang}>
@@ -19,13 +19,13 @@ function ProyectoCard({ proyecto }: { proyecto: Proyecto }) {
       </h3>
       <p className="mt-3 text-gris-claro">{proyecto.descripcion}</p>
 
-      <div className="mt-4 border-l-2 border-emerald-300 pl-4">
+      <div className="mt-4 border-l-2 border-red-400 pl-4">
         <p className="leading-6 text-gris-claro">{proyecto.impacto}</p>
       </div>
 
       <ul className="mt-4 flex flex-wrap gap-2" aria-label={`Tecnologías de ${proyecto.nombre}`}>
         {proyecto.tecnologias.map(tech => (
-          <li key={tech} className="border border-white/15 px-2 py-1 text-xs text-white/80">
+          <li key={tech} className="border border-white/15 px-2 py-1 text-xs text-white/90">
             {tech}
           </li>
         ))}
@@ -37,7 +37,7 @@ function ProyectoCard({ proyecto }: { proyecto: Proyecto }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`Abrir ${proyecto.nombre} en nueva pestaña`}
-          className={`inline-block bg-emerald-300 px-4 py-3 text-sm font-bold text-black transition hover:bg-white ${focusClassName('emerald')} cursor-pointer!`}
+          className={`inline-block bg-red-400 px-4 py-3 text-sm font-bold text-black transition hover:bg-white ${focusClassName('red')} cursor-pointer!`}
         >
           Ver demo
           <span className="sr-only"> de {proyecto.nombre}</span>
@@ -57,7 +57,7 @@ export default function Proyectos() {
   return (
     <section id="proyectos" className="scroll-mt-8 px-6 py-20">
       <div className="mx-auto max-w-5xl text-center">
-        <p className="font-semibold uppercase tracking-[0.18em] text-emerald-300">
+        <p className="font-semibold uppercase tracking-[0.18em] text-red-400">
           Trabajo seleccionado
         </p>
         <h2 className="mt-3 text-3xl font-bold md:text-4xl">Proyectos</h2>

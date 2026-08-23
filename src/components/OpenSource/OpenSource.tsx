@@ -11,7 +11,7 @@ import { focusClassName } from '../../utils/a11y/a11y';
 function OpenSourceCard({ repo }: { repo: RepoOpenSource }) {
   return (
     <article className="flex h-full flex-col border border-white/12 bg-white/3 p-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-400">
         {repo.tipo}
       </p>
       <h3 className="mt-2 text-xl font-bold">{repo.nombre}</h3>
@@ -21,7 +21,7 @@ function OpenSourceCard({ repo }: { repo: RepoOpenSource }) {
       )}
       <ul className="mt-4 flex flex-wrap gap-2" aria-label={`Tecnologías de ${repo.nombre}`}>
         {repo.tecnologias.map(tech => (
-          <li key={tech} className="border border-white/15 px-2 py-1 text-xs text-white/80">
+          <li key={tech} className="border border-white/15 px-2 py-1 text-xs text-white/90">
             {tech}
           </li>
         ))}
@@ -32,7 +32,7 @@ function OpenSourceCard({ repo }: { repo: RepoOpenSource }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`Ver código de ${repo.nombre} en GitHub, se abre en nueva pestaña`}
-          className={`inline-block bg-emerald-300 px-4 py-3 text-sm font-bold text-black transition hover:bg-white ${focusClassName('emerald')} cursor-pointer!`}
+          className={`inline-block bg-red-400 px-4 py-3 text-sm font-bold text-black transition hover:bg-white ${focusClassName('red')} cursor-pointer!`}
         >
           Ver código
           <span className="sr-only cursor-default"> de {repo.nombre}</span>
@@ -56,7 +56,7 @@ export default function OpenSource() {
       aria-labelledby="seccion-open-source"
     >
       <div className="mx-auto max-w-5xl text-center">
-        <p className="font-semibold uppercase tracking-[0.18em] text-emerald-300">Código público</p>
+        <p className="font-semibold uppercase tracking-[0.18em] text-red-400">Código público</p>
         <h2 id="seccion-open-source" className="mt-3 text-3xl font-bold md:text-4xl">
           Open source
         </h2>
@@ -66,7 +66,7 @@ export default function OpenSource() {
           laboratorio de evaluación de LLMs.
         </p>
       </div>
-      <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
         {openSource.map(repo => (
           <OpenSourceCard key={repo.id} repo={repo} />
         ))}

@@ -14,11 +14,12 @@ describe('OpenSource', () => {
     expect(screen.getByText(/la mayoría de mi trabajo de producto es privado/i)).toBeInTheDocument();
   });
 
-  it('muestra los tres repos públicos', () => {
+  it('muestra los cuatro repos públicos', () => {
     render(<OpenSource />);
     expect(screen.getByRole('heading', { name: /michi-router/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /comidaemergencia/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /comparación de modelos/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /skills & agents/i })).toBeInTheDocument();
   });
 
   it('cada repo tiene enlace a GitHub específico, no al perfil', () => {

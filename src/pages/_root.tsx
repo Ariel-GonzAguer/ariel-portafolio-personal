@@ -22,7 +22,6 @@ const structuredData = {
     'React',
     'TypeScript',
     'Waku',
-    'Astro',
     'Jamstack',
   ],
   sameAs: ['https://github.com/Ariel-GonzAguer', 'https://gatorojolab.com'],
@@ -53,7 +52,7 @@ export default async function RootElement({ children }: { children: ReactNode })
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className="font-lexend-mega min-h-screen bg-fondo text-white">{children}</body>
+      <body className="min-h-screen bg-fondo text-white">{children}</body>
     </html>
   );
 }

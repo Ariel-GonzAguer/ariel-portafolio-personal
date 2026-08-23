@@ -22,7 +22,7 @@ export const proyectos: Proyecto[] = [
     nombre: 'SUPER KEG',
     descripcion:
       'Aplicación web para gestión inteligente de barriles, inventario y operación diaria de cervecerías artesanales.',
-    tecnologias: ['React', 'Zustand', 'MichiRouter', 'Firebase'],
+    tecnologias: ['React', 'Zustand', 'Waku', 'Firebase'],
     enlace: 'https://superkeg.beer',
     rol: 'Product Engineer',
     impacto:
@@ -82,9 +82,7 @@ export interface ProyectoIA {
   descripcion: string;
   tecnologias: string[];
   enlace?: string;
-}
-
-/**
+}/**
  * Experiencia con IA/LLMs para la sección dedicada.
  * Incluye productos privados: solo se enlaza lo que es público.
  */
@@ -113,13 +111,18 @@ export const proyectosIA: ProyectoIA[] = [
     descripcion:
       'Creación de skills propias para agentes de código (OpenCode, CommandCode), configuración de entornos multi-agente y desarrollo asistido por LLMs en proyectos reales de producción.',
     tecnologias: ['OpenCode', 'CommandCode', 'Skills', 'MCP'],
+    enlace: 'https://github.com/Ariel-GonzAguer/skills-and-agents',
   },
 ];
 
 export interface RepoOpenSource {
   id: string;
   nombre: string;
-  tipo: 'Librería npm' | 'Aplicación open source' | 'Laboratorio de IA';
+  tipo:
+    | 'Librería npm'
+    | 'Aplicación open source'
+    | 'Laboratorio de IA'
+    | 'Skills y agentes';
   descripcion: string;
   tecnologias: string[];
   enlace: string;
@@ -135,7 +138,7 @@ export const openSource: RepoOpenSource[] = [
     nombre: 'michi-router',
     tipo: 'Librería npm',
     descripcion:
-      'Router minimalista para React publicado en npm (@arielgonzaguer/michi-router): TypeScript first, cero dependencias de runtime, rutas dinámicas y navegación interna segura. Lo uso en producción en SUPER KEG.',
+      'Router Client-side minimalista para React publicado en npm (@arielgonzaguer/michi-router): TypeScript first, cero dependencias de runtime, rutas dinámicas y navegación interna segura.',
     tecnologias: ['TypeScript', 'React', 'npm', 'Vitest'],
     enlace: 'https://github.com/Ariel-GonzAguer/michi-router',
     licencia: 'Ver repo',
@@ -145,7 +148,7 @@ export const openSource: RepoOpenSource[] = [
     nombre: 'ComidaEmergencia',
     tipo: 'Aplicación open source',
     descripcion:
-      'Aplicación para gestionar alimentos, medicamentos y recursos en emergencias, con recetas generadas por IA vía OpenAI. Proyecto mantenido con colaboradores, issues y pull requests abiertos.',
+      'Aplicación offline para gestionar alimentos, medicamentos y recursos en emergencias. Proyecto mantenido con colaboradores, issues y pull requests abiertos.',
     tecnologias: ['React', 'Zustand', 'Firebase', 'OpenAI', 'Vitest'],
     enlace: 'https://github.com/Ariel-GonzAguer/comidaEmergencia',
     licencia: 'MIT + Commons Clause',
@@ -158,5 +161,14 @@ export const openSource: RepoOpenSource[] = [
       'Evaluación sistemática de modelos de lenguaje generando código real: misma feature, mismo prompt, criterios objetivos de puntuación y resultados documentados y comparables.',
     tecnologias: ['LLMs', 'OpenCode', 'MCP', 'Waku'],
     enlace: 'https://github.com/Ariel-GonzAguer/comparacion-de-modelos',
+  },
+  {
+    id: 'skills-and-agents',
+    nombre: 'Skills & Agents',
+    tipo: 'Skills y agentes',
+    descripcion:
+      'Colección pública de mis skills, agentes y comandos para OpenCode: evaluación multi-agente de viabilidad de productos con red team, auditorías de seguridad OWASP, deploy de Waku en Netlify y más.',
+    tecnologias: ['OpenCode', 'LLMs', 'Skills', 'Agentes', 'MCP'],
+    enlace: 'https://github.com/Ariel-GonzAguer/skills-and-agents',
   },
 ];

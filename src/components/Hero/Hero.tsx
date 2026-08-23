@@ -1,6 +1,6 @@
 import { focusClassName } from '../../utils/a11y/a11y';
 
-const stackRapido = ['React', 'TypeScript', 'IA/LLMs', 'Waku', 'Firebase'];
+const stackRapido = ['React', 'TypeScript', 'OpenCode', 'Waku', 'Firebase', 'CommandCode'];
 
 /**
  * Sección de apertura: nombre, rol y llamados a la acción.
@@ -25,7 +25,7 @@ export default function Hero() {
       <div className="mt-8 flex flex-wrap justify-center gap-4">
         <a
           href="#proyectos"
-          className={`bg-emerald-300 px-5 py-3 font-bold text-black transition hover:bg-white ${focusClassName('emerald')}  cursor-pointer!`}
+          className={`bg-red-400 px-5 py-3 font-bold text-black transition hover:bg-white ${focusClassName('red')}  cursor-pointer!`}
         >
           Ver proyectos
         </a>

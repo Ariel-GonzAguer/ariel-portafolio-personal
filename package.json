@@ -8,8 +8,9 @@
     "build": "waku build",
     "start": "waku start",
     "lint": "eslint . --ext .ts,.tsx --fix",
-    "format": "prettier --write .",
-    "test": "vitest --run"
+    "format:fix": "prettier --write .",
+    "test": "vitest --run",
+    "deploy:netlify": "pnpm audit && pnpm test && pnpm format:fix && pnpm lint && bash scripts/deploy-netlify.sh"
   },
   "dependencies": {
     "react": "19.2.8",

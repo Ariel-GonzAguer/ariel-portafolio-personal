@@ -1,23 +1,53 @@
 const certificados = [
   {
+    titulo: 'OpenAI API - Coding with JavaScript',
+    emisor: 'CodeCademy',
+    link: '/certificados/certificado-openai-api-javascript.pdf',
+  },
+  {
+    titulo: 'Prompt Engineering',
+    emisor: 'CodeCademy',
+    link: '/certificados/certificado-prompt-engineering.pdf',
+  },
+  {
+    titulo: 'Recognizing Hallucinations, Inaccuracies, and Bias in AI',
+    emisor: 'CodeCademy',
+    link: '/certificados/certificado-hallucinations-bias-ia.pdf',
+  },
+  {
+    titulo: 'OWASP Top 10: Identification and Authentication Failures',
+    emisor: 'CodeCademy',
+    link: '/certificados/certificado-owasp-top10-auth-failures.pdf',
+  },
+  {
+    titulo: 'Becoming a Secure Coder',
+    emisor: 'CodeCademy',
+    link: '/certificados/certificado-secure-coder.pdf',
+  },
+  {
     titulo: 'FrontEnd Engineer',
     emisor: 'CodeCademy',
-    link: 'https://gatorojolab.com/certificados/Certificado%20Front%20End%20Engineer.pdf',
+    link: '/certificados/Certificado Front End Engineer.pdf',
   },
   {
     titulo: 'UX Designer',
     emisor: 'CodeCademy',
-    link: 'https://gatorojolab.com/certificados/Certificado%20UX%20Designer%20Career%20Path.pdf',
+    link: '/certificados/Certificado UX Designer Career Path.pdf',
   },
   {
     titulo: 'Green Digital Certificate Program',
     emisor: 'Inco / LinkedIn',
-    link: 'https://gatorojolab.com/certificados/Certificado%20Green%20Digital%20Certificate%20Program.pdf',
+    link: '/certificados/Certificado Green Digital Certificate Program.pdf',
   },
   {
     titulo: 'Habilidades humanas en la era de la IA',
     emisor: 'Microsoft / LinkedIn',
-    link: 'https://gatorojolab.com/certificados/Certificado%20Habilidades%20humanas%20en%20la%20era%20de%20la%20IA%20por%20Microsoft%20y%20LinkedIn.pdf',
+    link: '/certificados/Certificado Habilidades humanas en la era de la IA por Microsoft y LinkedIn.pdf',
+  },
+  {
+    titulo: 'Fundamentos profesionales en tecnología sostenible',
+    emisor: 'Microsoft / LinkedIn',
+    link: '/certificados/certificado-tecnologia-sostenible-microsoft-linkedin.pdf',
   },
 ];
 

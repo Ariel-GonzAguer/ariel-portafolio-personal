@@ -2,29 +2,29 @@
 
 import { useState } from 'react';
 import ReviewForm from './ReviewForm';
+import type { ExampleDiff } from './ExampleDiffs';
 import ReviewOutput from '../review-output/ReviewOutput';
 import type { ReviewResponse } from '../../hooks/useReviewStream/useReviewStream';
 
 /**
  * Workspace cliente del AI Code Reviewer.
  *
- * FASE 1: contiene el estado y hace fetch a /api/review (mock).
- * FASE 2: el handler real llama a OpenAI Responses API.
- * FASE 4: conectar a useReviewStream para streaming.
- *
- * Separado del page (que es server) para mantener getConfig en server.
+ * FASE 3: el diff es estado controlado. Selector de ejemplos lo llena.
+ * El submit dispara el handler real de /api/review (FASE 2).
+ * FASE 4 reemplazará el fetch por useReviewStream para streaming.
  */
 export default function ReviewWorkspace() {
+  const [diff, setDiff] = useState('');
   const [review, setReview] = useState<ReviewResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (diff: string) => {
+  const handleSubmit = async (submittedDiff: string) => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ diff }),
+        body: JSON.stringify({ diff: submittedDiff }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -39,9 +39,20 @@ export default function ReviewWorkspace() {
     }
   };
 
+  const handleExampleSelect = (example: ExampleDiff) => {
+    setDiff(example.diff);
+    setReview(null);
+  };
+
   return (
     <div className="mx-auto mt-12 grid max-w-6xl gap-12 md:grid-cols-2">
-      <ReviewForm onSubmit={handleSubmit} isLoading={isLoading} />
+      <ReviewForm
+        diff={diff}
+        onDiffChange={setDiff}
+        onSubmit={handleSubmit}
+        onExampleSelect={handleExampleSelect}
+        isLoading={isLoading}
+      />
       <div>
         {review ? (
           <ReviewOutput review={review} />

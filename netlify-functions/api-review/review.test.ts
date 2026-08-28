@@ -80,15 +80,6 @@ describe('api-review handler (fase 2 — OpenAI real)', () => {
     expect(mockParse).not.toHaveBeenCalled();
   });
 
-  it('honeypot lleno devuelve 200 silencioso sin llamar a OpenAI', async () => {
-    const res = await handler(
-      makeRequest('POST', { diff: validDiff, honeypot: 'spam' }),
-      {} as never,
-    );
-    expect(res.status).toBe(200);
-    expect(mockParse).not.toHaveBeenCalled();
-  });
-
   it('devuelve el review parseado de OpenAI con 200', async () => {
     mockParse.mockResolvedValue({ output_parsed: fakeReview });
 

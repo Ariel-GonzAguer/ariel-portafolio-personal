@@ -9,12 +9,11 @@ import { isOriginAllowed } from './_lib/validate-origin';
  * Netlify Function: /api/review
  *
  * FASE 2: llamada real a OpenAI Responses API con JSON schema estricto
- * y modelo gpt-4.1-mini. Respuesta no-streaming (FASE 4 agregará SSE).
+ * y modelo gpt-5.6-luna. Respuesta no-streaming (FASE 4 agregará SSE).
  *
  * Flujo:
  * 1. Validar método (POST) y origen (CSRF allowlist).
- * 2. Honeypot: si viene lleno, simular éxito silencioso.
- * 3. Parsear body y validar el diff (vacío, binario, injection, tamaño).
+ * 2. Parsear body y validar el diff (vacío, binario, injection, tamaño).
  * 4. Llamar a openai.responses.parse() con el schema.
  * 5. Devolver el JSON parseado.
  *
@@ -44,13 +43,7 @@ export default async function handler(
 
   const body = (await request.json().catch(() => null)) as {
     diff?: string;
-    honeypot?: string;
   } | null;
-
-  // Honeypot: si viene lleno, simular éxito silencioso.
-  if (body?.honeypot && body.honeypot.length > 0) {
-    return json({ ok: true }, 200);
-  }
 
   if (!body?.diff) {
     return json({ error: 'Diff is required' }, 400);
@@ -71,7 +64,7 @@ export default async function handler(
 
   try {
     const response = await client.responses.parse({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-5.6-luna',
       instructions: SYSTEM_PROMPT,
       input: [
         {

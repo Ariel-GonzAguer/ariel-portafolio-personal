@@ -1,4 +1,4 @@
-import type { Finding } from '../../hooks/useReviewStream/useReviewStream';
+import type { Finding } from '../../hooks/useReviewStream/types';
 import SeverityBadge from './SeverityBadge';
 
 interface FindingCardProps {

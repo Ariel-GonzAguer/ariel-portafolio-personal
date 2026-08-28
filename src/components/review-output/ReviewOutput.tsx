@@ -1,4 +1,4 @@
-import type { ReviewResponse } from '../../hooks/useReviewStream/useReviewStream';
+import type { ReviewResponse } from '../../hooks/useReviewStream/types';
 import FindingCard from './FindingCard';
 
 interface ReviewOutputProps {

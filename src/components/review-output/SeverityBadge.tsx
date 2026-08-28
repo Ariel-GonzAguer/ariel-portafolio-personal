@@ -1,4 +1,4 @@
-import type { Severity } from '../../hooks/useReviewStream/useReviewStream';
+import type { Severity } from '../../hooks/useReviewStream/types';
 
 const STYLES: Record<Severity, string> = {
   critical: 'border-red-500 bg-red-500/15 text-red-300',

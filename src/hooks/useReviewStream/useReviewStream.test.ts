@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ReviewResponse, Severity, Category, Verdict } from './useReviewStream';
+import type { ReviewResponse, Severity, Category, Verdict } from './types';
 
 /**
  * Tests del módulo de tipos del reviewer.

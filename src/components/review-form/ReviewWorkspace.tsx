@@ -1,47 +1,30 @@
 'use client';
 
 import { useState } from 'react';
+import { useReviewStream } from '../../hooks/useReviewStream/useReviewStream';
 import ReviewForm from './ReviewForm';
 import type { ExampleDiff } from './ExampleDiffs';
 import ReviewOutput from '../review-output/ReviewOutput';
-import type { ReviewResponse } from '../../hooks/useReviewStream/useReviewStream';
 
 /**
  * Workspace cliente del AI Code Reviewer.
  *
- * FASE 3: el diff es estado controlado. Selector de ejemplos lo llena.
- * El submit dispara el handler real de /api/review (FASE 2).
- * FASE 4 reemplazará el fetch por useReviewStream para streaming.
+ * FASE 4: usa el hook useReviewStream que maneja el SSE end-to-end.
+ * El diff es estado controlado acá; el form lo recibe y emite onChange.
+ * Al elegir un ejemplo nuevo, se llena el diff y se resetea el review.
  */
 export default function ReviewWorkspace() {
   const [diff, setDiff] = useState('');
-  const [review, setReview] = useState<ReviewResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { state, start, reset } = useReviewStream();
+  const isStreaming = state.status === 'streaming' || state.status === 'loading';
 
-  const handleSubmit = async (submittedDiff: string) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ diff: submittedDiff }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = (await response.json()) as ReviewResponse;
-      setReview(data);
-    } catch (err) {
-      console.error('Review error:', err);
-      setReview(null);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubmit = (submittedDiff: string) => {
+    void start(submittedDiff);
   };
 
   const handleExampleSelect = (example: ExampleDiff) => {
     setDiff(example.diff);
-    setReview(null);
+    reset();
   };
 
   return (
@@ -51,15 +34,48 @@ export default function ReviewWorkspace() {
         onDiffChange={setDiff}
         onSubmit={handleSubmit}
         onExampleSelect={handleExampleSelect}
-        isLoading={isLoading}
+        isLoading={isStreaming}
       />
       <div>
-        {review ? (
-          <ReviewOutput review={review} />
-        ) : (
+        {state.status === 'idle' && (
           <p className="text-gris-claro">
             El resultado del review aparecerá aquí cuando envíes un diff.
           </p>
+        )}
+        {state.status === 'loading' && (
+          <p className="text-gris-claro">Conectando con el modelo…</p>
+        )}
+        {state.status === 'streaming' && (
+          <p
+            className="text-gris-claro"
+            role="status"
+            aria-live="polite"
+          >
+            Streameando respuesta… {state.rawText.length} caracteres
+            recibidos.
+          </p>
+        )}
+        {state.status === 'error' && (
+          <div
+            role="alert"
+            className="border border-red-400 bg-red-400/10 p-4"
+          >
+            <p className="font-bold text-red-300">Error</p>
+            <p className="text-sm text-gris-claro">{state.error}</p>
+            {state.rawText && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs text-gris-claro">
+                  Ver respuesta parcial
+                </summary>
+                <pre className="mt-2 overflow-x-auto text-xs text-gris-claro">
+                  <code>{state.rawText}</code>
+                </pre>
+              </details>
+            )}
+          </div>
+        )}
+        {state.status === 'done' && state.result && (
+          <ReviewOutput review={state.result} />
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import type { Finding } from '../../hooks/useReviewStream/useReviewStream';
+import type { Finding } from '../../hooks/useReviewStream/types';
 import FindingCard from './FindingCard';
 
 const sampleFinding: Finding = {

@@ -1,10 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockParse = vi.fn();
+const mockStream = {
+  [Symbol.asyncIterator]: async function* () {
+    // Simula 3 deltas de un JSON que se va construyendo pieza por pieza.
+    yield { type: 'response.output_text.delta', delta: '{"summary":' };
+    yield { type: 'response.output_text.delta', delta: '"test",' };
+    yield { type: 'response.output_text.delta', delta: '"verdict":"approve","findings":[]}' };
+  },
+  controller: { abort: vi.fn() },
+};
 
 vi.mock('openai', () => {
   class FakeOpenAI {
-    responses = { parse: mockParse };
+    responses = {
+      stream: vi.fn().mockReturnValue(mockStream),
+    };
   }
   return { default: FakeOpenAI };
 });
@@ -32,25 +42,14 @@ const makeRequest = (
     body: body ? JSON.stringify(body) : undefined,
   });
 
-const fakeReview = {
-  summary: 'Cambio sólido.',
-  verdict: 'approve',
-  findings: [],
-};
-
-describe('api-review handler (fase 2 — OpenAI real)', () => {
+describe('api-review handler (fase 4 — streaming)', () => {
   beforeEach(() => {
-    mockParse.mockReset();
     process.env.OPENAI_API_KEY = 'test-key';
   });
 
   it('rechaza GET con 405', async () => {
-    const res = await handler(
-      makeRequest('GET'),
-      {} as never,
-    );
+    const res = await handler(makeRequest('GET'), {} as never);
     expect(res.status).toBe(405);
-    expect(mockParse).not.toHaveBeenCalled();
   });
 
   it('rechaza origen no permitido con 403', async () => {
@@ -59,16 +58,11 @@ describe('api-review handler (fase 2 — OpenAI real)', () => {
       {} as never,
     );
     expect(res.status).toBe(403);
-    expect(mockParse).not.toHaveBeenCalled();
   });
 
-  it('rechaza request sin diff con 400', async () => {
-    const res = await handler(
-      makeRequest('POST', {}),
-      {} as never,
-    );
+  it('rechaza POST sin diff con 400', async () => {
+    const res = await handler(makeRequest('POST', {}), {} as never);
     expect(res.status).toBe(400);
-    expect(mockParse).not.toHaveBeenCalled();
   });
 
   it('rechaza diff inválido (no unified) con 400', async () => {
@@ -77,41 +71,6 @@ describe('api-review handler (fase 2 — OpenAI real)', () => {
       {} as never,
     );
     expect(res.status).toBe(400);
-    expect(mockParse).not.toHaveBeenCalled();
-  });
-
-  it('devuelve el review parseado de OpenAI con 200', async () => {
-    mockParse.mockResolvedValue({ output_parsed: fakeReview });
-
-    const res = await handler(
-      makeRequest('POST', { diff: validDiff }),
-      {} as never,
-    );
-    expect(res.status).toBe(200);
-    const data = (await res.json()) as typeof fakeReview;
-    expect(data.verdict).toBe('approve');
-    expect(data.findings).toEqual([]);
-    expect(mockParse).toHaveBeenCalledOnce();
-  });
-
-  it('devuelve 502 si OpenAI no devuelve output_parsed', async () => {
-    mockParse.mockResolvedValue({ output_parsed: null });
-
-    const res = await handler(
-      makeRequest('POST', { diff: validDiff }),
-      {} as never,
-    );
-    expect(res.status).toBe(502);
-  });
-
-  it('devuelve 502 si OpenAI lanza un error', async () => {
-    mockParse.mockRejectedValue(new Error('rate limit exceeded'));
-
-    const res = await handler(
-      makeRequest('POST', { diff: validDiff }),
-      {} as never,
-    );
-    expect(res.status).toBe(502);
   });
 
   it('devuelve 500 si OPENAI_API_KEY no está seteada', async () => {
@@ -121,6 +80,56 @@ describe('api-review handler (fase 2 — OpenAI real)', () => {
       {} as never,
     );
     expect(res.status).toBe(500);
-    expect(mockParse).not.toHaveBeenCalled();
+  });
+
+  it('devuelve text/event-stream con un diff válido', async () => {
+    const res = await handler(
+      makeRequest('POST', { diff: validDiff }),
+      {} as never,
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/event-stream');
+    expect(res.headers.get('X-Accel-Buffering')).toBe('no');
+  });
+
+  it('el stream emite eventos delta y done', async () => {
+    const res = await handler(
+      makeRequest('POST', { diff: validDiff }),
+      {} as never,
+    );
+    expect(res.body).not.toBeNull();
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    const events: string[] = [];
+    while (events.length < 4) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n\n');
+      buffer = parts.pop() ?? '';
+      for (const part of parts) {
+        if (part) events.push(part);
+      }
+    }
+    reader.releaseLock();
+
+    // 3 deltas + 1 done = 4 eventos
+    expect(events.length).toBeGreaterThanOrEqual(3);
+    const dataEvents = events.filter((e) => e.startsWith('data: '));
+    expect(dataEvents.length).toBeGreaterThanOrEqual(3);
+
+    // Cada delta es JSON con type=delta y text no vacío.
+    const firstDelta = JSON.parse(
+      (dataEvents[0] ?? '{"type":"missing"}').slice(5),
+    ) as { type: string; text: string };
+    expect(firstDelta.type).toBe('delta');
+    expect(firstDelta.text).toBeTruthy();
+
+    // El último evento es done.
+    const lastEvent = JSON.parse(
+      (dataEvents[dataEvents.length - 1] ?? '{"type":"missing"}').slice(5),
+    ) as { type: string };
+    expect(lastEvent.type).toBe('done');
   });
 });

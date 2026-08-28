@@ -5,7 +5,28 @@ import { EXAMPLE_DIFFS } from './ExampleDiffs';
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
+
+/**
+ * Crea una Response simulada que emite eventos SSE como ReadableStream.
+ * Replica el contrato del handler /api/review: chunks `data: {...}\n\n`.
+ */
+function sseResponse(chunks: string[]): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      for (const chunk of chunks) {
+        controller.enqueue(encoder.encode(`data: ${chunk}\n\n`));
+      }
+      controller.close();
+    },
+  });
+  return new Response(stream, {
+    status: 200,
+    headers: { 'Content-Type': 'text/event-stream' },
+  });
+}
 
 describe('ReviewWorkspace', () => {
   it('muestra el form y el placeholder inicial', () => {
@@ -49,17 +70,21 @@ describe('ReviewWorkspace', () => {
   });
 
   it('al enviar el form, hace POST a /api/review y muestra el review', async () => {
-    const fakeReview = {
+    const review = {
       summary: 'Cambio aceptable.',
-      verdict: 'approve' as const,
+      verdict: 'approve',
       findings: [],
     };
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(fakeReview), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
+    const json = JSON.stringify(review);
+    // Partimos el JSON en 3 chunks para simular streaming.
+    const halfway = Math.floor(json.length / 2);
+    const chunks = [
+      JSON.stringify({ type: 'delta', text: json.slice(0, halfway) }),
+      JSON.stringify({ type: 'delta', text: json.slice(halfway) }),
+      JSON.stringify({ type: 'done' }),
+    ];
+
+    const fetchMock = vi.fn().mockResolvedValue(sseResponse(chunks));
     vi.stubGlobal('fetch', fetchMock);
 
     render(<ReviewWorkspace />);
@@ -81,12 +106,29 @@ describe('ReviewWorkspace', () => {
     expect(init.method).toBe('POST');
     const body = JSON.parse(init.body as string);
     expect(body.diff).toBe(example.diff);
-    // honeypot debe ir aunque el form no lo llene (lo llena FormData pero el state no lo incluye)
-    // verificamos que diff viene, no honeypot
-    expect(body.honeypot).toBeUndefined();
 
     await waitFor(() => {
       expect(screen.getByText(/cambio aceptable/i)).toBeInTheDocument();
+    });
+  });
+
+  it('muestra mensaje de error si el stream devuelve un error event', async () => {
+    const chunks = [
+      JSON.stringify({ type: 'error', message: 'OpenAI timeout' }),
+    ];
+    const fetchMock = vi.fn().mockResolvedValue(sseResponse(chunks));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<ReviewWorkspace />);
+    const example = EXAMPLE_DIFFS[0];
+    if (!example) throw new Error('No examples available');
+    fireEvent.change(screen.getByLabelText(/cargar un ejemplo/i), {
+      target: { value: example.id },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /revisar diff/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/openai timeout/i)).toBeInTheDocument();
     });
   });
 });

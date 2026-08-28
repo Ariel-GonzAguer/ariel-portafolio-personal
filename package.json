@@ -13,6 +13,8 @@
     "deploy:netlify": "pnpm audit && pnpm test && pnpm format:fix && pnpm lint && bash scripts/deploy-netlify.sh"
   },
   "dependencies": {
+    "@netlify/blobs": "^11.0.1",
+    "openai": "^7.7.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-server-dom-webpack": "19.2.8",

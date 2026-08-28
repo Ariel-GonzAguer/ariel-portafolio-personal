@@ -18,10 +18,18 @@
   path = "/*"
 
 [[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(self)"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+for = "/*"
+[headers.values]
+X-Frame-Options = "SAMEORIGIN"
+X-Content-Type-Options = "nosniff"
+Referrer-Policy = "strict-origin-when-cross-origin"
+Permissions-Policy = "camera=(self)"
+Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+
+# AI Code Reviewer: redirige /api/review a la Netlify Function dedicada.
+# Mantiene la function en netlify-functions/api-review/ (separada del SSR adapter serve.js).
+[[redirects]]
+from = "/api/review"
+to = "/.netlify/functions/api-review/review"
+status = 200
+force = false

@@ -26,6 +26,7 @@ describe('sanitizeDiff', () => {
   it('elimina caracteres de control (NUL, BEL, etc.)', () => {
     const withNul = 'hello\x00world\x07test\x1b[31m';
     const result = sanitizeDiff(withNul);
+    // eslint-disable-next-line no-control-regex -- intencional: verifica ausencia
     expect(result).not.toMatch(/[\x00\x07\x1B]/);
     expect(result).toContain('helloworldtest');
   });

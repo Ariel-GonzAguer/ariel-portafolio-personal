@@ -8,7 +8,7 @@ interface FindingCardProps {
 /**
  * Tarjeta para un hallazgo individual del reviewer.
  *
- * FASE 1: render de los campos. Sin syntax highlighting del fix aún (fase 7).
+ * Render de los campos. Sin syntax highlighting del fix aún.
  */
 export default function FindingCard({ finding }: FindingCardProps) {
   return (

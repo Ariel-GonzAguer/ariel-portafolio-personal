@@ -3,7 +3,7 @@ import type { ReviewResponse, Severity, Category, Verdict } from './types';
 
 /**
  * Tests del módulo de tipos del reviewer.
- * En la fase 1, solo validamos que los tipos compilan y los union literals
+ * Validamos que los tipos compilan y los union literals
  * cubren los valores esperados. En fases siguientes se testea el hook real.
  */
 describe('useReviewStream (tipos)', () => {

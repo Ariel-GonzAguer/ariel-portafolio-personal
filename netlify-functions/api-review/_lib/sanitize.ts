@@ -4,8 +4,8 @@
  * El input del usuario es código que va a parar al prompt del LLM.
  * Aunque validate-diff ya rechaza binarios y headers mal formados,
  * el contenido legítimo puede tener strings que el modelo interpretaría
- * como instrucciones (ej: una variable llamada `ignore_previous_instructions`).
- * El sanitizer neutraliza esos vectores sin romper diffs legítimos.
+ * como instrucciones. El sanitizer neutraliza los vectores obvios sin
+ * romper diffs legítimos.
  *
  * Reglas:
  * - Escapa triple backticks ``` para romper intentos de "code fence escape"
@@ -16,13 +16,16 @@
  *   (una sola línea de 50 KB satura la ventana de contexto del modelo).
  * - Mantiene \n, \t y \r (válidos en diffs).
  *
- * FASE 5 (seguridad): implementación inicial.
+ * Limitación conocida: las variantes con snake_case o kebab-case
+ * (ej: `ignore_previous_instructions`) NO son detectadas por las regex
+ * actuales de detect-injection. Mejora pendiente.
  */
 
 const MAX_LINE_LENGTH = 2000;
 const BACKTICK_TRIPLE = '```';
 // Caracteres de control que NO permitimos: 0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F, 0x7F
 // Mantenemos: 0x09 (\t), 0x0A (\n), 0x0D (\r)
+// eslint-disable-next-line no-control-regex -- intencional: filtra NUL, BEL, etc.
 const CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
 
 /**

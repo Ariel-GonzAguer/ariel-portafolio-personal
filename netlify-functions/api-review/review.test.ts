@@ -42,7 +42,7 @@ const makeRequest = (
     body: body ? JSON.stringify(body) : undefined,
   });
 
-describe('api-review handler (fase 4 — streaming)', () => {
+describe('api-review handler (streaming)', () => {
   beforeEach(() => {
     process.env.OPENAI_API_KEY = 'test-key';
   });
@@ -145,7 +145,7 @@ describe('api-review handler (fase 4 — streaming)', () => {
       makeRequest('POST', { diff: diffWithInjection }),
       {} as never,
     );
-    // En la fase 5, el injection NO se rechaza, se loguea y se sanitiza.
+    // El injection NO se rechaza: se loguea y se sanitiza.
     expect(res.status).toBe(200);
     expect(warn).toHaveBeenCalledOnce();
     const message = warn.mock.calls[0]?.[0] as string;

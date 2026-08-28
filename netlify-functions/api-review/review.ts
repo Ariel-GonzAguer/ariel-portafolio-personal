@@ -10,8 +10,8 @@ import { isOriginAllowed } from './_lib/validate-origin';
 /**
  * Netlify Function: /api/review
  *
- * FASE 5 (seguridad): sanitiza el input antes de enviarlo a OpenAI.
- * FASE 4: streaming con Responses API + ReadableStream + SSE.
+ * Sanitiza el input antes de enviarlo a OpenAI.
+ * Streaming con Responses API + ReadableStream + SSE.
  *
  * Flujo de seguridad:
  * 1. Validar método (POST) y origen (CSRF allowlist).
@@ -71,7 +71,7 @@ export default async function handler(
     });
   }
 
-  // FASE 5: sanitizar el input antes de enviarlo al LLM.
+  // Sanitizar el input antes de enviarlo al LLM.
   // Orden: validate (rechaza) → detect (loguea) → sanitize (neutraliza).
   const injectionMatches = detectInjection(body.diff);
   if (injectionMatches.length > 0) {

@@ -1,27 +1,26 @@
 /**
- * Validador de unified diff.
+ * Validador estructural de unified diff.
  *
- * Reglas:
+ * FASE 5: refactorizado. Ya NO detecta prompt injection (eso lo hace
+ * detect-injection.ts y se loguea sin rechazar). Solo valida la
+ * estructura mínima de un diff.
+ *
+ * Reglas (todas rechazo con 400):
  * - No vacío
- * - ≤ 100 KB
+ * - ≤ 50 KB (reducido de 100 KB para limitar superficie de ataque)
  * - Headers --- a/ y +++ b/ presentes
  * - No es binario
- * - No contiene patrones de prompt injection
  *
- * FASE 2: validación básica. FASE 6 se refuerza con sanitización completa.
+ * El sanitize posterior neutraliza backticks, control chars y líneas
+ * largas. Si el input no pasa esta validación, se rechaza antes de
+ * gastar tokens en OpenAI.
  */
 
-const MAX_DIFF_BYTES = 100_000;
+const MAX_DIFF_BYTES = 50_000;
 
 const FORBIDDEN_PATTERNS: { re: RegExp; reason: string }[] = [
+  // Binarios: se rechazan siempre (un diff binario no es revisable).
   { re: /^Binary files /m, reason: 'Binary diffs are not supported.' },
-  {
-    re: /ignore (all )?(previous|prior|above) instructions/i,
-    reason: 'Potential prompt injection detected.',
-  },
-  { re: /<\s*system\s*>/i, reason: 'Potential prompt injection detected.' },
-  { re: /you are now/i, reason: 'Potential prompt injection detected.' },
-  { re: /\bDAN\b/i, reason: 'Potential prompt injection detected.' },
 ];
 
 const REQUIRED_HEADERS = [/^--- a\/.+/m, /^\+\+\+ b\/.+/m];

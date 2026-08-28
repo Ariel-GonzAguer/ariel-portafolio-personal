@@ -3,19 +3,24 @@ import OpenAI from 'openai';
 import { REVIEW_SCHEMA } from './_lib/review-schema';
 import { SYSTEM_PROMPT } from './_lib/system-prompt';
 import { validateDiff } from './_lib/validate-diff';
+import { sanitizeDiff } from './_lib/sanitize';
+import { detectInjection, logInjectionAttempt } from './_lib/detect-injection';
 import { isOriginAllowed } from './_lib/validate-origin';
 
 /**
  * Netlify Function: /api/review
  *
+ * FASE 5 (seguridad): sanitiza el input antes de enviarlo a OpenAI.
  * FASE 4: streaming con Responses API + ReadableStream + SSE.
  *
- * Flujo:
+ * Flujo de seguridad:
  * 1. Validar método (POST) y origen (CSRF allowlist).
- * 2. Parsear body y validar el diff (vacío, binario, injection, tamaño).
- * 3. Llamar a openai.responses.stream() con el schema.
- * 4. Reenviar cada evento como Server-Sent Event al cliente.
- * 5. Al cerrar el stream upstream, enviar `data: [DONE]\n\n`.
+ * 2. Validar estructura del diff (vacío, binario, headers, tamaño).
+ * 3. Detectar intentos de prompt injection y loguearlos (sin rechazar).
+ * 4. Sanitizar el diff (escapar backticks, quitar control chars, truncar líneas).
+ * 5. Llamar a openai.responses.stream() con el diff sanitizado.
+ * 6. Reenviar cada evento como Server-Sent Event al cliente.
+ * 7. Al cerrar el stream upstream, enviar `data: [DONE]\n\n`.
  *
  * Headers SSE críticos:
  * - Content-Type: text/event-stream
@@ -66,6 +71,17 @@ export default async function handler(
     });
   }
 
+  // FASE 5: sanitizar el input antes de enviarlo al LLM.
+  // Orden: validate (rechaza) → detect (loguea) → sanitize (neutraliza).
+  const injectionMatches = detectInjection(body.diff);
+  if (injectionMatches.length > 0) {
+    logInjectionAttempt(injectionMatches, {
+      ip: request.headers.get('x-nf-client-connection-ip') ?? undefined,
+      diffLength: body.diff.length,
+    });
+  }
+  const safeDiff = sanitizeDiff(body.diff);
+
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.error('OPENAI_API_KEY is not set');
@@ -79,7 +95,7 @@ export default async function handler(
 
   let upstream: Awaited<ReturnType<typeof createStream>>;
   try {
-    upstream = await createStream(client, body.diff);
+    upstream = await createStream(client, safeDiff);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('OpenAI error:', message);

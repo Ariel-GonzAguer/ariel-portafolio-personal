@@ -6,6 +6,7 @@ import { validateDiff } from './_lib/validate-diff';
 import { sanitizeDiff } from './_lib/sanitize';
 import { detectInjection, logInjectionAttempt } from './_lib/detect-injection';
 import { isOriginAllowed } from './_lib/validate-origin';
+import { SSE_HEADERS, jsonError, withSecurityHeaders } from './_lib/security-headers';
 
 /**
  * Netlify Function: /api/review
@@ -39,17 +40,11 @@ export default async function handler(
   _context: Context,
 ): Promise<Response> {
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError('Method not allowed', 405);
   }
 
   if (!isOriginAllowed(request)) {
-    return new Response(JSON.stringify({ error: 'Origin not allowed' }), {
-      status: 403,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError('Origin not allowed', 403);
   }
 
   const body = (await request.json().catch(() => null)) as {
@@ -57,18 +52,12 @@ export default async function handler(
   } | null;
 
   if (!body?.diff) {
-    return new Response(JSON.stringify({ error: 'Diff is required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError('Diff is required', 400);
   }
 
   const diffValidation = validateDiff(body.diff);
   if (!diffValidation.ok) {
-    return new Response(JSON.stringify({ error: diffValidation.reason }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError(diffValidation.reason, 400);
   }
 
   // Sanitizar el input antes de enviarlo al LLM.
@@ -85,10 +74,7 @@ export default async function handler(
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.error('OPENAI_API_KEY is not set');
-    return new Response(JSON.stringify({ error: 'Service not configured' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonError('Service not configured', 500);
   }
 
   const client = new OpenAI({ apiKey });
@@ -99,10 +85,7 @@ export default async function handler(
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('OpenAI error:', message);
-    return new Response(
-      JSON.stringify({ error: 'Failed to start review stream' }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } },
-    );
+    return jsonError('Failed to start review stream', 502);
   }
 
   return createSSEResponse(upstream);
@@ -171,12 +154,7 @@ function createSSEResponse(
   });
 
   return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-      'X-Accel-Buffering': 'no',
-    },
+    headers: withSecurityHeaders({ ...SSE_HEADERS }),
   });
 }
 

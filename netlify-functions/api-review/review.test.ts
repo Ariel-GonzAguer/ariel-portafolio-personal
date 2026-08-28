@@ -159,4 +159,29 @@ describe('api-review handler (streaming)', () => {
     const data = (await res.json()) as { error: string };
     expect(data.error).toMatch(/too large/i);
   });
+
+  it('aplica security headers a responses JSON de error', async () => {
+    const res = await handler(makeRequest('GET'), {} as never);
+    expect(res.status).toBe(405);
+    expect(res.headers.get('Strict-Transport-Security')).toBe(
+      'max-age=31536000; includeSubDomains',
+    );
+    expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
+    expect(res.headers.get('X-Frame-Options')).toBe('DENY');
+    expect(res.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
+    expect(res.headers.get('Permissions-Policy')).toBe(
+      'geolocation=(), microphone=(), camera=()',
+    );
+  });
+
+  it('aplica security headers también al stream SSE', async () => {
+    const res = await handler(makeRequest('POST', { diff: validDiff }), {} as never);
+    expect(res.status).toBe(200);
+    // SSE headers preservados
+    expect(res.headers.get('Content-Type')).toBe('text/event-stream');
+    expect(res.headers.get('X-Accel-Buffering')).toBe('no');
+    // Security headers aplicados
+    expect(res.headers.get('X-Frame-Options')).toBe('DENY');
+    expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
+  });
 });

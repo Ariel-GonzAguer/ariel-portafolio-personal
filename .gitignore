@@ -4,4 +4,4 @@ dist
 .env
 *.gen.ts
 .netlify
-planes/
+planes

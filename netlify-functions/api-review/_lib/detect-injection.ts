@@ -10,14 +10,42 @@
  * con console.warn. En producción, Netlify captura los logs.
  */
 
+/**
+ * Helper para construir un patrón tolerante a separadores variables.
+ * Acepta espacio, tab, newline, guion bajo y guion entre palabras, para
+ * capturar variantes como `ignore_previous_instructions`,
+ * `ignore-previous-instructions` o `ignore\nprevious\ninstructions`.
+ *
+ * Cada part puede ser una palabra literal o un grupo (opcional con "?"
+ * al final). flex() se encarga de meter `[\s_-]+` entre cada part
+ * (opcional cuando el grupo entero es opcional, obligatorio en otro caso).
+ */
+function flex(...parts: string[]): string {
+  const out: string[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const isLast = i === parts.length - 1;
+    const isOptional = part.endsWith('?');
+    if (isOptional) {
+      const inner = part.slice(0, -1);
+      out.push(`(?:${inner}[\\s_-]+)?`);
+    } else if (isLast) {
+      out.push(part);
+    } else {
+      out.push(`${part}[\\s_-]+`);
+    }
+  }
+  return out.join('');
+}
+
 const INJECTION_PATTERNS: { re: RegExp; label: string }[] = [
-  { re: /ignore (all )?(previous|prior|above) instructions/i, label: 'ignore-previous' },
+  { re: new RegExp(flex('ignore', '(all)?', '(previous|prior|above)', 'instructions'), 'i'), label: 'ignore-previous' },
   { re: /<\s*system\s*>/i, label: 'system-tag' },
-  { re: /you are now/i, label: 'role-override' },
+  { re: new RegExp(flex('you', 'are', 'now'), 'i'), label: 'role-override' },
   { re: /\bDAN\b/i, label: 'dan-jailbreak' },
-  { re: /\b(developer|system)\s*mode\b/i, label: 'developer-mode' },
-  { re: /reveal (the )?(system|initial) prompt/i, label: 'reveal-prompt' },
-  { re: /disregard (all )?(previous|prior) (rules|instructions)/i, label: 'disregard-rules' },
+  { re: new RegExp(`\\b(${flex('developer', 'mode')}|${flex('system', 'mode')})\\b`, 'i'), label: 'developer-mode' },
+  { re: new RegExp(flex('reveal', '(the)?', '(system|initial)', 'prompt'), 'i'), label: 'reveal-prompt' },
+  { re: new RegExp(flex('disregard', '(all)?', '(previous|prior)', '(rules|instructions)'), 'i'), label: 'disregard-rules' },
 ];
 
 export interface InjectionMatch {
@@ -29,11 +57,16 @@ export interface InjectionMatch {
 export function detectInjection(input: string): InjectionMatch[] {
   const matches: InjectionMatch[] = [];
   for (const { re, label } of INJECTION_PATTERNS) {
-    const globalRe = new RegExp(re.source, re.flags);
+    // Forzar flag 'g' para que exec() avance lastIndex tras cada match.
+    // Sin 'g', exec() siempre arranca desde 0 y devuelve el mismo match
+    // infinitamente, causando un loop sin progreso (bug preexistente que
+    // se camuflaba porque los tests verificaban result[0] o length >= N).
+    const flags = re.flags.includes('g') ? re.flags : `${re.flags}g`;
+    const globalRe = new RegExp(re.source, flags);
     let m: RegExpExecArray | null;
     while ((m = globalRe.exec(input)) !== null) {
       matches.push({ label, index: m.index, match: m[0] });
-      // Protección contra loops infinitos en regex con grupos vacíos.
+      // Protección adicional contra matches de longitud 0.
       if (m.index === globalRe.lastIndex) globalRe.lastIndex++;
     }
   }

@@ -120,6 +120,7 @@ export const proyectosIA: ProyectoIA[] = [
     descripcion:
       'Pega un unified diff y recibe review técnico estructurado con severidad, categoría y fix sugerido. Construido sobre la Responses API de OpenAI con JSON Schema estricto y streaming en vivo.',
     tecnologias: ['OpenAI Responses API', 'Waku', 'Netlify Functions', 'TypeScript'],
+    enlace: 'https://arielgonzaguer.gatorojolab.com/review',
   },
 ];
 

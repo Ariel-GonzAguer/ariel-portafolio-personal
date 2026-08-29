@@ -18,8 +18,8 @@ export default function ReviewWorkspace() {
   const { state, start, reset } = useReviewStream();
   const isStreaming = state.status === 'streaming' || state.status === 'loading';
 
-  const handleSubmit = (submittedDiff: string) => {
-    void start(submittedDiff);
+  const handleSubmit = (submittedDiff: string, botTrap: boolean) => {
+    void start(submittedDiff, botTrap);
   };
 
   const handleExampleSelect = (example: ExampleDiff) => {

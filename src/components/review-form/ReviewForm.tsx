@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { focusClassName } from '../../utils/a11y/a11y';
 import { EXAMPLE_DIFFS, type ExampleDiff } from './ExampleDiffs';
 
 interface ReviewFormProps {
   diff: string;
   onDiffChange: (diff: string) => void;
-  onSubmit: (diff: string) => void;
+  onSubmit: (diff: string, botTrap: boolean) => void;
   onExampleSelect: (example: ExampleDiff) => void;
   isLoading: boolean;
 }
@@ -14,6 +15,12 @@ interface ReviewFormProps {
  *
  * FASE 3: el diff vive en estado controlado (lo trae el padre).
  * El selector de ejemplos precargados llena el textarea.
+ *
+ * Honeypot: doble checkbox.
+ * - Visible: "Los gatos son geniales" (requerido para enviar).
+ * - Oculto: checkbox con name="website" que los bots marcan pero los
+ *   humanos no ven. Si el backend recibe `website: true`, devuelve
+ *   200 silencioso sin gastar tokens de OpenAI.
  */
 export default function ReviewForm({
   diff,
@@ -22,12 +29,15 @@ export default function ReviewForm({
   onExampleSelect,
   isLoading,
 }: ReviewFormProps) {
+  const [catsApproved, setCatsApproved] = useState(false);
+  const [botTrap, setBotTrap] = useState(false);
+
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        if (diff.trim().length > 0) {
-          onSubmit(diff);
+        if (diff.trim().length > 0 && catsApproved) {
+          onSubmit(diff, botTrap);
         }
       }}
       className="flex flex-col gap-4"
@@ -58,9 +68,38 @@ export default function ReviewForm({
         100 KB.
       </p>
 
+      {/* Checkbox visible: verificación anti-bot amigable. */}
+      <label className="flex items-center gap-2 text-sm text-white/90">
+        <input
+          type="checkbox"
+          name="cats"
+          checked={catsApproved}
+          onChange={(e) => setCatsApproved(e.target.checked)}
+          className="accent-red-400"
+        />
+        Los gatos son geniales
+      </label>
+
+      {/* Honeypot: checkbox oculto que los bots marcan. */}
+      <div
+        style={{ position: 'absolute', left: '-9999px' }}
+        aria-hidden="true"
+      >
+        <label htmlFor="website">Website</label>
+        <input
+          type="checkbox"
+          id="website"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          checked={botTrap}
+          onChange={(e) => setBotTrap(e.target.checked)}
+        />
+      </div>
+
       <button
         type="submit"
-        disabled={isLoading || diff.trim().length === 0}
+        disabled={isLoading || diff.trim().length === 0 || !catsApproved}
         className={`self-start bg-red-400 px-5 py-3 text-sm font-bold text-black transition hover:bg-white disabled:opacity-50 ${focusClassName('red')} cursor-pointer!`}
       >
         {isLoading ? 'Analizando…' : 'Revisar diff'}

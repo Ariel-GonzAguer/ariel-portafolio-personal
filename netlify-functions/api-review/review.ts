@@ -48,6 +48,20 @@ export default async function handler(
     return jsonError('Origin not allowed', 403);
   }
 
+  const body = (await request.json().catch(() => null)) as {
+    diff?: string;
+    website?: boolean;
+  } | null;
+
+  // Honeypot: si el checkbox oculto está marcado, es un bot.
+  // Devolver 200 silencioso sin gastar tokens de OpenAI ni consultar Blobs.
+  if (body?.website) {
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: withSecurityHeaders({ 'Content-Type': 'application/json' }),
+    });
+  }
+
   // Rate limit: 3 requests/día por IP.
   const ip = request.headers.get('x-nf-client-connection-ip') ?? 'unknown';
   const rateLimit = await checkRateLimit(ip);
@@ -56,10 +70,6 @@ export default async function handler(
       'Retry-After': getRetryAfterHeader(),
     });
   }
-
-  const body = (await request.json().catch(() => null)) as {
-    diff?: string;
-  } | null;
 
   if (!body?.diff) {
     return jsonError('Diff is required', 400);
@@ -71,13 +81,17 @@ export default async function handler(
   }
 
   // Sanitizar el input antes de enviarlo al LLM.
-  // Orden: validate (rechaza) → detect (loguea) → sanitize (neutraliza).
+  // Orden: validate (rechaza) → detect (rechaza + loguea) → sanitize (neutraliza).
   const injectionMatches = detectInjection(body.diff);
   if (injectionMatches.length > 0) {
     logInjectionAttempt(injectionMatches, {
       ip: request.headers.get('x-nf-client-connection-ip') ?? undefined,
       diffLength: body.diff.length,
     });
+    return jsonError(
+      'Se detectó un intento de inyección de prompt. Tu solicitud no será procesada.',
+      400,
+    );
   }
   const safeDiff = sanitizeDiff(body.diff);
 

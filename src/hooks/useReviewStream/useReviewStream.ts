@@ -20,7 +20,7 @@ export function useReviewStream() {
 
   const abortRef = useRef<AbortController | null>(null);
 
-  const start = useCallback(async (diff: string) => {
+  const start = useCallback(async (diff: string, botTrap = false) => {
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
@@ -32,7 +32,7 @@ export function useReviewStream() {
       response = await fetch('/api/review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ diff }),
+        body: JSON.stringify({ diff, website: botTrap }),
         signal: ac.signal,
       });
     } catch (err) {

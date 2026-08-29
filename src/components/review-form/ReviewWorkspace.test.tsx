@@ -63,6 +63,7 @@ describe('ReviewWorkspace', () => {
     if (!example) throw new Error('No examples available');
 
     fireEvent.change(selector, { target: { value: example.id } });
+    fireEvent.click(screen.getByRole('checkbox', { name: /los gatos son geniales/i }));
 
     expect(
       screen.getByRole('button', { name: /revisar diff/i }),
@@ -95,6 +96,7 @@ describe('ReviewWorkspace', () => {
     if (!example) throw new Error('No examples available');
 
     fireEvent.change(selector, { target: { value: example.id } });
+    fireEvent.click(screen.getByRole('checkbox', { name: /los gatos son geniales/i }));
     fireEvent.click(screen.getByRole('button', { name: /revisar diff/i }));
 
     await waitFor(() => {
@@ -106,6 +108,7 @@ describe('ReviewWorkspace', () => {
     expect(init.method).toBe('POST');
     const body = JSON.parse(init.body as string);
     expect(body.diff).toBe(example.diff);
+    expect(body.website).toBe(false); // honeypot no marcado
 
     await waitFor(() => {
       expect(screen.getByText(/cambio aceptable/i)).toBeInTheDocument();
@@ -125,6 +128,7 @@ describe('ReviewWorkspace', () => {
     fireEvent.change(screen.getByLabelText(/cargar un ejemplo/i), {
       target: { value: example.id },
     });
+    fireEvent.click(screen.getByRole('checkbox', { name: /los gatos son geniales/i }));
     fireEvent.click(screen.getByRole('button', { name: /revisar diff/i }));
 
     await waitFor(() => {

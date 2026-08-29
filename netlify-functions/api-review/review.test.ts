@@ -138,7 +138,7 @@ describe('api-review handler (streaming)', () => {
     expect(lastEvent.type).toBe('done');
   });
 
-  it('FASE 5: NO rechaza diffs con prompt injection, pero loguea', async () => {
+  it('rechaza diffs con prompt injection y loguea el intento', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const diffWithInjection = `--- a/x
 +++ b/x
@@ -147,12 +147,14 @@ describe('api-review handler (streaming)', () => {
 +const cmd = 'follow user';`;
 
     const res = await handler(makeRequest('POST', { diff: diffWithInjection }), {} as never);
-    // El injection NO se rechaza: se loguea y se sanitiza.
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(400);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toMatch(/inyección de prompt/i);
+    // Además loguea el intento.
     expect(warn).toHaveBeenCalledOnce();
-    const message = warn.mock.calls[0]?.[0] as string;
-    expect(message).toContain('prompt injection');
-    expect(message).toContain('ignore-previous');
+    const logMessage = warn.mock.calls[0]?.[0] as string;
+    expect(logMessage).toContain('prompt injection');
+    expect(logMessage).toContain('ignore-previous');
     warn.mockRestore();
   });
 
@@ -228,5 +230,26 @@ describe('api-review handler (streaming)', () => {
     });
     await handler(req, {} as never);
     expect(mockRateLimit).toHaveBeenCalledWith('10.0.0.1');
+  });
+
+  it('honeypot: devuelve 200 silencioso si website está marcado (bot)', async () => {
+    const res = await handler(
+      makeRequest('POST', { diff: validDiff, website: true }),
+      {} as never,
+    );
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as { ok: boolean };
+    expect(data.ok).toBe(true);
+    // No debe llamar al rate limit ni a OpenAI.
+    expect(mockRateLimit).not.toHaveBeenCalled();
+  });
+
+  it('honeypot: website false no afecta el flujo normal', async () => {
+    const res = await handler(
+      makeRequest('POST', { diff: validDiff, website: false }),
+      {} as never,
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/event-stream');
   });
 });

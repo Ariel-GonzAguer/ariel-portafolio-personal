@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { _resetInMemoryRateLimit } from './in-memory-rate-limit';
 
 const mockStream = {
   [Symbol.asyncIterator]: async function* () {
@@ -25,7 +26,7 @@ vi.mock('waku', () => ({
   getEnv: () => undefined,
 }));
 
-// Mock del rate limit: por defecto permite todas las requests.
+// Mock del rate limit principal: por defecto permite todas las requests.
 const mockRateLimit = vi.fn().mockResolvedValue({
   allowed: true,
   remaining: 2,
@@ -37,7 +38,7 @@ vi.mock('./rate-limit', () => ({
   getRetryAfterHeader: () => '50400',
 }));
 
-import { handleReview } from './reviewRoute';
+const { handleReview } = await import('./reviewRoute');
 
 const validDiff = `--- a/src/utils.ts
 +++ b/src/utils.ts
@@ -61,6 +62,9 @@ const makeRequest = (method: string, body?: unknown, origin = 'http://localhost:
 describe('handleReview (streaming)', () => {
   beforeEach(() => {
     process.env.OPENAI_API_KEY = 'test-key';
+    // Los tests asumen entorno de dev para que localhost sea un origin válido.
+    process.env.NODE_ENV = 'development';
+    _resetInMemoryRateLimit();
     mockRateLimit.mockClear();
     mockRateLimit.mockResolvedValue({
       allowed: true,

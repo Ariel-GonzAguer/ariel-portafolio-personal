@@ -8,11 +8,17 @@ import { detectInjection, logInjectionAttempt } from './detect-injection';
 import { isOriginAllowed } from './validate-origin';
 import { SSE_HEADERS, jsonError, withSecurityHeaders } from './security-headers';
 import { checkRateLimit, getRetryAfterHeader } from './rate-limit';
+import { checkInMemoryRateLimit } from './in-memory-rate-limit';
 
 const STREAM_TIMEOUT_MS = 60_000;
 
 /**
  * Handler del AI Code Reviewer para POST /api/review.
+ *
+ * SERVER-ONLY: este módulo accede a OPENAI_API_KEY y a Netlify Blobs.
+ * Solo se importa desde API routes de Waku (`src/pages/_api/...`).
+ * Nunca importar desde componentes cliente (`src/components/...`)
+ * o desde hooks cliente (`'use client'`).
  *
  * Sanitiza el input antes de enviarlo a OpenAI y responde con
  * Server-Sent Events (streaming con Responses API).
@@ -20,7 +26,8 @@ const STREAM_TIMEOUT_MS = 60_000;
  * Flujo de seguridad:
  * 1. Validar origen (CSRF allowlist).
  * 2. Honeypot check.
- * 3. Rate limit (3/día por IP, tolerante a errores de Blobs).
+ * 3. Rate limit (3/día por IP, tolerante a errores de Blobs) +
+ *    rate limit secundario en memoria (10/min) como red de seguridad.
  * 4. Validar estructura del diff.
  * 5. Detectar prompt injection (rechaza + loguea).
  * 6. Sanitizar el diff.
@@ -46,11 +53,20 @@ export async function handleReview(request: Request): Promise<Response> {
   }
 
   // Rate limit: 3 requests/día por IP. Si Blobs falla (p.ej. en dev
-  // local sin contexto Netlify), no bloqueamos la request.
+  // local sin contexto Netlify), no bloqueamos la request. El rate
+  // limit secundario en memoria (10/min) actúa como red de seguridad.
   const ip =
     request.headers.get('x-nf-client-connection-ip') ??
     request.headers.get('x-forwarded-for') ??
     'unknown';
+
+  const memLimit = checkInMemoryRateLimit(ip);
+  if (!memLimit.allowed) {
+    return jsonError('Too many requests', 429, {
+      'Retry-After': String(Math.ceil(memLimit.resetInMs / 1000)),
+    });
+  }
+
   try {
     const rateLimit = await checkRateLimit(ip);
     if (!rateLimit.allowed) {

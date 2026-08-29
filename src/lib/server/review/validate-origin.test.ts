@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { isOriginAllowed } from './validate-origin';
 
 // getEnv de Waku no existe en vitest (node). Devolvemos undefined para
@@ -8,6 +8,11 @@ vi.mock('waku', () => ({
 }));
 
 describe('isOriginAllowed', () => {
+  beforeEach(() => {
+    // Los tests asumen entorno de dev, salvo los que testean producción.
+    process.env.NODE_ENV = 'development';
+  });
+
   it('rechaza request sin origin (curl, server-to-server)', () => {
     const req = new Request('http://localhost/api/review', { method: 'POST' });
     expect(isOriginAllowed(req)).toBe(false);
@@ -48,6 +53,24 @@ describe('isOriginAllowed', () => {
   it('rechaza origin localhost en producción', () => {
     const previous = process.env.NODE_ENV;
     process.env.NODE_ENV = 'production';
+    try {
+      const req = new Request('http://localhost/api/review', {
+        method: 'POST',
+        headers: { Origin: 'http://localhost:3000' },
+      });
+      expect(isOriginAllowed(req)).toBe(false);
+    } finally {
+      if (previous === undefined) {
+        delete process.env.NODE_ENV;
+      } else {
+        process.env.NODE_ENV = previous;
+      }
+    }
+  });
+
+  it('rechaza origin localhost si NODE_ENV no está seteada (anti default-to-dev)', () => {
+    const previous = process.env.NODE_ENV;
+    delete process.env.NODE_ENV;
     try {
       const req = new Request('http://localhost/api/review', {
         method: 'POST',

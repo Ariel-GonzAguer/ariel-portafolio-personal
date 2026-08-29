@@ -20,7 +20,10 @@ const DEFAULT_ALLOWED = new Set([
 function isLocalDevOrigin(origin: string): boolean {
   const isLoopback =
     origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
-  const isDev = (getEnv('NODE_ENV') ?? process.env.NODE_ENV) !== 'production';
+  // Comparación explícita con 'development'. Si NODE_ENV no está seteado
+  // (caso anómalo, e.g. Netlify mal configurado), NO se trata como dev.
+  // Evita el patrón "default-to-dev" que haría pasar localhost en producción.
+  const isDev = (getEnv('NODE_ENV') ?? process.env.NODE_ENV) === 'development';
   return isDev && isLoopback;
 }
 

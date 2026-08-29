@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ReviewResponse } from '../../hooks/useReviewStream/types';
 import ReviewOutput from './ReviewOutput';
 
@@ -50,5 +50,27 @@ describe('ReviewOutput', () => {
     const empty: ReviewResponse = { ...sampleReview, findings: [], verdict: 'approve' };
     render(<ReviewOutput review={empty} />);
     expect(screen.getByText(/no se encontraron hallazgos/i)).toBeInTheDocument();
+  });
+
+  it('tiene botón para copiar el review como JSON', () => {
+    render(<ReviewOutput review={sampleReview} />);
+    expect(
+      screen.getByRole('button', { name: /copiar review como json/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('al hacer click, copia el JSON al clipboard', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+
+    render(<ReviewOutput review={sampleReview} />);
+    fireEvent.click(screen.getByRole('button', { name: /copiar review como json/i }));
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledOnce();
+    });
+    expect(writeText.mock.calls[0][0]).toBe(JSON.stringify(sampleReview, null, 2));
+
+    vi.unstubAllGlobals();
   });
 });

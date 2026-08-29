@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { ReviewResponse } from '../../hooks/useReviewStream/types';
+import { focusClassName } from '../../utils/a11y/a11y';
 import FindingCard from './FindingCard';
 
 interface ReviewOutputProps {
@@ -20,9 +22,21 @@ const VERDICT_STYLE: Record<ReviewResponse['verdict'], string> = {
 /**
  * Render del resultado completo del reviewer: summary, verdict y findings.
  *
- * FASE 1: estructura visual. FASE 4+: animación de streaming mientras llegan los tokens.
+ * Incluye botón para copiar el review como JSON al clipboard.
  */
 export default function ReviewOutput({ review }: ReviewOutputProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(review, null, 2));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Silencioso: el usuario puede copiar manualmente.
+    }
+  };
+
   return (
     <section aria-label="Resultado del review" className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -32,6 +46,14 @@ export default function ReviewOutput({ review }: ReviewOutputProps) {
         >
           {VERDICT_LABEL[review.verdict]}
         </span>
+        <button
+          type="button"
+          onClick={() => void handleCopy()}
+          className={`ml-auto border border-white/15 px-3 py-1 text-xs text-white/70 transition hover:bg-white/10 ${focusClassName('white')} cursor-pointer!`}
+          aria-label="Copiar review como JSON"
+        >
+          {copied ? 'Copiado ✓' : 'Copiar JSON'}
+        </button>
       </div>
       <p className="text-gris-claro">{review.summary}</p>
 

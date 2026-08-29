@@ -2,6 +2,12 @@
   command = "pnpm build"
   publish = "dist/public"
 
+[dev]
+  command = "pnpm dev"
+  port = 8888
+  targetPort = 3000
+  autoLaunch = false
+
 # Deshabilitar trailing slashes para evitar errores en rutas dinámicas
 [build.processing]
   skip_processing = false

@@ -48,14 +48,17 @@ export const REVIEW_SCHEMA = {
           },
           title: {
             type: 'string',
+            maxLength: 80,
             description: 'Título corto (≤80 chars) que resume el problema.',
           },
           explanation: {
             type: 'string',
+            maxLength: 1500,
             description: 'Por qué importa este problema y qué falla concretamente.',
           },
           fix: {
             type: 'string',
+            maxLength: 4000,
             description:
               'Código corregido (no pseudocódigo). Si es vacío, string "" para hallazgos puramente informativos.',
           },

@@ -11,21 +11,8 @@ function generateNonce(): string {
 
 /**
  * Edge Function que añade nonces dinámicos a la Content Security Policy
- * y los inyecta en los scripts inline del HTML.
- *
- * Waku/RSC genera scripts en el cliente (ej. FLIGHT_DATA hydration) que
- * no pueden llevar nonce. Para no romper la seguridad con 'unsafe-inline',
- * permitimos un set fijo de hashes SHA-256 conocidos que corresponden a
- * el output de Waku. Si en algún momento Waku cambia el formato del
- * RSC payload y aparecen hashes nuevos, hay que agregarlos acá.
+ * y los inyecta en los scripts inline del HTML
  */
-const WAKU_RSC_HASHES = [
-  // (self.__FLIGHT_DATA||=[]).push(...) — payload principal de hidratación.
-  "sha256-mTJ4cJaTm2Gw95GeXEpZdvEEY9ybh6FZu1bwcNE7QlY=",
-  // Script de Waku eval'd desde el sandbox (sandbox eval code:17:34).
-  "sha256-ieoeWczDHkReVBsRBqaal5AFMlBtNjMzgwKvLqi/tSU=",
-];
-
 export default async (_request: Request, context: Context) => {
   // Generar un nonce único para esta request
   const nonce = generateNonce();
@@ -39,15 +26,14 @@ export default async (_request: Request, context: Context) => {
     return response;
   }
 
-  // Crear nueva response con headers modificados
+  // Crear nueva respuesta con headers modificados
   const newHeaders = new Headers(response.headers);
 
-  // Configurar CSP con el nonce dinámico + hashes de scripts de Waku
-  // que no pueden llevar nonce (se generan en el cliente desde el RSC).
+  // Configurar CSP con el nonce dinámico
   const csp = [
     "default-src 'none'",
-    `script-src 'self' 'nonce-${nonce}' ${WAKU_RSC_HASHES.join(' ')}`,
-    `script-src-elem 'self' 'nonce-${nonce}' ${WAKU_RSC_HASHES.join(' ')}`,
+    `script-src 'self' 'nonce-${nonce}'`,
+    `script-src-elem 'self' 'nonce-${nonce}'`,
     "connect-src 'self'",
     "img-src 'self'",
     "style-src 'self' 'unsafe-inline'",

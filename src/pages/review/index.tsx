@@ -31,6 +31,22 @@ export default function ReviewPage() {
             fix concreto. Streaming en vivo desde la Responses API de OpenAI con JSON Schema
             estricto.
           </p>
+          <aside
+            aria-label="Aviso de seguridad y privacidad"
+            className="mx-auto mt-6 max-w-2xl border border-white/15 bg-white/3 p-4 text-left text-sm text-gris-claro"
+          >
+            <p className="font-semibold text-white/90">Aviso de seguridad y privacidad</p>
+            <p className="mt-2">
+              Por seguridad, los intentos de abuso (prompt injection, rate limit excedido, requests
+              sin origen permitido) se registran en logs de servidor. Cada entrada puede incluir: IP
+              de origen, longitud del diff, etiqueta del patrón detectado y timestamp. El contenido
+              literal del diff no se loguea.
+            </p>
+            <p className="mt-2 text-xs text-white/50">
+              El diff completo se envía a OpenAI únicamente para generar el review y no se conserva
+              en este servicio más allá de la respuesta.
+            </p>
+          </aside>
         </section>
         <ReviewWorkspace />
       </main>

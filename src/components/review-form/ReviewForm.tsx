@@ -133,6 +133,7 @@ function ExampleSelector({ onSelect, disabled }: ExampleSelectorProps) {
         }
       }}
       className={`border border-white/15 bg-white/3 px-2 py-1 text-xs text-white/90 ${focusClassName('white')} cursor-pointer!`}
+      style={{ colorScheme: 'dark' }}
     >
       <option value="" disabled>
         Cargar ejemplo ▾

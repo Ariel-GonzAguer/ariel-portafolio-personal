@@ -1,4 +1,5 @@
 import type { Finding } from '../../hooks/useReviewStream/types';
+import CodeBlock from './CodeBlock';
 import SeverityBadge from './SeverityBadge';
 
 interface FindingCardProps {
@@ -8,7 +9,7 @@ interface FindingCardProps {
 /**
  * Tarjeta para un hallazgo individual del reviewer.
  *
- * Render de los campos. Sin syntax highlighting del fix aún.
+ * El fix se renderiza con syntax highlighting (shiki).
  */
 export default function FindingCard({ finding }: FindingCardProps) {
   return (
@@ -23,11 +24,7 @@ export default function FindingCard({ finding }: FindingCardProps) {
       </div>
       <h4 className="mt-3 text-lg font-bold">{finding.title}</h4>
       <p className="mt-2 text-sm text-gris-claro">{finding.explanation}</p>
-      {finding.fix && (
-        <pre className="mt-3 overflow-x-auto border border-white/10 bg-black/30 p-3 text-xs text-white/90">
-          <code>{finding.fix}</code>
-        </pre>
-      )}
+      {finding.fix && <CodeBlock code={finding.fix} />}
     </article>
   );
 }

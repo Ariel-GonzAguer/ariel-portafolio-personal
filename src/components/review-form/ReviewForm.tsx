@@ -132,8 +132,8 @@ function ExampleSelector({ onSelect, disabled }: ExampleSelectorProps) {
           event.target.value = '';
         }
       }}
-      className={`border border-white/15 bg-white/3 px-2 py-1 text-xs text-white/90 ${focusClassName('white')} cursor-pointer!`}
-      style={{ colorScheme: 'dark' }}
+      className={`border border-white/15 px-2 py-1 text-xs text-white/90 ${focusClassName('white')} cursor-pointer!`}
+      style={{ backgroundColor: '#1a1a1a', colorScheme: 'dark' }}
     >
       <option value="" disabled>
         Cargar ejemplo ▾

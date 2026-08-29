@@ -75,7 +75,11 @@ export default function ReviewWorkspace() {
           </div>
         )}
         {state.status === 'done' && state.result && (
-          <ReviewOutput review={state.result} />
+          <ReviewOutput
+            review={state.result}
+            inputLength={diff.length}
+            outputLength={state.rawText.length}
+          />
         )}
       </div>
     </div>

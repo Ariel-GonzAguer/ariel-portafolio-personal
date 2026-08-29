@@ -7,6 +7,7 @@ import { sanitizeDiff } from './_lib/sanitize';
 import { detectInjection, logInjectionAttempt } from './_lib/detect-injection';
 import { isOriginAllowed } from './_lib/validate-origin';
 import { SSE_HEADERS, jsonError, withSecurityHeaders } from './_lib/security-headers';
+import { checkRateLimit, getRetryAfterHeader } from './_lib/rate-limit';
 
 /**
  * Netlify Function: /api/review
@@ -45,6 +46,15 @@ export default async function handler(
 
   if (!isOriginAllowed(request)) {
     return jsonError('Origin not allowed', 403);
+  }
+
+  // Rate limit: 3 requests/día por IP.
+  const ip = request.headers.get('x-nf-client-connection-ip') ?? 'unknown';
+  const rateLimit = await checkRateLimit(ip);
+  if (!rateLimit.allowed) {
+    return jsonError('Rate limit exceeded', 429, {
+      'Retry-After': getRetryAfterHeader(),
+    });
   }
 
   const body = (await request.json().catch(() => null)) as {

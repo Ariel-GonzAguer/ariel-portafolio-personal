@@ -19,6 +19,18 @@ vi.mock('openai', () => {
   return { default: FakeOpenAI };
 });
 
+// Mock del rate limit: por defecto permite todas las requests.
+const mockRateLimit = vi.fn().mockResolvedValue({
+  allowed: true,
+  remaining: 2,
+  resetAt: new Date('2026-08-30T00:00:00Z'),
+});
+
+vi.mock('./_lib/rate-limit', () => ({
+  checkRateLimit: (...args: unknown[]) => mockRateLimit(...args),
+  getRetryAfterHeader: () => '50400',
+}));
+
 import handler from './review';
 
 const validDiff = `--- a/src/utils.ts
@@ -43,6 +55,12 @@ const makeRequest = (method: string, body?: unknown, origin = 'http://localhost:
 describe('api-review handler (streaming)', () => {
   beforeEach(() => {
     process.env.OPENAI_API_KEY = 'test-key';
+    mockRateLimit.mockClear();
+    mockRateLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 2,
+      resetAt: new Date('2026-08-30T00:00:00Z'),
+    });
   });
 
   it('rechaza GET con 405', async () => {
@@ -183,5 +201,32 @@ describe('api-review handler (streaming)', () => {
     // Security headers aplicados
     expect(res.headers.get('X-Frame-Options')).toBe('DENY');
     expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
+  });
+
+  it('devuelve 429 con Retry-After cuando el rate limit se excede', async () => {
+    mockRateLimit.mockResolvedValueOnce({
+      allowed: false,
+      remaining: 0,
+      resetAt: new Date('2026-08-30T00:00:00Z'),
+    });
+    const res = await handler(makeRequest('POST', { diff: validDiff }), {} as never);
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBe('50400');
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toMatch(/rate limit/i);
+  });
+
+  it('pasa la IP del header x-nf-client-connection-ip al rate limit', async () => {
+    const req = new Request('http://localhost/api/review', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'http://localhost:3000',
+        'x-nf-client-connection-ip': '10.0.0.1',
+      },
+      body: JSON.stringify({ diff: validDiff }),
+    });
+    await handler(req, {} as never);
+    expect(mockRateLimit).toHaveBeenCalledWith('10.0.0.1');
   });
 });

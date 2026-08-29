@@ -27,7 +27,11 @@ const VERDICT_STYLE: Record<ReviewResponse['verdict'], string> = {
  *
  * Incluye botón para copiar el review como JSON al clipboard.
  */
-export default function ReviewOutput({ review, outputLength = 0, inputLength = 0 }: ReviewOutputProps) {
+export default function ReviewOutput({
+  review,
+  outputLength = 0,
+  inputLength = 0,
+}: ReviewOutputProps) {
   const [copied, setCopied] = useState(false);
   const co2 = calculateReviewCO2(inputLength, outputLength);
 
@@ -65,15 +69,11 @@ export default function ReviewOutput({ review, outputLength = 0, inputLength = 0
       </p>
 
       <div className="flex flex-col gap-4">
-        <h3 className="text-xl font-bold">
-          Findings ({review.findings.length})
-        </h3>
+        <h3 className="text-xl font-bold">Findings ({review.findings.length})</h3>
         {review.findings.length === 0 ? (
           <p className="text-gris-claro">No se encontraron hallazgos.</p>
         ) : (
-          review.findings.map((finding) => (
-            <FindingCard key={finding.id} finding={finding} />
-          ))
+          review.findings.map((finding) => <FindingCard key={finding.id} finding={finding} />)
         )}
       </div>
     </section>

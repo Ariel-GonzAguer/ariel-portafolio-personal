@@ -79,9 +79,7 @@ export async function handleReview(request: Request): Promise<Response> {
   if (injectionMatches.length > 0) {
     logInjectionAttempt(
       injectionMatches,
-      ip === 'unknown'
-        ? { diffLength: body.diff.length }
-        : { ip, diffLength: body.diff.length },
+      ip === 'unknown' ? { diffLength: body.diff.length } : { ip, diffLength: body.diff.length },
     );
     return jsonError(
       'Se detectó un intento de inyección de prompt. Tu solicitud no será procesada.',
@@ -146,17 +144,13 @@ async function createStream(client: OpenAI, diff: string) {
   );
 }
 
-function createSSEResponse(
-  upstream: Awaited<ReturnType<typeof createStream>>,
-): Response {
+function createSSEResponse(upstream: Awaited<ReturnType<typeof createStream>>): Response {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     async start(controller) {
       const send = (event: unknown) => {
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify(event)}\n\n`),
-        );
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
       };
 
       try {

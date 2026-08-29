@@ -21,23 +21,15 @@ export default function ReviewPage() {
         />
       </>
       <main id="main" className="px-6 py-20">
-        <section
-          aria-labelledby="review-hero"
-          className="mx-auto max-w-3xl text-center"
-        >
-          <p className="font-semibold uppercase tracking-[0.18em] text-red-400">
-            Frontend + IA
-          </p>
-          <h1
-            id="review-hero"
-            className="mt-3 text-3xl font-bold md:text-5xl"
-          >
+        <section aria-labelledby="review-hero" className="mx-auto max-w-3xl text-center">
+          <p className="font-semibold uppercase tracking-[0.18em] text-red-400">Frontend + IA</p>
+          <h1 id="review-hero" className="mt-3 text-3xl font-bold md:text-5xl">
             AI Code Reviewer
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-gris-claro">
-            Pega un diff y recibe feedback técnico estructurado: severidad,
-            categoría, explicación y fix concreto. Streaming en vivo desde la
-            Responses API de OpenAI con JSON Schema estricto.
+            Pega un diff y recibe feedback técnico estructurado: severidad, categoría, explicación y
+            fix concreto. Streaming en vivo desde la Responses API de OpenAI con JSON Schema
+            estricto.
           </p>
         </section>
         <ReviewWorkspace />

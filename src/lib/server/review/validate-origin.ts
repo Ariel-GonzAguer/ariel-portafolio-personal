@@ -19,10 +19,8 @@ const DEFAULT_ALLOWED = new Set([
 
 function isLocalDevOrigin(origin: string): boolean {
   const isLoopback =
-    origin.startsWith('http://localhost:') ||
-    origin.startsWith('http://127.0.0.1:');
-  const isDev =
-    (getEnv('NODE_ENV') ?? process.env.NODE_ENV) !== 'production';
+    origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+  const isDev = (getEnv('NODE_ENV') ?? process.env.NODE_ENV) !== 'production';
   return isDev && isLoopback;
 }
 

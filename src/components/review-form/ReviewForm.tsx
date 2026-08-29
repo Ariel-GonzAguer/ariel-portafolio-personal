@@ -46,10 +46,7 @@ export default function ReviewForm({
         <label htmlFor="diff" className="text-sm font-semibold text-white/90">
           Pega tu unified diff
         </label>
-        <ExampleSelector
-          onSelect={onExampleSelect}
-          disabled={isLoading}
-        />
+        <ExampleSelector onSelect={onExampleSelect} disabled={isLoading} />
       </div>
       <textarea
         id="diff"
@@ -64,8 +61,7 @@ export default function ReviewForm({
         aria-describedby="diff-help"
       />
       <p id="diff-help" className="text-xs text-gris-claro">
-        Diff en formato unified (lo que produce <code>git diff</code>). Máximo
-        100 KB.
+        Diff en formato unified (lo que produce <code>git diff</code>). Máximo 100 KB.
       </p>
 
       {/* Checkbox visible: verificación anti-bot amigable. */}
@@ -81,10 +77,7 @@ export default function ReviewForm({
       </label>
 
       {/* Honeypot: checkbox oculto que los bots marcan. */}
-      <div
-        style={{ position: 'absolute', left: '-9999px' }}
-        aria-hidden="true"
-      >
+      <div style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true">
         <label htmlFor="website">Website</label>
         <input
           type="checkbox"

@@ -63,8 +63,7 @@ const TS_N1_INPUT: ExampleDiff = {
 const PY_SQL_INJECTION: ExampleDiff = {
   id: 'py-sql-injection',
   label: 'Python: SQL injection y eval',
-  description:
-    'Concatenación directa en SQL y un eval() inseguro. Dos findings de security.',
+  description: 'Concatenación directa en SQL y un eval() inseguro. Dos findings de security.',
   diff: `--- a/api/users.py
 +++ b/api/users.py
 @@ -1,12 +1,18 @@
@@ -116,8 +115,4 @@ const CSS_A11Y_AND_PERF: ExampleDiff = {
 +}`,
 };
 
-export const EXAMPLE_DIFFS: ExampleDiff[] = [
-  TS_N1_INPUT,
-  PY_SQL_INJECTION,
-  CSS_A11Y_AND_PERF,
-];
+export const EXAMPLE_DIFFS: ExampleDiff[] = [TS_N1_INPUT, PY_SQL_INJECTION, CSS_A11Y_AND_PERF];

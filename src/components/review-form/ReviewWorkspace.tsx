@@ -42,24 +42,14 @@ export default function ReviewWorkspace() {
             El resultado del review aparecerá aquí cuando envíes un diff.
           </p>
         )}
-        {state.status === 'loading' && (
-          <p className="text-gris-claro">Conectando con el modelo…</p>
-        )}
+        {state.status === 'loading' && <p className="text-gris-claro">Conectando con el modelo…</p>}
         {state.status === 'streaming' && (
-          <p
-            className="text-gris-claro"
-            role="status"
-            aria-live="polite"
-          >
-            Streameando respuesta… {state.rawText.length} caracteres
-            recibidos.
+          <p className="text-gris-claro" role="status" aria-live="polite">
+            Streameando respuesta… {state.rawText.length} caracteres recibidos.
           </p>
         )}
         {state.status === 'error' && (
-          <div
-            role="alert"
-            className="border border-red-400 bg-red-400/10 p-4"
-          >
+          <div role="alert" className="border border-red-400 bg-red-400/10 p-4">
             <p className="font-bold text-red-300">Error</p>
             <p className="text-sm text-gris-claro">{state.error}</p>
             {state.rawText && (

@@ -70,9 +70,7 @@ describe('handleReview (streaming)', () => {
   });
 
   it('rechaza origen no permitido con 403', async () => {
-    const res = await handleReview(
-      makeRequest('POST', { diff: validDiff }, 'https://evil.com'),
-    );
+    const res = await handleReview(makeRequest('POST', { diff: validDiff }, 'https://evil.com'));
     expect(res.status).toBe(403);
   });
 
@@ -219,9 +217,7 @@ describe('handleReview (streaming)', () => {
   });
 
   it('honeypot: devuelve 200 silencioso si website está marcado (bot)', async () => {
-    const res = await handleReview(
-      makeRequest('POST', { diff: validDiff, website: true }),
-    );
+    const res = await handleReview(makeRequest('POST', { diff: validDiff, website: true }));
     expect(res.status).toBe(200);
     const data = (await res.json()) as { ok: boolean };
     expect(data.ok).toBe(true);
@@ -230,9 +226,7 @@ describe('handleReview (streaming)', () => {
   });
 
   it('honeypot: website false no afecta el flujo normal', async () => {
-    const res = await handleReview(
-      makeRequest('POST', { diff: validDiff, website: false }),
-    );
+    const res = await handleReview(makeRequest('POST', { diff: validDiff, website: false }));
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('text/event-stream');
   });

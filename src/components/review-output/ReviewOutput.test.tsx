@@ -54,9 +54,7 @@ describe('ReviewOutput', () => {
 
   it('tiene botón para copiar el review como JSON', () => {
     render(<ReviewOutput review={sampleReview} />);
-    expect(
-      screen.getByRole('button', { name: /copiar review como json/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /copiar review como json/i })).toBeInTheDocument();
   });
 
   it('al hacer click, copia el JSON al clipboard', async () => {

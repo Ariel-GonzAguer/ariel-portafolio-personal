@@ -5,12 +5,7 @@
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 
 export type Category =
-  | 'security'
-  | 'performance'
-  | 'type_safety'
-  | 'accessibility'
-  | 'correctness'
-  | 'maintainability';
+  'security' | 'performance' | 'type_safety' | 'accessibility' | 'correctness' | 'maintainability';
 
 export type Verdict = 'approve' | 'request_changes' | 'comment';
 
@@ -30,12 +25,7 @@ export interface ReviewResponse {
   findings: Finding[];
 }
 
-export type ReviewStatus =
-  | 'idle'
-  | 'loading'
-  | 'streaming'
-  | 'done'
-  | 'error';
+export type ReviewStatus = 'idle' | 'loading' | 'streaming' | 'done' | 'error';
 
 export interface ReviewState {
   status: ReviewStatus;

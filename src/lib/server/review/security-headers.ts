@@ -13,7 +13,7 @@ export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  "Permissions-Policy": 'geolocation=(), microphone=(), camera=()',
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
 } as const;
 
 /**
@@ -35,9 +35,7 @@ export const SSE_HEADERS: Readonly<Record<string, string>> = {
  * Si una clave se repite, gana el valor de `specific` (útil para
  * sobreescribir Content-Type en respuestas de error JSON).
  */
-export function withSecurityHeaders(
-  specific: Record<string, string>,
-): Record<string, string> {
+export function withSecurityHeaders(specific: Record<string, string>): Record<string, string> {
   return { ...SECURITY_HEADERS, ...specific };
 }
 

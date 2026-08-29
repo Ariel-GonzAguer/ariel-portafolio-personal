@@ -44,9 +44,7 @@ function stripControlChars(input: string): string {
 function truncateLongLines(input: string): string {
   return input
     .split('\n')
-    .map((line) =>
-      line.length > MAX_LINE_LENGTH ? line.slice(0, MAX_LINE_LENGTH) + '…' : line,
-    )
+    .map((line) => (line.length > MAX_LINE_LENGTH ? line.slice(0, MAX_LINE_LENGTH) + '…' : line))
     .join('\n');
 }
 

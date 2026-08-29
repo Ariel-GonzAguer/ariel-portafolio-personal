@@ -5,8 +5,7 @@ import CodeBlock from './CodeBlock';
 // Mock de shiki: devuelve HTML con un span que marca el código.
 vi.mock('shiki', () => ({
   createHighlighter: vi.fn().mockResolvedValue({
-    codeToHtml: (code: string) =>
-      `<pre><code><span class="hl">${code}</span></code></pre>`,
+    codeToHtml: (code: string) => `<pre><code><span class="hl">${code}</span></code></pre>`,
   }),
 }));
 

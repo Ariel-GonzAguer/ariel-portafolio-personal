@@ -40,13 +40,25 @@ function flex(...parts: string[]): string {
 }
 
 const INJECTION_PATTERNS: { re: RegExp; label: string }[] = [
-  { re: new RegExp(flex('ignore', '(all)?', '(previous|prior|above)', 'instructions'), 'i'), label: 'ignore-previous' },
+  {
+    re: new RegExp(flex('ignore', '(all)?', '(previous|prior|above)', 'instructions'), 'i'),
+    label: 'ignore-previous',
+  },
   { re: /<\s*system\s*>/i, label: 'system-tag' },
   { re: new RegExp(flex('you', 'are', 'now'), 'i'), label: 'role-override' },
   { re: /\bDAN\b/i, label: 'dan-jailbreak' },
-  { re: new RegExp(`\\b(${flex('developer', 'mode')}|${flex('system', 'mode')})\\b`, 'i'), label: 'developer-mode' },
-  { re: new RegExp(flex('reveal', '(the)?', '(system|initial)', 'prompt'), 'i'), label: 'reveal-prompt' },
-  { re: new RegExp(flex('disregard', '(all)?', '(previous|prior)', '(rules|instructions)'), 'i'), label: 'disregard-rules' },
+  {
+    re: new RegExp(`\\b(${flex('developer', 'mode')}|${flex('system', 'mode')})\\b`, 'i'),
+    label: 'developer-mode',
+  },
+  {
+    re: new RegExp(flex('reveal', '(the)?', '(system|initial)', 'prompt'), 'i'),
+    label: 'reveal-prompt',
+  },
+  {
+    re: new RegExp(flex('disregard', '(all)?', '(previous|prior)', '(rules|instructions)'), 'i'),
+    label: 'disregard-rules',
+  },
 ];
 
 export interface InjectionMatch {

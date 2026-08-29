@@ -32,42 +32,32 @@ describe('ReviewWorkspace', () => {
   it('muestra el form y el placeholder inicial', () => {
     render(<ReviewWorkspace />);
     expect(screen.getByLabelText(/pega tu unified diff/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/el resultado del review aparecerá aquí/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/el resultado del review aparecerá aquí/i)).toBeInTheDocument();
   });
 
   it('al elegir un ejemplo, llena el textarea con su diff', () => {
     render(<ReviewWorkspace />);
-    const selector = screen.getByLabelText(
-      /cargar un ejemplo/i,
-    ) as HTMLSelectElement;
+    const selector = screen.getByLabelText(/cargar un ejemplo/i) as HTMLSelectElement;
     const example = EXAMPLE_DIFFS[0];
     expect(example).toBeDefined();
     if (!example) return;
 
     fireEvent.change(selector, { target: { value: example.id } });
 
-    const textarea = screen.getByLabelText(
-      /pega tu unified diff/i,
-    ) as HTMLTextAreaElement;
+    const textarea = screen.getByLabelText(/pega tu unified diff/i) as HTMLTextAreaElement;
     expect(textarea.value).toBe(example.diff);
   });
 
   it('después de elegir un ejemplo, el botón de submit queda habilitado', () => {
     render(<ReviewWorkspace />);
-    const selector = screen.getByLabelText(
-      /cargar un ejemplo/i,
-    ) as HTMLSelectElement;
+    const selector = screen.getByLabelText(/cargar un ejemplo/i) as HTMLSelectElement;
     const example = EXAMPLE_DIFFS[0];
     if (!example) throw new Error('No examples available');
 
     fireEvent.change(selector, { target: { value: example.id } });
     fireEvent.click(screen.getByRole('checkbox', { name: /los gatos son geniales/i }));
 
-    expect(
-      screen.getByRole('button', { name: /revisar diff/i }),
-    ).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /revisar diff/i })).not.toBeDisabled();
   });
 
   it('al enviar el form, hace POST a /api/review y muestra el review', async () => {
@@ -89,9 +79,7 @@ describe('ReviewWorkspace', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     render(<ReviewWorkspace />);
-    const selector = screen.getByLabelText(
-      /cargar un ejemplo/i,
-    ) as HTMLSelectElement;
+    const selector = screen.getByLabelText(/cargar un ejemplo/i) as HTMLSelectElement;
     const example = EXAMPLE_DIFFS[0];
     if (!example) throw new Error('No examples available');
 
@@ -116,9 +104,7 @@ describe('ReviewWorkspace', () => {
   });
 
   it('muestra mensaje de error si el stream devuelve un error event', async () => {
-    const chunks = [
-      JSON.stringify({ type: 'error', message: 'OpenAI timeout' }),
-    ];
+    const chunks = [JSON.stringify({ type: 'error', message: 'OpenAI timeout' })];
     const fetchMock = vi.fn().mockResolvedValue(sseResponse(chunks));
     vi.stubGlobal('fetch', fetchMock);
 

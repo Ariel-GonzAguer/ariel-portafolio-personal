@@ -71,9 +71,7 @@ export function useReviewStream() {
       if (payload === '[DONE]') return;
       try {
         const parsed = JSON.parse(payload) as
-          | { type: 'delta'; text: string }
-          | { type: 'done' }
-          | { type: 'error'; message: string };
+          { type: 'delta'; text: string } | { type: 'done' } | { type: 'error'; message: string };
         if (parsed.type === 'delta') {
           rawText += parsed.text;
           setState((s) => ({ ...s, rawText, status: 'streaming' }));

@@ -23,20 +23,11 @@ export const REVIEW_SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: [
-          'id',
-          'severity',
-          'category',
-          'line',
-          'title',
-          'explanation',
-          'fix',
-        ],
+        required: ['id', 'severity', 'category', 'line', 'title', 'explanation', 'fix'],
         properties: {
           id: {
             type: 'string',
-            description:
-              'Identificador único del hallazgo, ej: SEC-1, PERF-2, A11Y-1.',
+            description: 'Identificador único del hallazgo, ej: SEC-1, PERF-2, A11Y-1.',
           },
           severity: {
             enum: ['critical', 'high', 'medium', 'low', 'info'],
@@ -53,8 +44,7 @@ export const REVIEW_SCHEMA = {
           },
           line: {
             type: 'string',
-            description:
-              'Línea(s) en formato L42 o L42-L47 según los hunks del diff.',
+            description: 'Línea(s) en formato L42 o L42-L47 según los hunks del diff.',
           },
           title: {
             type: 'string',
@@ -62,8 +52,7 @@ export const REVIEW_SCHEMA = {
           },
           explanation: {
             type: 'string',
-            description:
-              'Por qué importa este problema y qué falla concretamente.',
+            description: 'Por qué importa este problema y qué falla concretamente.',
           },
           fix: {
             type: 'string',

@@ -25,9 +25,7 @@ const FORBIDDEN_PATTERNS: { re: RegExp; reason: string }[] = [
 
 const REQUIRED_HEADERS = [/^--- a\/.+/m, /^\+\+\+ b\/.+/m];
 
-export type ValidationResult =
-  | { ok: true }
-  | { ok: false; reason: string };
+export type ValidationResult = { ok: true } | { ok: false; reason: string };
 
 export function validateDiff(input: string): ValidationResult {
   if (!input || input.trim().length === 0) {

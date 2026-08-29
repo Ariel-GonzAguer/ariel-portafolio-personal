@@ -18,7 +18,7 @@ describe('sanitizeDiff', () => {
   });
 
   it('NO escapa backticks simples (1 o 2 consecutivos)', () => {
-    const single = "const x = `template literal`;";
+    const single = 'const x = `template literal`;';
     const result = sanitizeDiff(single);
     expect(result).toBe(single);
   });
@@ -53,12 +53,7 @@ describe('sanitizeDiff', () => {
   });
 
   it('maneja correctamente múltiples líneas largas', () => {
-    const input = [
-      'short',
-      'x'.repeat(5000),
-      'another short',
-      'y'.repeat(3000),
-    ].join('\n');
+    const input = ['short', 'x'.repeat(5000), 'another short', 'y'.repeat(3000)].join('\n');
     const result = sanitizeDiff(input);
     const lines = result.split('\n');
     expect(lines).toHaveLength(4);

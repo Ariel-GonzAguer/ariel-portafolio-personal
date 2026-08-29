@@ -79,10 +79,10 @@ describe('logInjectionAttempt', () => {
 
   it('loguea con labels, ip, length y preview', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    logInjectionAttempt(
-      [{ label: 'dan-jailbreak', index: 0, match: 'DAN' }],
-      { ip: '1.2.3.4', diffLength: 200 },
-    );
+    logInjectionAttempt([{ label: 'dan-jailbreak', index: 0, match: 'DAN' }], {
+      ip: '1.2.3.4',
+      diffLength: 200,
+    });
     expect(warn).toHaveBeenCalledOnce();
     const message = warn.mock.calls[0]?.[0] as string;
     expect(message).toContain('dan-jailbreak');
@@ -95,10 +95,10 @@ describe('logInjectionAttempt', () => {
   it('trunca el preview a 200 chars', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const longMatch = 'a'.repeat(500);
-    logInjectionAttempt(
-      [{ label: 'test', index: 0, match: longMatch }],
-      { ip: '1.2.3.4', diffLength: 1000 },
-    );
+    logInjectionAttempt([{ label: 'test', index: 0, match: longMatch }], {
+      ip: '1.2.3.4',
+      diffLength: 1000,
+    });
     const message = warn.mock.calls[0]?.[0] as string;
     // El preview en el log tiene exactamente 200 'a' + las comillas.
     const previewMatch = message.match(/"(a+)"/);

@@ -32,6 +32,7 @@ Producto público en [/review](https://arielgonzaguer.gatorojolab.com/review): p
 **Stack**: OpenAI Responses API (`gpt-5.6-luna`) + JSON Schema estricto + streaming SSE + Netlify Functions.
 
 **Seguridad**:
+
 - Rate limit: 3 requests/día por IP (Netlify Blobs)
 - Honeypot: doble checkbox anti-bot
 - Prompt injection: detección + rechazo con alert al usuario
@@ -40,6 +41,7 @@ Producto público en [/review](https://arielgonzaguer.gatorojolab.com/review): p
 - Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
 
 **UX**:
+
 - Streaming en vivo (SSE)
 - Syntax highlighting del fix (shiki)
 - Copy-to-clipboard del review como JSON

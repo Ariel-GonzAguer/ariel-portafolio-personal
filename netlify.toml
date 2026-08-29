@@ -2,12 +2,6 @@
   command = "pnpm build"
   publish = "dist/public"
 
-[dev]
-  command = "pnpm dev"
-  port = 8888
-  targetPort = 3000
-  autoLaunch = false
-
 # Deshabilitar trailing slashes para evitar errores en rutas dinámicas
 [build.processing]
   skip_processing = false
@@ -32,10 +26,3 @@ Referrer-Policy = "strict-origin-when-cross-origin"
 Permissions-Policy = "camera=(self)"
 Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
 
-# AI Code Reviewer: redirige /api/review a la Netlify Function dedicada.
-# Mantiene la function en netlify-functions/api-review/ (separada del SSR adapter serve.js).
-[[redirects]]
-from = "/api/review"
-to = "/.netlify/functions/api-review/review"
-status = 200
-force = false

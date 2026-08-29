@@ -24,6 +24,7 @@ function flex(...parts: string[]): string {
   const out: string[] = [];
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
+    if (!part) continue;
     const isLast = i === parts.length - 1;
     const isOptional = part.endsWith('?');
     if (isOptional) {

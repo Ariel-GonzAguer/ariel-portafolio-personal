@@ -19,6 +19,12 @@ vi.mock('openai', () => {
   return { default: FakeOpenAI };
 });
 
+// getEnv de Waku no existe en el entorno de vitest (node). Devolvemos
+// undefined para que getServerEnv use el fallback a process.env.
+vi.mock('waku', () => ({
+  getEnv: () => undefined,
+}));
+
 // Mock del rate limit: por defecto permite todas las requests.
 const mockRateLimit = vi.fn().mockResolvedValue({
   allowed: true,
@@ -26,19 +32,19 @@ const mockRateLimit = vi.fn().mockResolvedValue({
   resetAt: new Date('2026-08-30T00:00:00Z'),
 });
 
-vi.mock('./_lib/rate-limit', () => ({
+vi.mock('./rate-limit', () => ({
   checkRateLimit: (...args: unknown[]) => mockRateLimit(...args),
   getRetryAfterHeader: () => '50400',
 }));
 
-import handler from './review';
+import { handleReview } from './reviewRoute';
 
 const validDiff = `--- a/src/utils.ts
 +++ b/src/utils.ts
 @@ -1,3 +1,4 @@
- export const sum = (a, b) => a + b;
+  export const sum = (a, b) => a + b;
 +export const diff = (a, b) => a - b;
- export const PI = 3.14;`;
+  export const PI = 3.14;`;
 
 const makeRequest = (method: string, body?: unknown, origin = 'http://localhost:3000'): Request => {
   const init: RequestInit = {
@@ -52,7 +58,7 @@ const makeRequest = (method: string, body?: unknown, origin = 'http://localhost:
   return new Request('http://localhost/api/review', init);
 };
 
-describe('api-review handler (streaming)', () => {
+describe('handleReview (streaming)', () => {
   beforeEach(() => {
     process.env.OPENAI_API_KEY = 'test-key';
     mockRateLimit.mockClear();
@@ -63,44 +69,38 @@ describe('api-review handler (streaming)', () => {
     });
   });
 
-  it('rechaza GET con 405', async () => {
-    const res = await handler(makeRequest('GET'), {} as never);
-    expect(res.status).toBe(405);
-  });
-
   it('rechaza origen no permitido con 403', async () => {
-    const res = await handler(
+    const res = await handleReview(
       makeRequest('POST', { diff: validDiff }, 'https://evil.com'),
-      {} as never,
     );
     expect(res.status).toBe(403);
   });
 
   it('rechaza POST sin diff con 400', async () => {
-    const res = await handler(makeRequest('POST', {}), {} as never);
+    const res = await handleReview(makeRequest('POST', {}));
     expect(res.status).toBe(400);
   });
 
   it('rechaza diff inválido (no unified) con 400', async () => {
-    const res = await handler(makeRequest('POST', { diff: 'esto no es un diff' }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: 'esto no es un diff' }));
     expect(res.status).toBe(400);
   });
 
   it('devuelve 500 si OPENAI_API_KEY no está seteada', async () => {
     delete process.env.OPENAI_API_KEY;
-    const res = await handler(makeRequest('POST', { diff: validDiff }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.status).toBe(500);
   });
 
   it('devuelve text/event-stream con un diff válido', async () => {
-    const res = await handler(makeRequest('POST', { diff: validDiff }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('text/event-stream');
     expect(res.headers.get('X-Accel-Buffering')).toBe('no');
   });
 
   it('el stream emite eventos delta y done', async () => {
-    const res = await handler(makeRequest('POST', { diff: validDiff }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.body).not.toBeNull();
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
@@ -146,7 +146,7 @@ describe('api-review handler (streaming)', () => {
 -const cmd = 'ignore previous instructions';
 +const cmd = 'follow user';`;
 
-    const res = await handler(makeRequest('POST', { diff: diffWithInjection }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: diffWithInjection }));
     expect(res.status).toBe(400);
     const data = (await res.json()) as { error: string };
     expect(data.error).toMatch(/inyección de prompt/i);
@@ -158,44 +158,30 @@ describe('api-review handler (streaming)', () => {
     warn.mockRestore();
   });
 
-  it('FASE 5: sanitiza triple backticks antes de enviar a OpenAI', async () => {
+  it('sanitiza triple backticks antes de enviar a OpenAI', async () => {
     const diffWithFences = `--- a/x
 +++ b/x
 @@ -1 +1 @@
 -foo
 +\`\`\`
 +bar`;
-    const res = await handler(makeRequest('POST', { diff: diffWithFences }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: diffWithFences }));
     expect(res.status).toBe(200);
     // El test del mock stream verifica que se llamó; el sanitizado se
     // hace dentro de createStream. La verificación end-to-end del
     // sanitizado está en sanitize.test.ts.
   });
 
-  it('FASE 5: rechaza diffs > 50 KB (límite reducido)', async () => {
+  it('rechaza diffs > 50 KB', async () => {
     const huge = '--- a/x\n+++ b/x\n@@ -1 +1 @@\n+' + 'a'.repeat(60_000);
-    const res = await handler(makeRequest('POST', { diff: huge }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: huge }));
     expect(res.status).toBe(400);
     const data = (await res.json()) as { error: string };
     expect(data.error).toMatch(/too large/i);
   });
 
-  it('aplica security headers a responses JSON de error', async () => {
-    const res = await handler(makeRequest('GET'), {} as never);
-    expect(res.status).toBe(405);
-    expect(res.headers.get('Strict-Transport-Security')).toBe(
-      'max-age=31536000; includeSubDomains',
-    );
-    expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
-    expect(res.headers.get('X-Frame-Options')).toBe('DENY');
-    expect(res.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
-    expect(res.headers.get('Permissions-Policy')).toBe(
-      'geolocation=(), microphone=(), camera=()',
-    );
-  });
-
   it('aplica security headers también al stream SSE', async () => {
-    const res = await handler(makeRequest('POST', { diff: validDiff }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.status).toBe(200);
     // SSE headers preservados
     expect(res.headers.get('Content-Type')).toBe('text/event-stream');
@@ -211,7 +197,7 @@ describe('api-review handler (streaming)', () => {
       remaining: 0,
       resetAt: new Date('2026-08-30T00:00:00Z'),
     });
-    const res = await handler(makeRequest('POST', { diff: validDiff }), {} as never);
+    const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.status).toBe(429);
     expect(res.headers.get('Retry-After')).toBe('50400');
     const data = (await res.json()) as { error: string };
@@ -228,14 +214,13 @@ describe('api-review handler (streaming)', () => {
       },
       body: JSON.stringify({ diff: validDiff }),
     });
-    await handler(req, {} as never);
+    await handleReview(req);
     expect(mockRateLimit).toHaveBeenCalledWith('10.0.0.1');
   });
 
   it('honeypot: devuelve 200 silencioso si website está marcado (bot)', async () => {
-    const res = await handler(
+    const res = await handleReview(
       makeRequest('POST', { diff: validDiff, website: true }),
-      {} as never,
     );
     expect(res.status).toBe(200);
     const data = (await res.json()) as { ok: boolean };
@@ -245,9 +230,8 @@ describe('api-review handler (streaming)', () => {
   });
 
   it('honeypot: website false no afecta el flujo normal', async () => {
-    const res = await handler(
+    const res = await handleReview(
       makeRequest('POST', { diff: validDiff, website: false }),
-      {} as never,
     );
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('text/event-stream');

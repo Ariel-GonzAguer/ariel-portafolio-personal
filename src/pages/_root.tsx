@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import '../styles.css';
 
-const siteUrl = 'https://arielgonzaguer.dev';
+const siteUrl = 'https://arielgonzaguer.gaterojolab.com';
 const siteTitle = 'Ariel GonzAgüer | Frontend/Product Engineer';
 const siteDescription =
   'Portafolio personal de Ariel GonzAgüer: Frontend/Product Engineer enfocado en React, TypeScript, accesibilidad, performance y productos web sostenibles.';

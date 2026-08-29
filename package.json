@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "waku dev",
+    "dev:netlify": "netlify dev",
     "build": "waku build",
     "start": "waku start",
     "lint": "eslint . --ext .ts,.tsx --fix",

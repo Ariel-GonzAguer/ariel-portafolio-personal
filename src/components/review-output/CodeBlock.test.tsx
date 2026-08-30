@@ -51,7 +51,7 @@ describe('CodeBlock', () => {
     });
   });
 
-it('pasa el lang a shiki', async () => {
+  it('pasa el lang a shiki', async () => {
     // `CodeBlock` mantiene un singleton `highlighterPromise` a nivel
     // módulo. Los tests anteriores ya lo cachearon con su propio mock,
     // así que reseteamos módulos y reimportamos para que el spy de

@@ -35,7 +35,6 @@ export default function ReviewWorkspace() {
   if (state.code !== prevCode) {
     setPrevCode(state.code);
     if (state.code === 'injection_detected') {
-       
       alert(
         'Se detectó un intento de inyección de prompt. El intento fue registrado ' +
           '(IP, patrón y timestamp) en los logs de Netlify. Por seguridad, el ' +

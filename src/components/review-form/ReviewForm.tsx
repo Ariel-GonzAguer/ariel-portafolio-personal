@@ -66,11 +66,7 @@ function getServerTimeSnapshot(): number {
  * En el server devuelve 0 para que el primer render sea determinístico.
  */
 function useTickingNow(): number {
-  return useSyncExternalStore(
-    subscribeToClock,
-    getCurrentTimeSnapshot,
-    getServerTimeSnapshot,
-  );
+  return useSyncExternalStore(subscribeToClock, getCurrentTimeSnapshot, getServerTimeSnapshot);
 }
 
 /**

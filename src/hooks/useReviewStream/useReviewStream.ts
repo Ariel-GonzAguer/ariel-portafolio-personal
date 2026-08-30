@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import type { ReviewResponse, ReviewState } from './types';
+import type { ReviewErrorCode, ReviewResponse, ReviewState } from './types';
+
+/**
+ * Cooldown que se activa cuando el server rechaza por prompt injection.
+ * 6 minutos = 360_000 ms. Suficiente para disuadir iteración rápida sin
+ * bloquear al usuario legítimo que tipeó accidentalmente un patrón.
+ */
+const INJECTION_COOLDOWN_MS = 6 * 60 * 1000;
 
 /**
  * Hook que maneja el streaming de un review desde /api/review.
@@ -9,6 +16,16 @@ import type { ReviewResponse, ReviewState } from './types';
  * FASE 4: implementa la lectura de Server-Sent Events con
  * ReadableStream.getReader(), parseo incremental del JSON del schema,
  * y cancelación vía AbortController.
+ *
+ * FASE 5 (seguridad): cuando el server devuelve un error estructurado
+ * (HTTP 4xx/5xx con `{ error, code }`), el hook expone el `code` en el
+ * state para que la UI reaccione según el tipo. Caso especial:
+ * `injection_detected` activa un cooldown de 6 minutos vía `cooldownUntil`.
+ *
+ * Decisión arquitectónica: el cooldown vive en el state del hook, no
+ * en un useEffect del componente. Esto evita las reglas nuevas de
+ * React 19 (`react-hooks/set-state-in-effect`) y mantiene la lógica
+ * de seguridad encapsulada donde ya corre el flujo del fetch.
  */
 export function useReviewStream() {
   const [state, setState] = useState<ReviewState>({
@@ -16,6 +33,8 @@ export function useReviewStream() {
     rawText: '',
     result: null,
     error: null,
+    code: null,
+    cooldownUntil: null,
   });
 
   const abortRef = useRef<AbortController | null>(null);
@@ -25,7 +44,14 @@ export function useReviewStream() {
     const ac = new AbortController();
     abortRef.current = ac;
 
-    setState({ status: 'loading', rawText: '', result: null, error: null });
+    setState({
+      status: 'loading',
+      rawText: '',
+      result: null,
+      error: null,
+      code: null,
+      cooldownUntil: null,
+    });
 
     let response: Response;
     try {
@@ -42,16 +68,38 @@ export function useReviewStream() {
           : err instanceof Error
             ? err.message
             : 'Error de red';
-      setState({ status: 'error', rawText: '', result: null, error: message });
-      return;
-    }
-
-    if (!response.ok || !response.body) {
       setState({
         status: 'error',
         rawText: '',
         result: null,
-        error: `HTTP ${response.status}`,
+        error: message,
+        code: null,
+        cooldownUntil: null,
+      });
+      return;
+    }
+
+    if (!response.ok || !response.body) {
+      let code: ReviewErrorCode | null = null;
+      let message = `HTTP ${response.status}`;
+      try {
+        const errBody = (await response.json()) as { error?: string; code?: string };
+        if (typeof errBody.error === 'string') message = errBody.error;
+        if (typeof errBody.code === 'string') code = errBody.code as ReviewErrorCode;
+      } catch {
+        // Body no era JSON; mantener el fallback.
+      }
+      const isInjection = code === 'injection_detected';
+      setState({
+        status: 'error',
+        rawText: '',
+        result: null,
+        error: message,
+        code,
+        // Activar el cooldown solo si el server rechazó por injection.
+        // El timestamp se setea acá (no en un effect) porque es el
+        // momento exacto del rechazo, no una reacción a un re-render.
+        cooldownUntil: isInjection ? Date.now() + INJECTION_COOLDOWN_MS : null,
       });
       return;
     }
@@ -82,6 +130,8 @@ export function useReviewStream() {
             rawText,
             result: null,
             error: parsed.message,
+            code: null,
+            cooldownUntil: null,
           });
         }
       } catch {
@@ -102,7 +152,6 @@ export function useReviewStream() {
       }
       if (buffer.trim()) processEvent(buffer);
 
-      // Si el hook ya marcó error durante el streaming, no pisamos el estado.
       if (hadError) {
         return;
       }
@@ -116,11 +165,13 @@ export function useReviewStream() {
           rawText,
           result: null,
           error: 'El modelo no devolvió JSON válido.',
+          code: null,
+          cooldownUntil: null,
         });
         return;
       }
 
-      setState({ status: 'done', rawText, result, error: null });
+      setState({ status: 'done', rawText, result, error: null, code: null, cooldownUntil: null });
     } catch (err) {
       const message =
         err instanceof Error && err.name === 'AbortError'
@@ -133,6 +184,8 @@ export function useReviewStream() {
         status: 'error',
         error: message,
         rawText: s.rawText,
+        code: null,
+        cooldownUntil: null,
       }));
     } finally {
       reader.releaseLock();
@@ -145,7 +198,14 @@ export function useReviewStream() {
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
-    setState({ status: 'idle', rawText: '', result: null, error: null });
+    setState({
+      status: 'idle',
+      rawText: '',
+      result: null,
+      error: null,
+      code: null,
+      cooldownUntil: null,
+    });
   }, []);
 
   return { state, start, abort, reset };

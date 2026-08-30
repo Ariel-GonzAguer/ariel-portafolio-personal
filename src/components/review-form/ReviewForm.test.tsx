@@ -9,6 +9,7 @@ const defaultProps = {
   onSubmit: vi.fn(),
   onExampleSelect: vi.fn(),
   isLoading: false,
+  cooldownUntil: null,
 };
 
 describe('ReviewForm', () => {
@@ -64,5 +65,55 @@ describe('ReviewForm', () => {
     expect(checkbox).not.toBeChecked();
     // El botón debe estar deshabilitado si el checkbox no está marcado.
     expect(screen.getByRole('button', { name: /revisar diff/i })).toBeDisabled();
+  });
+
+  it('con cooldownUntil activo en el futuro, el botón muestra countdown y está disabled', () => {
+    const future = Date.now() + 5 * 60 * 1000; // 5 minutos en el futuro
+    render(<ReviewForm {...defaultProps} cooldownUntil={future} />);
+    const button = screen.getByRole('button', { name: /bloqueado por seguridad/i });
+    expect(button).toBeDisabled();
+    expect(button.textContent).toMatch(/\d:\d\d/);
+  });
+
+  it('con cooldownUntil en el pasado, el botón vuelve a estado normal', () => {
+    const past = Date.now() - 1000;
+    render(<ReviewForm {...defaultProps} cooldownUntil={past} />);
+    expect(screen.getByRole('button', { name: /revisar diff/i })).toBeInTheDocument();
+  });
+
+  it('durante cooldown, el textarea y el checkbox visible quedan disabled', () => {
+    const future = Date.now() + 60_000;
+    render(
+      <ReviewForm
+        {...defaultProps}
+        diff={'--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b'}
+        cooldownUntil={future}
+      />,
+    );
+    expect(screen.getByLabelText(/pega tu unified diff/i)).toBeDisabled();
+    expect(screen.getByRole('checkbox', { name: /los gatos son geniales/i })).toBeDisabled();
+  });
+
+  it('durante cooldown, el selector de ejemplos también queda disabled', () => {
+    const future = Date.now() + 60_000;
+    render(<ReviewForm {...defaultProps} cooldownUntil={future} />);
+    expect(screen.getByLabelText(/cargar un ejemplo/i)).toBeDisabled();
+  });
+
+  it('durante cooldown, intentar submit no llama a onSubmit', () => {
+    const onSubmit = vi.fn();
+    const future = Date.now() + 60_000;
+    render(
+      <ReviewForm
+        {...defaultProps}
+        onSubmit={onSubmit}
+        diff={'--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b'}
+        cooldownUntil={future}
+      />,
+    );
+    // El botón está disabled por cooldown; un click directo no dispara submit.
+    const button = screen.getByRole('button', { name: /bloqueado por seguridad/i });
+    fireEvent.click(button);
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

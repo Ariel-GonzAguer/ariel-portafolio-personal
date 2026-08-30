@@ -67,7 +67,7 @@ describe('ReviewOutput', () => {
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledOnce();
     });
-    expect(writeText.mock.calls[0][0]).toBe(JSON.stringify(sampleReview, null, 2));
+    expect(writeText.mock.calls[0]?.[0]).toBe(JSON.stringify(sampleReview, null, 2));
 
     vi.unstubAllGlobals();
   });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { focusClassName } from '../../utils/a11y/a11y';
 import { EXAMPLE_DIFFS, type ExampleDiff } from './ExampleDiffs';
 
@@ -8,6 +8,69 @@ interface ReviewFormProps {
   onSubmit: (diff: string, botTrap: boolean) => void;
   onExampleSelect: (example: ExampleDiff) => void;
   isLoading: boolean;
+  /**
+   * Timestamp (ms epoch) hasta el cual el botón de submit queda
+   * deshabilitado por cooldown de seguridad tras un intento de prompt
+   * injection. Si es null, no hay cooldown activo.
+   */
+  cooldownUntil: number | null;
+}
+
+/**
+ * Suscripción singleton al reloj del navegador para el countdown del
+ * cooldown. `useSyncExternalStore` exige que `subscribe` Y `getSnapshot`
+ * sean referencialmente estables entre renders, por eso viven a nivel
+ * módulo. El truco clave: `getSnapshot` NO llama a `Date.now()` — lee
+ * de una variable que solo se actualiza dentro del callback del
+ * interval. Así React no detecta "cambio" en cada render y no entra
+ * en loop infinito.
+ *
+ * Mantiene un único setInterval compartido por todos los consumidores
+ * (un Set de callbacks) para no spamear timers. Emite un tick cada
+ * 250 ms mientras hay al menos un listener activo.
+ */
+const clockListeners = new Set<() => void>();
+let clockInterval: ReturnType<typeof setInterval> | null = null;
+let currentTimeSnapshot = 0;
+
+function subscribeToClock(callback: () => void): () => void {
+  clockListeners.add(callback);
+  if (clockInterval === null) {
+    // Capturar el tiempo actual al arrancar para que el primer render
+    // del consumidor tenga un valor útil.
+    currentTimeSnapshot = Date.now();
+    clockInterval = setInterval(() => {
+      currentTimeSnapshot = Date.now();
+      clockListeners.forEach((cb) => cb());
+    }, 250);
+  }
+  return () => {
+    clockListeners.delete(callback);
+    if (clockListeners.size === 0 && clockInterval !== null) {
+      clearInterval(clockInterval);
+      clockInterval = null;
+    }
+  };
+}
+
+function getCurrentTimeSnapshot(): number {
+  return currentTimeSnapshot;
+}
+
+function getServerTimeSnapshot(): number {
+  return 0;
+}
+
+/**
+ * Hook que devuelve la hora actual re-renderizando cada 250 ms.
+ * En el server devuelve 0 para que el primer render sea determinístico.
+ */
+function useTickingNow(): number {
+  return useSyncExternalStore(
+    subscribeToClock,
+    getCurrentTimeSnapshot,
+    getServerTimeSnapshot,
+  );
 }
 
 /**
@@ -21,6 +84,12 @@ interface ReviewFormProps {
  * - Oculto: checkbox con name="website" que los bots marcan pero los
  *   humanos no ven. Si el backend recibe `website: true`, devuelve
  *   200 silencioso sin gastar tokens de OpenAI.
+ *
+ * FASE 5 (seguridad): el botón se deshabilita durante el cooldown que
+ * activa el padre cuando el server detecta prompt injection. El
+ * countdown se actualiza vía `useSyncExternalStore` sobre el reloj
+ * del navegador (cumple las reglas de React 19 sobre sincronización
+ * con fuentes externas, sin setState en useEffect).
  */
 export default function ReviewForm({
   diff,
@@ -28,15 +97,23 @@ export default function ReviewForm({
   onSubmit,
   onExampleSelect,
   isLoading,
+  cooldownUntil,
 }: ReviewFormProps) {
   const [catsApproved, setCatsApproved] = useState(false);
   const [botTrap, setBotTrap] = useState(false);
+  const now = useTickingNow();
+
+  const cooldownRemainingMs = cooldownUntil !== null ? Math.max(0, cooldownUntil - now) : 0;
+  const isCoolingDown = cooldownRemainingMs > 0;
+  const remainingMinutes = Math.floor(cooldownRemainingMs / 60_000);
+  const remainingSeconds = Math.floor((cooldownRemainingMs % 60_000) / 1000);
+  const countdownLabel = `${remainingMinutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        if (diff.trim().length > 0 && catsApproved) {
+        if (diff.trim().length > 0 && catsApproved && !isCoolingDown) {
           onSubmit(diff, botTrap);
         }
       }}
@@ -46,7 +123,7 @@ export default function ReviewForm({
         <label htmlFor="diff" className="text-sm font-semibold text-white/90">
           Pega tu unified diff
         </label>
-        <ExampleSelector onSelect={onExampleSelect} disabled={isLoading} />
+        <ExampleSelector onSelect={onExampleSelect} disabled={isLoading || isCoolingDown} />
       </div>
       <textarea
         id="diff"
@@ -59,6 +136,7 @@ export default function ReviewForm({
           'white',
         )}`}
         aria-describedby="diff-help"
+        disabled={isCoolingDown}
       />
       <p id="diff-help" className="text-xs text-gris-claro">
         Diff en formato unified (lo que produce <code>git diff</code>). Máximo 100 KB.
@@ -72,6 +150,7 @@ export default function ReviewForm({
           checked={catsApproved}
           onChange={(e) => setCatsApproved(e.target.checked)}
           className="accent-red-400"
+          disabled={isCoolingDown}
         />
         Los gatos son geniales
       </label>
@@ -92,10 +171,14 @@ export default function ReviewForm({
 
       <button
         type="submit"
-        disabled={isLoading || diff.trim().length === 0 || !catsApproved}
+        disabled={isLoading || diff.trim().length === 0 || !catsApproved || isCoolingDown}
         className={`self-start bg-red-400 px-5 py-3 text-sm font-bold text-black transition hover:bg-white disabled:opacity-50 ${focusClassName('red')} cursor-pointer!`}
       >
-        {isLoading ? 'Analizando…' : 'Revisar diff'}
+        {isLoading
+          ? 'Analizando…'
+          : isCoolingDown
+            ? `Bloqueado por seguridad (${countdownLabel})`
+            : 'Revisar diff'}
       </button>
     </form>
   );

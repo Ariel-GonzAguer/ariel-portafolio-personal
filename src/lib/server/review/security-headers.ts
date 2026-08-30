@@ -42,13 +42,20 @@ export function withSecurityHeaders(specific: Record<string, string>): Record<st
 /**
  * Helper para construir responses JSON de error con los security headers
  * ya aplicados. Evita repetir la lista en cada return del handler.
+ *
+ * El `code` opcional permite al cliente distinguir tipos de error sin
+ * parsear el mensaje (útil para mostrar UI distinta: alert de seguridad
+ * vs error genérico). Los códigos siguen snake_case y son estables.
  */
 export function jsonError(
   message: string,
   status: number,
   extraHeaders: Record<string, string> = {},
+  code?: string,
 ): Response {
-  return new Response(JSON.stringify({ error: message }), {
+  const body: { error: string; code?: string } = { error: message };
+  if (code) body.code = code;
+  return new Response(JSON.stringify(body), {
     status,
     headers: withSecurityHeaders({
       'Content-Type': 'application/json',

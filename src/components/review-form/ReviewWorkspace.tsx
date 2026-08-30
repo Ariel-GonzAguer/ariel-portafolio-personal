@@ -12,14 +12,41 @@ import ReviewOutput from '../review-output/ReviewOutput';
  * FASE 4: usa el hook useReviewStream que maneja el SSE end-to-end.
  * El diff es estado controlado acá; el form lo recibe y emite onChange.
  * Al elegir un ejemplo nuevo, se llena el diff y se resetea el review.
+ *
+ * FASE 5 (seguridad): cuando el server responde con
+ * `code: 'injection_detected'`, el hook expone `cooldownUntil` en su
+ * state. Acá mostramos el alert nativo y vaciamos el textarea.
+ *
+ * Implementación: seguimos el patrón recomendado por React 19 de
+ * "ajustar state durante render"
+ * (https://react.dev/learn/you-might-not-need-an-effect). En vez de
+ * un `useEffect` que dispara `setDiff` cuando cambia `state.code`,
+ * comparamos contra el valor previo y reseteamos sincrónicamente.
+ * Esto evita la regla `react-hooks/set-state-in-effect`.
  */
 export default function ReviewWorkspace() {
   const [diff, setDiff] = useState('');
-  const { state, start, reset } = useReviewStream();
+  const [prevCode, setPrevCode] = useState<string | null>(null);
+  const { state, start: startReview, reset } = useReviewStream();
   const isStreaming = state.status === 'streaming' || state.status === 'loading';
 
+  // Reset del diff al detectar el code nuevo de injection. Se hace
+  // durante el render para evitar setState en useEffect.
+  if (state.code !== prevCode) {
+    setPrevCode(state.code);
+    if (state.code === 'injection_detected') {
+       
+      alert(
+        'Se detectó un intento de inyección de prompt. El intento fue registrado ' +
+          '(IP, patrón y timestamp) en los logs de Netlify. Por seguridad, el ' +
+          'textarea fue vaciado y el envío queda deshabilitado por 6 minutos.',
+      );
+      setDiff('');
+    }
+  }
+
   const handleSubmit = (submittedDiff: string, botTrap: boolean) => {
-    void start(submittedDiff, botTrap);
+    void startReview(submittedDiff, botTrap);
   };
 
   const handleExampleSelect = (example: ExampleDiff) => {
@@ -35,6 +62,7 @@ export default function ReviewWorkspace() {
         onSubmit={handleSubmit}
         onExampleSelect={handleExampleSelect}
         isLoading={isStreaming}
+        cooldownUntil={state.cooldownUntil}
       />
       <div>
         {state.status === 'idle' && (

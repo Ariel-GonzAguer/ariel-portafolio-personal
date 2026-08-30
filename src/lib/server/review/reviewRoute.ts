@@ -91,6 +91,8 @@ export async function handleReview(request: Request): Promise<Response> {
   }
 
   // Detectar prompt injection → rechazar con alert al usuario.
+  // El code `injection_detected` permite al cliente mostrar UI distinta
+  // (alert del navegador + vaciar textarea + cooldown del botón).
   const injectionMatches = detectInjection(body.diff);
   if (injectionMatches.length > 0) {
     logInjectionAttempt(
@@ -100,6 +102,8 @@ export async function handleReview(request: Request): Promise<Response> {
     return jsonError(
       'Se detectó un intento de inyección de prompt. Tu solicitud no será procesada.',
       400,
+      {},
+      'injection_detected',
     );
   }
   const safeDiff = sanitizeDiff(body.diff);

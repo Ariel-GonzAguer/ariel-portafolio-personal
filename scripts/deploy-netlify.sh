@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usar `NETLIFY_SITE_ID` en .env.local permitirá pasar implicitamente el site id al comando de deploy.
-if [ -f ".env.local" ]; then
-  echo "Cargando variables de entorno desde .env.local"
-  # exporta todas las variables definidas en el archivo .env.local
+# Usar `NETLIFY_SITE_ID` en .env permitirá pasar implicitamente el site id al comando de deploy.
+if [ -f ".env" ]; then
+  echo "Cargando variables de entorno desde .env"
+  # exporta todas las variables definidas en el archivo .env
   set -o allexport
   # shellcheck disable=SC1091
-  source ".env.local"
+  source ".env"
   set +o allexport
 fi
 

@@ -1,30 +1,10 @@
 import type { ReactNode } from 'react';
 import '../styles.css';
 
-const siteUrl = 'https://arielgonzaguer.dev';
+const siteUrl = 'https://arielgonzaguer.gaterojolab.com';
 const siteTitle = 'Ariel GonzAgüer | Frontend/Product Engineer';
 const siteDescription =
   'Portafolio personal de Ariel GonzAgüer: Frontend/Product Engineer enfocado en React, TypeScript, accesibilidad, performance y productos web sostenibles.';
-
-const structuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: 'Ariel GonzAgüer',
-  jobTitle: 'Frontend/Product Engineer',
-  url: siteUrl,
-  description: siteDescription,
-  knowsAbout: [
-    'Frontend Engineering',
-    'Product Engineering',
-    'Web Accessibility',
-    'Web Performance',
-    'React',
-    'TypeScript',
-    'Waku',
-    'Jamstack',
-  ],
-  sameAs: ['https://github.com/Ariel-GonzAguer', 'https://gatorojolab.com'],
-};
 
 export default async function RootElement({ children }: { children: ReactNode }) {
   return (
@@ -45,11 +25,6 @@ export default async function RootElement({ children }: { children: ReactNode })
         <meta name="twitter:title" content={siteTitle} />
         <meta name="twitter:description" content={siteDescription} />
         <meta name="theme-color" content="#0a0a0c" />
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
       </head>
       <body className="min-h-screen bg-fondo text-white">{children}</body>
     </html>

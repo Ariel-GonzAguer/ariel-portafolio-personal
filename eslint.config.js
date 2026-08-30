@@ -8,7 +8,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', '**/*.gen.ts', 'serve.js'],
+    ignores: ['dist/**', 'node_modules/**', '.netlify/**', '**/*.gen.ts', 'serve.js'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,

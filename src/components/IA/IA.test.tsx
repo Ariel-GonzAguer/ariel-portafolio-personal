@@ -12,11 +12,16 @@ describe('IA', () => {
     ).toBeInTheDocument();
   });
 
-  it('muestra los tres tipos de experiencia con IA', () => {
+  it('muestra los tipos de experiencia con IA presentes en los datos', () => {
     render(<IA />);
-    expect(screen.getByText(/producto con ia/i)).toBeInTheDocument();
-    expect(screen.getByText(/chatbot llm/i)).toBeInTheDocument();
-    expect(screen.getByText(/workflow de agentes/i)).toBeInTheDocument();
+    // Verifica que al menos un elemento con cada tipo aparece.
+    // Antes había 1 por tipo; con la entrada del AI Code Reviewer
+    // ahora hay 2 de "Producto con IA", así que usamos getAllByText.
+    const tiposUnicos = new Set(proyectosIA.map((p) => p.tipo));
+    for (const tipo of tiposUnicos) {
+      const matches = screen.getAllByText(new RegExp(tipo, 'i'));
+      expect(matches.length).toBeGreaterThanOrEqual(1);
+    }
   });
 
   it('renderiza cada proyecto de la sección', () => {

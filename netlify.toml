@@ -18,10 +18,11 @@
   path = "/*"
 
 [[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(self)"
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+for = "/*"
+[headers.values]
+X-Frame-Options = "SAMEORIGIN"
+X-Content-Type-Options = "nosniff"
+Referrer-Policy = "strict-origin-when-cross-origin"
+Permissions-Policy = "camera=(self)"
+Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+

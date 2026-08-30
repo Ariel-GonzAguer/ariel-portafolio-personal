@@ -64,3 +64,9 @@ h3 {
   --color-gris-claro: rgb(206, 208, 213);
   --color-fondo: rgb(10, 10, 12);
 }
+
+/* Select options en modo oscuro — los navegadores ignoran inline styles en <option> */
+select option {
+  background-color: #1a1a1a;
+  color: #e5e5e5;
+}

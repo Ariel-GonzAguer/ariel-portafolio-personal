@@ -47,6 +47,19 @@ export default function ReviewPage() {
               en este servicio más allá de la respuesta.
             </p>
           </aside>
+          <details className="mx-auto mt-6 max-w-2xl text-center">
+            <summary className="mt-4 cursor-pointer text-center">
+              Click acá para saber más de esta herramienta
+            </summary>
+
+            <p className="mt-2 text-center text-gris-claro">
+              Este AI Code Reviewer utiliza el modelo GPT 5.6 Luna de OpenAI. Podés usarla un máximo de 3 veces por día. Te dará retroalimentación enfocada en cinco categorías: seguridad, performance, type-safety, mantenibilidad y accesibilidad, y te dirá si hay riesgos, catalogándolos como <code>critical</code>, <code>high</code>, <code>medium</code>, <code>low</code>, <code>info</code>.
+            </p>
+            <p className="mt-2 text-center text-gris-claro">
+              Para poder usarla, necesitás marcar la casilla que dice `Los gatos son geniales`.
+            </p>
+
+          </details>
         </section>
         <ReviewWorkspace />
       </main>

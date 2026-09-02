@@ -122,6 +122,15 @@ export const proyectosIA: ProyectoIA[] = [
     tecnologias: ['OpenAI Responses API', 'Waku', 'Netlify Functions', 'TypeScript'],
     enlace: 'https://arielgonzaguer.gatorojolab.com/review',
   },
+  {
+    id: 'patchwork',
+    nombre: 'Patchwork - WebMCP',
+    tipo: 'Producto con IA',
+    descripcion:
+      'Trabaja en equipo con un agente de IA para diseñar, plantar, mantener y diagnosticar problemas en un huerto urbano, usando el WebMCP.',
+    tecnologias: ['WebMCP', 'OpenAI', 'Google', 'Michi-Router'],
+    enlace: 'https://patchwork-webmcp-challenge.netlify.app/',
+  },
 ];
 
 export interface RepoOpenSource {

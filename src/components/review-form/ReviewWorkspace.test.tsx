@@ -121,4 +121,90 @@ describe('ReviewWorkspace', () => {
       expect(screen.getByText(/openai timeout/i)).toBeInTheDocument();
     });
   });
+
+  it('cuando el server rechaza con injection_detected, dispara alert, vacía textarea y bloquea el botón', async () => {
+    const errorBody = JSON.stringify({
+      error: 'Se detectó un intento de inyección de prompt.',
+      code: 'injection_detected',
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(errorBody, {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    render(<ReviewWorkspace />);
+    const example = EXAMPLE_DIFFS[0];
+    if (!example) throw new Error('No examples available');
+
+    fireEvent.change(screen.getByLabelText(/cargar un ejemplo/i), {
+      target: { value: example.id },
+    });
+    fireEvent.click(screen.getByRole('checkbox', { name: /los gatos son geniales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /revisar diff/i }));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledOnce();
+    });
+    const alertMessage = alertSpy.mock.calls[0]?.[0] as string;
+    expect(alertMessage).toMatch(/intento de inyección de prompt/i);
+
+    // El textarea fue vaciado.
+    const textarea = screen.getByLabelText(/pega tu unified diff/i) as HTMLTextAreaElement;
+    expect(textarea.value).toBe('');
+
+    // El botón quedó disabled con countdown visible.
+    const blockedButton = screen.getByRole('button', { name: /bloqueado por seguridad/i });
+    expect(blockedButton).toBeDisabled();
+    expect(blockedButton.textContent).toMatch(/\d:\d\d/);
+
+    alertSpy.mockRestore();
+  });
+
+  it('elegir un ejemplo después del cooldown limpia el bloqueo', async () => {
+    const errorBody = JSON.stringify({
+      error: 'Se detectó un intento de inyección de prompt.',
+      code: 'injection_detected',
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(errorBody, {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+    render(<ReviewWorkspace />);
+    const example = EXAMPLE_DIFFS[0];
+    if (!example) throw new Error('No examples available');
+
+    fireEvent.change(screen.getByLabelText(/cargar un ejemplo/i), {
+      target: { value: example.id },
+    });
+    fireEvent.click(screen.getByRole('checkbox', { name: /los gatos son geniales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /revisar diff/i }));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalled();
+    });
+
+    // Cargar otro ejemplo limpia el bloqueo: cooldownUntil pasa a null,
+    // por lo que el botón vuelve a estar habilitado con diff nuevo.
+    const example2 = EXAMPLE_DIFFS[1] ?? EXAMPLE_DIFFS[0];
+    if (!example2) throw new Error('No examples available');
+    fireEvent.change(screen.getByLabelText(/cargar un ejemplo/i), {
+      target: { value: example2.id },
+    });
+
+    const textarea = screen.getByLabelText(/pega tu unified diff/i) as HTMLTextAreaElement;
+    expect(textarea.value).toBe(example2.diff);
+    // El botón de bloqueo desaparece.
+    expect(screen.queryByRole('button', { name: /bloqueado por seguridad/i })).toBeNull();
+
+    alertSpy.mockRestore();
+  });
 });

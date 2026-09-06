@@ -16,11 +16,14 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
     },
+    // Vitest 4 (ver migration guide: pool reescrito sin tinypool):
+    // `poolOptions.threads.singleThread` se reemplaza por la opción
+    // top-level `maxWorkers: 1` para conservar el orden determinístico
+    // de ejecución de los tests. NO usamos `isolate: false` porque
+    // compartiría módulos entre archivos y rompería los mocks de
+    // `vi.mock` (ver caveat de la doc de migración).
+    // https://vitest.dev/guide/migration#pool-rework
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    maxWorkers: 1,
   },
 });

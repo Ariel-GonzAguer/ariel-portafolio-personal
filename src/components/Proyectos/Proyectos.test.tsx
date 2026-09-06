@@ -6,7 +6,9 @@ import Proyectos from './Proyectos';
 describe('Proyectos', () => {
   it('renderiza la sección con heading', () => {
     render(<Proyectos />);
-    expect(screen.getByRole('heading', { level: 2, name: /^proyectos$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: /frontend \/ product engineer/i }),
+    ).toBeInTheDocument();
   });
 
   it('muestra todos los proyectos destacados', () => {

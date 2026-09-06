@@ -60,7 +60,7 @@ export default function Proyectos() {
         <p className="font-semibold uppercase tracking-[0.18em] text-red-400">
           Trabajo seleccionado
         </p>
-        <h2 className="mt-3 text-3xl font-bold md:text-4xl">Proyectos</h2>
+        <h2 className="mt-3 text-3xl font-bold md:text-4xl">Frontend / Product Engineer</h2>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-gris-claro">
           Casos reales donde diseñé y desarrollé el producto completo: del flujo de usuario al
           despliegue.

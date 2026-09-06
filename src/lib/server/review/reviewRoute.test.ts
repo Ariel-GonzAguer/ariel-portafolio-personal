@@ -150,8 +150,10 @@ describe('handleReview (streaming)', () => {
 
     const res = await handleReview(makeRequest('POST', { diff: diffWithInjection }));
     expect(res.status).toBe(400);
-    const data = (await res.json()) as { error: string };
+    const data = (await res.json()) as { error: string; code: string };
     expect(data.error).toMatch(/inyección de prompt/i);
+    // El cliente usa este code para mostrar el alert de seguridad.
+    expect(data.code).toBe('injection_detected');
     // Además loguea el intento.
     expect(warn).toHaveBeenCalledOnce();
     const logMessage = warn.mock.calls[0]?.[0] as string;

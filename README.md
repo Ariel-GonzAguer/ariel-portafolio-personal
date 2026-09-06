@@ -1,14 +1,19 @@
 # ariel-personal
 
-Portafolio personal de Ariel GonzAgüer: Frontend/Product Engineer + IA.
+Bienvenidas, bienvenidos a mi portafolio personal.  
+Soy Ariel GonzAgüer, Frontend/Product Engineer + IA. Me enfoco en accesibilidad, sostenibilidad y en poner a la persona usuaria en el centro de la experiencia.  
 
-Sitio de una sola página, estático y accesible, con secciones de proyectos destacados, experiencia con IA/LLMs, código abierto, certificaciones y contacto.
+Creo que la internet es parte esencial del futuro, y quiero ayudar a construirla de forma clara, accesible y sostenible.
 
-> Producción: [arielgonzaguer.gatorojolab.com](https://arielgonzaguer.gatorojolab.com)
+Mi portafolio es un sitio estático, con secciones de proyectos destacados, experiencia con IA/LLMs, código abierto, certificaciones y contacto.
+
+Vea el sitio desplegado acá → [arielgonzaguer.gatorojolab.com](https://arielgonzaguer.gatorojolab.com)  
+
+Para ver el sitio de mi estudio de Desarrollo web visite → [gatorojolab.com](https://gatorojolab.com)
 
 ## Stack
 
-- [Waku](https://waku.gg) 1 beta (React Server Components) + React 19 + TypeScript
+- [Waku](https://waku.gg) + React 19 + TypeScript
 - Tailwind CSS v4
 - Vitest + Testing Library (149 tests)
 - Netlify Functions + Netlify Blobs
@@ -25,16 +30,17 @@ Sitio de una sola página, estático y accesible, con secciones de proyectos des
 | Sobre mí                 | Bio, fortalezas y stack diario                                                                         |
 | Certificaciones y cursos | Certificados de IA, seguridad, UX y sostenibilidad con PDF verificable                                 |
 
-## AI Code Reviewer
+## Features
+
+### AI Code Reviewer
 
 Producto público en [/review](https://arielgonzaguer.gatorojolab.com/review): pega un unified diff y recibe review técnico estructurado con severidad, categoría y fix sugerido.
 
-**Stack**: OpenAI Responses API (`gpt-5.6-luna`) + JSON Schema estricto + streaming SSE + Netlify Functions.
+**Stack**: OpenAI Responses API (`gpt-5.6-luna`) + JSON Schema estricto + streaming SSE.
 
 **Seguridad**:
 
 - Rate limit: 3 requests/día por IP (Netlify Blobs)
-- Honeypot: doble checkbox anti-bot
 - Prompt injection: detección + rechazo con alert al usuario
 - Sanitización de input (backticks, control chars, líneas largas)
 - CSRF allowlist por origin
@@ -89,15 +95,6 @@ public/
 ├── imagenes/           # screenshots de proyectos
 └── certificados/       # PDFs de certificaciones
 ```
-
-## Decisiones técnicas
-
-- **Render estático**: todo el sitio se genera en build; el AI Code Reviewer es una página estática que llama a una Netlify Function.
-- **Tipografía estratégica**: Lexend Mega solo en headings y marca; el cuerpo usa la fuente nativa del sistema.
-- **Accesibilidad como base**: skip link, foco visible, `aria-label` descriptivos, contraste AA+, `prefers-reduced-motion` respetado.
-- **Datos desacoplados**: los proyectos viven en `src/data/proyectos.ts`; los componentes solo renderizan.
-- **Links honestos**: los productos privados no muestran botones de código; solo se enlaza repositorio público.
-- **Seguridad en capas**: honeypot → rate limit → validate → detect injection → sanitize → OpenAI.
 
 ## Autor
 

@@ -21,7 +21,7 @@ export function focusClassName(color: 'red' | 'white' = 'red'): string {
 ```typescript
 export function calculateReviewCO2(inputLength: number, outputLength: number): string {
   // Estimación: ~0.0004 kg CO₂ por token (aproximación estándar de OpenAI)
-  const inputTokens = Math.ceil(inputLength / 4);  // promedio 4 chars/token
+  const inputTokens = Math.ceil(inputLength / 4); // promedio 4 chars/token
   const outputTokens = Math.ceil(outputLength / 4);
   const kgCO2 = (inputTokens + outputTokens) * 0.0004;
   return `${kgCO2.toFixed(4)} kg`;
@@ -29,10 +29,12 @@ export function calculateReviewCO2(inputLength: number, outputLength: number): s
 ```
 
 **Uso en `ReviewOutput`**:
+
 - `inputLength`: caracteres del diff pegado por el usuario.
 - `outputLength`: caracteres del review generado (aproximado por el número de tokens * 4).
 
 **Fórmula**: `(inputTokens + outputTokens) * 0.0004 kg CO₂`.
+
 - Promedio de 4 caracteres por token es estándar de la industria para modelos de lenguaje.
 - El resultado se muestra en `ReviewOutput.tsx` dentro de un `<p aria-label="Huella de carbono estimada">`.
 
@@ -65,7 +67,8 @@ export function calculateReviewCO2(inputLength: number, outputLength: number): s
 ```css
 @font-face {
   font-family: 'Lexend_Mega';
-  src: local('Lexend_Mega'),
+  src:
+    local('Lexend_Mega'),
     url(/tipografias/Lexend_Mega/Lexend_Mega.woff2) format('woff2');
   font-display: swap;
 }
@@ -112,11 +115,11 @@ select option {
 
 ## `middleware/no-trailing-slash.ts` — Middleware de trailing slash
 
-*Nota: este middleware está configurado pero revisar su implementación actual si es necesario. Su propósito es asegurar que las URLs no tengan slash trailing innecesario.*
-  ---
-  
-  ## Referencias
-  
-  - [Arquitectura general](architecture/overview.md)
-  - [Backend - Seguridad](backend/auth.md)
-  - [Netlify Docs — Middleware](https://docs.netlify.com/functions/edge-functions/#middleware)
+_Nota: este middleware está configurado pero revisar su implementación actual si es necesario. Su propósito es asegurar que las URLs no tengan slash trailing innecesario._
+---
+
+## Referencias
+
+- [Arquitectura general](architecture/overview.md)
+- [Backend - Seguridad](backend/auth.md)
+- [Netlify Docs — Middleware](https://docs.netlify.com/functions/edge-functions/#middleware)

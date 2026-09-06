@@ -8,6 +8,7 @@ Pega un unified diff y recibe un review técnico estructurado con severidad, cat
 **Contexto de negocio**: El AI Code Reviewer es el proyecto prioritario #1 del portafolio personal de Ariel GonzAgüer. Fue implementado para demostrar criterio de ingeniería real al revisar código — no simplemente "llamar a ChatGPT", sino construir un sistema completo con patrones de seguridad adecuados, validación de input, streaming SSE y manejo de edge cases. Es 100% nuevo en el portafolio: no hay nada similar en la sección IA actual. Reutiliza los patrones de seguridad ya establecidos en el proyecto (honeypot, rate limit, injection detection, sanitization, origin check, security headers), por lo que el patrón de seguridad y la estructura de la function son conocidos. El output visualmente impactante (findings con badges de color, verdict estilo GitHub) lo hace ideal para demos en vivo.
 
 **Por qué este primero** (de las 3 opciones consideradas):
+
 - Demuestra criterio de ingeniería real, no "llamar a ChatGPT".
 - Es 100 % nuevo en el portafolio: no hay nada similar en la sección IA actual.
 - Reutiliza la skill `chatbot-openai-builder` que ya tienes registrada, así que el patrón de seguridad y la estructura de la function son conocidos.
@@ -17,7 +18,7 @@ Pega un unified diff y recibe un review técnico estructurado con severidad, cat
 
 Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
 
-```
+````
 1. Usuario visita /review (página estática, SSR/SSG)
    │
    ▼
@@ -106,59 +107,65 @@ abort(): void
 
 reset(): void
 // Reinicia el state a idle
-```
+````
 
 ### `ReviewForm` props
 
-| Prop | Tipo | Descripción | Requerido |
-| ---- | ---- | ----------- | --------- |
-| `diff` | `string` | Texto del unified diff que el usuario pegó | Sí |
-| `onDiffChange` | `(diff: string) => void` | Callback cuando el usuario escribe en el textarea | Sí |
-| `onSubmit` | `(diff: string, botTrap: boolean) => void` | Callback al submit del formulario | Sí |
-| `onExampleSelect` | `(example: ExampleDiff) => void` | Callback al seleccionar un ejemplo precargado | Sí |
-| `isLoading` | `boolean` | Estado de loading global | Sí |
-| `cooldownUntil` | `number \| null` | Timestamp (ms epoch) hasta que el botón queda deshabilitado por cooldown de seguridad | Sí |
+| Prop              | Tipo                                       | Descripción                                                                           | Requerido |
+| ----------------- | ------------------------------------------ | ------------------------------------------------------------------------------------- | --------- |
+| `diff`            | `string`                                   | Texto del unified diff que el usuario pegó                                            | Sí        |
+| `onDiffChange`    | `(diff: string) => void`                   | Callback cuando el usuario escribe en el textarea                                     | Sí        |
+| `onSubmit`        | `(diff: string, botTrap: boolean) => void` | Callback al submit del formulario                                                     | Sí        |
+| `onExampleSelect` | `(example: ExampleDiff) => void`           | Callback al seleccionar un ejemplo precargado                                         | Sí        |
+| `isLoading`       | `boolean`                                  | Estado de loading global                                                              | Sí        |
+| `cooldownUntil`   | `number \| null`                           | Timestamp (ms epoch) hasta que el botón queda deshabilitado por cooldown de seguridad | Sí        |
 
 ### `ReviewOutput` props
 
-| Prop | Tipo | Descripción | Requerido |
-| ---- | ---- | ----------- | --------- |
-| `review` | `ReviewResponse` | Objeto JSON con summary, verdict, findings | Sí |
-| `outputLength` | `number` (opcional) | Longitud del output (usado para cálculo CO₂) | No |
-| `inputLength` | `number` (opcional) | Longitud del input (usado para cálculo CO₂) | No |
+| Prop           | Tipo                | Descripción                                  | Requerido |
+| -------------- | ------------------- | -------------------------------------------- | --------- |
+| `review`       | `ReviewResponse`    | Objeto JSON con summary, verdict, findings   | Sí        |
+| `outputLength` | `number` (opcional) | Longitud del output (usado para cálculo CO₂) | No        |
+| `inputLength`  | `number` (opcional) | Longitud del input (usado para cálculo CO₂)  | No        |
 
 ### `Finding` (individual finding del review)
 
 ```typescript
 interface Finding {
-  id: string;        // Ej: 'SEC-1', 'PERF-2', 'A11Y-1'
+  id: string; // Ej: 'SEC-1', 'PERF-2', 'A11Y-1'
   severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
-  category: 'security' | 'performance' | 'type_safety' | 'accessibility' | 'correctness' | 'maintainability';
-  line: string;      // Ej: 'L42' o 'L42-L47'
-  title: string;     // Título corto (≤80 chars)
+  category:
+    | 'security'
+    | 'performance'
+    | 'type_safety'
+    | 'accessibility'
+    | 'correctness'
+    | 'maintainability';
+  line: string; // Ej: 'L42' o 'L42-L47'
+  title: string; // Título corto (≤80 chars)
   explanation: string; // Por qué importa concretamente
-  fix: string;       // Código corregido, no pseudocódigo
+  fix: string; // Código corregido, no pseudocódigo
 }
 ```
 
 ### Vértices de verdict
 
-| Verdict | Etiqueta | Estilo CSS |
-| ------- | -------- | ----------
-| `approve` | Aprobar | `border-green-400 text-green-300` |
-| `request_changes` | Solicitar cambios | `border-red-400 text-red-300` |
-| `comment` | Solo comentarios | `border-white/30 text-white/80` |
+| Verdict           | Etiqueta          | Estilo CSS                        |
+| ----------------- | ----------------- | --------------------------------- |
+| `approve`         | Aprobar           | `border-green-400 text-green-300` |
+| `request_changes` | Solicitar cambios | `border-red-400 text-red-300`     |
+| `comment`         | Solo comentarios  | `border-white/30 text-white/80`   |
 
 ## Dependencias externas
 
-| Librería | Versión | Propósito |
-| -------- | ------- | --------- |
-| `openai` | `^7.7.0` | Cliente oficial OpenAI (Responses API) |
-| `@netlify/blobs` | `^11.0.1` | Almacenamiento para rate limit (rate-limit.ts) |
-| `shiki` | `^4.4.3` | Syntax highlighting del diff en la UI (ReviewOutput) |
-| `react` | `19.2.8` | Framework UI |
-| `react-dom` | `19.2.8` | Renderizador DOM |
-| `waku` | `1.0.0-beta.9` | Framework RSC + SSR |
+| Librería         | Versión        | Propósito                                            |
+| ---------------- | -------------- | ---------------------------------------------------- |
+| `openai`         | `^7.7.0`       | Cliente oficial OpenAI (Responses API)               |
+| `@netlify/blobs` | `^11.0.1`      | Almacenamiento para rate limit (rate-limit.ts)       |
+| `shiki`          | `^4.4.3`       | Syntax highlighting del diff en la UI (ReviewOutput) |
+| `react`          | `19.2.8`       | Framework UI                                         |
+| `react-dom`      | `19.2.8`       | Renderizador DOM                                     |
+| `waku`           | `1.0.0-beta.9` | Framework RSC + SSR                                  |
 
 ## Limitaciones y consideraciones
 

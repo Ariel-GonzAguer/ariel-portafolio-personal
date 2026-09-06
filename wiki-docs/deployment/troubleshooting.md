@@ -7,6 +7,7 @@
 **Causa**: `firebase-admin` no está incluido en el bundle de la Netlify Function, o version incompatible.
 
 **Solución**:
+
 1. Verificar `openai@^7.7.0` y `@netlify/blobs@^11.0.1` en `package.json`.
 2. Verificar `ssr.external: ['openai', '@netlify/blobs']` en `waku.config.ts` (si aplica) o bien asegurar que estas dependencias no sean tree-shaken innecesariamente.
 
@@ -21,6 +22,7 @@
 **Causa**: El rate limit usa Netlify Blobs con key `rl:${ip}:${yyyy-mm-dd}`. En dev local, Blobs puede comportarse de forma inesperada sin contexto Netlify.
 
 **Solución**:
+
 1. El rate limit secundario en memoria (`in-memory-rate-limit.ts`) actúa como red de seguridad: 10 requests/min.
 2. En desarrollo local, las requests suelen no contar contra el rate limit de Blobs si no hay contexto Netlify.
 3. Si el problema persiste, verificar que `checkInMemoryRateLimit(ip)` en `reviewRoute.ts` no esté bloqueando.
@@ -36,6 +38,7 @@
 **Causa**: El plan free de Netlify tiene límite de 26s por función serverless. El modelo `gpt-5.6-luna` puede tardar más de 26s en generar el review para diffs largos.
 
 **Solución**:
+
 1. El timeout está configurado en 60_000 ms (1 minuto) en `reviewRoute.ts` (`STREAM_TIMEOUT_MS`).
 2. Considerar actualizar a plan Pro de Netlify (límite 60s) si se esperan reviews largos.
 3. Para diffs muy largos, el usuario puede recibir un review parcial (primeros findings) y luego solicitar otro.
@@ -51,6 +54,7 @@
 **Causa**: La política CSP del sitio restringe `connect-src` a orígenes permitidos.
 
 **Solución**:
+
 1. Ya está cubierto: la edge function `netlify/edge-functions/csp-nonce.ts` permite `connect-src 'self'`, lo cual cubre el fetch a `/api/review` desde el mismo origen.
 2. Si se quiere endurecer CSP, agregar `connect-src 'self'` explícitamente.
 
@@ -65,6 +69,7 @@
 **Causa**: La API key se está incluyendo erróneamente en el bundle de cliente.
 
 **Solución**:
+
 1. **Nunca** poner `OPENAI_API_KEY` en variables de cliente (`process.env.OPENAI_API_KEY_CLIENT` o similar).
 2. La key debe estar solo en `process.env.OPENAI_API_KEY` server-side (Netlify UI env vars).
 3. Revisar `getServerEnv()` en `reviewRoute.ts` — usa `getEnv(key) ?? process.env[key]` y retorna `undefined` si está vacío.
@@ -81,6 +86,7 @@
 **Causa**: El `createSSEResponse` en `reviewRoute.ts` no está usando `withSecurityHeaders` correctamente.
 
 **Solución**:
+
 1. Verificar que `createSSEResponse` retorne `new Response(stream, { headers: withSecurityHeaders({ ...SSE_HEADERS }) })`.
 2. Los headers SSE están definidos en `security-headers.ts`:
    - `Content-Type: text/event-stream`
@@ -99,6 +105,7 @@
 **Causa**: El checkbox oculto `name="website"` no está oculto correctamente o el backend no está verificando `body.website`.
 
 **Solución**:
+
 1. En `ReviewForm.tsx`, el checkbox oculto tiene `style={{ position: 'absolute', left: '-9999px' }}` y `aria-hidden="true"`.
 2. En `reviewRoute.ts`, la verificación es: `if (body?.website) { return new Response(JSON.stringify({ ok: true }), ...); }`.
 3. Asegurarse de que no hay otro input con name="website" en el form que esté visible.
@@ -114,6 +121,7 @@
 **Causa**: Las 7 patrones de `detect-injection.ts` cubren los casos obvios, pero variantes con `snake_case` o `kebab-case` (ej: `ignore_previous_instructions`) no son detectadas.
 
 **Solución**:
+
 1. El sanitizer (`sanitize.ts`) ya neutraliza la mayoría de vectores (backticks ``` → Unicode, chars de control, líneas >2000 chars).
 2. Como mejora pendiente: agregar patrones `snake_case`/`kebab-case` a `detect-injection.ts`.
 3. En producción, los logs de `console.warn` capturan los intentos de injection para métricas.
@@ -129,6 +137,7 @@
 **Causa**: El header `Origin` de la request no está en la allowlist de `validate-origin.ts`.
 
 **Solución**:
+
 1. Por defecto, se permiten: `https://arielgonzaguer.gatorojolab.com` y `https://arielgonzaguer.dev`.
 2. En desarrollo local, localhost y 127.0.0.1 siempre se permiten (a menos que `NODE_ENV` esté en producción).
 3. Si se quiere agregar un dominio extra, configurar la env var `ALLOWED_ORIGINS` en Netlify UI (CSV: `https://dominio.com,https://otro.com`).
@@ -150,6 +159,7 @@
 **Causa**: Dependencias incompatibles o versions conflitantes.
 
 **Solución**:
+
 1. Ejecutar `pnpm audit` para detectar vulnerabilidades.
 2. Ejecutar `pnpm install --frozen-lockfile` para asegurar versions consistentes.
 3. Revisar `package.json` y `pnpm-lock.yaml` por versiones conflictantes.

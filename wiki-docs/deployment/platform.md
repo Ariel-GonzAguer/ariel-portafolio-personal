@@ -30,12 +30,12 @@ El proyecto se despliega en **Netlify** usando las siguientes configuraciones:
 
 Todas las variables deben configurarse en **Netlify UI** (Site settings > Environment variables), **no** en el repo (`.env` está en `.gitignore`).
 
-| Variable | Requerido | Descripción | Default |
-| -------- | --------- | ----------- | ------- |
-| `OPENAI_API_KEY` | **Sí** | API key de OpenAI (solo server-side) | — |
-| `ALLOWED_ORIGINS` | No (aditivo) | CSV de orígenes adicionales (los por defecto siempre se permiten) | `''` (vacío) |
-| `NODE_ENV` | No | Entorno de ejecución | `production` |
-| `NETLIFY_BLOBS_CONTEXT` | No (auto) | Contexto de Netlify Blobs (se inicializa automáticamente) | — |
+| Variable                | Requerido    | Descripción                                                       | Default      |
+| ----------------------- | ------------ | ----------------------------------------------------------------- | ------------ |
+| `OPENAI_API_KEY`        | **Sí**       | API key de OpenAI (solo server-side)                              | —            |
+| `ALLOWED_ORIGINS`       | No (aditivo) | CSV de orígenes adicionales (los por defecto siempre se permiten) | `''` (vacío) |
+| `NODE_ENV`              | No           | Entorno de ejecución                                              | `production` |
+| `NETLIFY_BLOBS_CONTEXT` | No (auto)    | Contexto de Netlify Blobs (se inicializa automáticamente)         | —            |
 
 ### Flujo de deploy manual
 
@@ -77,10 +77,10 @@ Todas las variables deben configurarse en **Netlify UI** (Site settings > Enviro
 ```
 
 El script `scripts/deploy-netlify.sh` maneja el deploy efectivo a Netlify (puede incluir variables de entorno o triggers adicionales).
-  ---
-  
-  ## Referencias
-  
-  - [Netlify Docs — Plataforma](https://docs.netlify.com/)
-  - [Variables de entorno](https://docs.netlify.com/site-build/environment-variables/)
-  - [Backend - Seguridad](backend/auth.md)
+---
+
+## Referencias
+
+- [Netlify Docs — Plataforma](https://docs.netlify.com/)
+- [Variables de entorno](https://docs.netlify.com/site-build/environment-variables/)
+- [Backend - Seguridad](backend/auth.md)

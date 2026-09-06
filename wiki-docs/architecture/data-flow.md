@@ -14,7 +14,7 @@ Componentes renderizan con props (única fuente de verdad)
 
 ## Flujo: AI Code Reviewer (`/review`)
 
-```
+````
 1. Usuario visita /review (página estática, getConfig({ render: 'static' }))
    │
    ▼
@@ -83,7 +83,7 @@ Componentes renderizan con props (única fuente de verdad)
    │
    ▼
 7. Browser renderiza ReviewOutput con findings, verdict badges, syntax highlighting (shiki)
-```
+````
 
 ## Diagrama ASCII: Flujo completo AI Code Reviewer
 
@@ -108,9 +108,10 @@ Componentes renderizan con props (única fuente de verdad)
 │    + CO₂)           │              │    + usage         │
  └─────────────────────┘              └─────────────────────┘
   ---
-  
+
   ## Referencias
-  
+
   - [Arquitectura general](architecture/overview.md)
   - [Flujo de datos](data-flow.md)
   - [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses)
+```

@@ -10,17 +10,17 @@ Este archivo es la **única fuente de verdad** para los datos del portafolio. Lo
 
 ```typescript
 export interface Proyecto {
-  id: string;           // Identificador único (ej: 'superkeg', 'gluten-corp')
-  nombre: string;       // Nombre del proyecto
-  descripcion: string;  // Descripción corta
+  id: string; // Identificador único (ej: 'superkeg', 'gluten-corp')
+  nombre: string; // Nombre del proyecto
+  descripcion: string; // Descripción corta
   tecnologias: string[]; // Tecnologías usadas (ej: ['React', 'Zustand', 'Firebase'])
-  enlace: string;       // URL de demo (siempre https://...)
+  enlace: string; // URL de demo (siempre https://...)
   repositorio?: string; // URL del repositorio público (opcional, solo cuando código es público)
-  rol: string;          // Rol del autor (ej: 'Product Engineer', 'Frontend/Product Engineer')
-  impacto: string;      // Impacto real del proyecto
-  enfoque: string[];    // Enfoques principales (ej: ['SaaS', 'Estado global', 'UX operativa'])
-  img: string;          // Ruta de imagen (/imagenes/proyectos/...)
-  lang: 'es' | 'en';   // Idioma del proyecto
+  rol: string; // Rol del autor (ej: 'Product Engineer', 'Frontend/Product Engineer')
+  impacto: string; // Impacto real del proyecto
+  enfoque: string[]; // Enfoques principales (ej: ['SaaS', 'Estado global', 'UX operativa'])
+  img: string; // Ruta de imagen (/imagenes/proyectos/...)
+  lang: 'es' | 'en'; // Idioma del proyecto
 }
 ```
 
@@ -55,31 +55,31 @@ export interface RepoOpenSource {
 
 #### `proyectos` (4 productos reales)
 
-| ID | Nombre | Tecnologías | Enfoque | Impacto |
-| -- | ------ | ----------- | ------- | ------- |
-| `superkeg` | SUPER KEG | React, Zustand, Waka, Firebase | SaaS, Estado global, UX operativa | Producto SaaS real en uso diario: dominio operativo complejo, inventario en tiempo real y flujos de estado avanzados. |
-| `gluten-corp` | Gluten Corp | React, Zustand, Sonner, Firebase | Flujo de compra, Estado global | Arquitectura de estado compleja con flujo de compra completo e integración bidireccional con panel administrativo propio. |
-| `shuttle506` | Shuttle 506 Jaco | Astro, React, EmailJS | SEO, Conversión, Performance | Alta performance y flujo de conversión directo que genera contactos reales para el negocio. |
-| `pasaporte` | Pasaporte.app | Waku, TailwindCSS, QRCode, Motion | QR, Mobile-first, Eventos | Producto físico-digital: integración QR y UX mobile-first pensada para miles de asistentes por evento. |
+| ID            | Nombre           | Tecnologías                       | Enfoque                           | Impacto                                                                                                                   |
+| ------------- | ---------------- | --------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `superkeg`    | SUPER KEG        | React, Zustand, Waka, Firebase    | SaaS, Estado global, UX operativa | Producto SaaS real en uso diario: dominio operativo complejo, inventario en tiempo real y flujos de estado avanzados.     |
+| `gluten-corp` | Gluten Corp      | React, Zustand, Sonner, Firebase  | Flujo de compra, Estado global    | Arquitectura de estado compleja con flujo de compra completo e integración bidireccional con panel administrativo propio. |
+| `shuttle506`  | Shuttle 506 Jaco | Astro, React, EmailJS             | SEO, Conversión, Performance      | Alta performance y flujo de conversión directo que genera contactos reales para el negocio.                               |
+| `pasaporte`   | Pasaporte.app    | Waku, TailwindCSS, QRCode, Motion | QR, Mobile-first, Eventos         | Producto físico-digital: integración QR y UX mobile-first pensada para miles de asistentes por evento.                    |
 
 #### `proyectosIA` (5 experiencias con IA)
 
-| ID | Nombre | Tipo | Tecnologías | Enlace |
-| -- | ----- | ---- | ----------- | ----- |
-| `monthly-cat-friend` | Monthly Cat Friend | Producto con IA | OpenAI SDK, Waku, Firebase, PWA | (privado) |
-| `mandarino` | Mandarino | Chatbot LLM | OpenAI API, Netlify Functions, React | https://gatorojolab.com |
-| `skills-agentes` | Skills y workflows de agentes | Workflow de agentes | OpenCode, CommandCode, Skills, MCP | https://github.com/Ariel-GonzAguer/skills-and-agents |
-| `ai-code-reviewer` | AI Code Reviewer | Producto con IA | OpenAI Responses API, Waku, Netlify Functions, TypeScript | https://arielgonzaguer.gatorojolab.com/review |
-| `patchwork` | Patchwork - WebMCP | Producto con IA | WebMCP, OpenAI, Google, Michi-Router | https://patchwork-webmcp-challenge.netlify.app/ |
+| ID                   | Nombre                        | Tipo                | Tecnologías                                               | Enlace                                               |
+| -------------------- | ----------------------------- | ------------------- | --------------------------------------------------------- | ---------------------------------------------------- |
+| `monthly-cat-friend` | Monthly Cat Friend            | Producto con IA     | OpenAI SDK, Waku, Firebase, PWA                           | (privado)                                            |
+| `mandarino`          | Mandarino                     | Chatbot LLM         | OpenAI API, Netlify Functions, React                      | https://gatorojolab.com                              |
+| `skills-agentes`     | Skills y workflows de agentes | Workflow de agentes | OpenCode, CommandCode, Skills, MCP                        | https://github.com/Ariel-GonzAguer/skills-and-agents |
+| `ai-code-reviewer`   | AI Code Reviewer              | Producto con IA     | OpenAI Responses API, Waku, Netlify Functions, TypeScript | https://arielgonzaguer.gatorojolab.com/review        |
+| `patchwork`          | Patchwork - WebMCP            | Producto con IA     | WebMCP, OpenAI, Google, Michi-Router                      | https://patchwork-webmcp-challenge.netlify.app/      |
 
 #### `openSource` (3 repositorios públicos verificables)
 
-| ID | Nombre | Tipo | Tecnologías | Licencia |
-| -- | ----- | ---- | ----------- | -------- |
-| `michi-router` | michi-router | Librería npm | TypeScript, React, npm, Vitest | Ver repo |
-| `comida-emergencia` | ComidaEmergencia | Aplicación open source | React, Zustand, Firebase, OpenAI, Vitest | MIT + Commons Clause |
-| `comparacion-de-modelos` | Comparación de modelos | Laboratorio de IA | LLMs, OpenCode, MCP, Waku | Ver repo |
-| `skills-and-agents` | Skills & Agents | Skills y agentes | OpenCode, LLMs, Skills, Agentes, MCP | https://github.com/Ariel-GonzAguer/skills-and-agents |
+| ID                       | Nombre                 | Tipo                   | Tecnologías                              | Licencia                                             |
+| ------------------------ | ---------------------- | ---------------------- | ---------------------------------------- | ---------------------------------------------------- |
+| `michi-router`           | michi-router           | Librería npm           | TypeScript, React, npm, Vitest           | Ver repo                                             |
+| `comida-emergencia`      | ComidaEmergencia       | Aplicación open source | React, Zustand, Firebase, OpenAI, Vitest | MIT + Commons Clause                                 |
+| `comparacion-de-modelos` | Comparación de modelos | Laboratorio de IA      | LLMs, OpenCode, MCP, Waku                | Ver repo                                             |
+| `skills-and-agents`      | Skills & Agents        | Skills y agentes       | OpenCode, LLMs, Skills, Agentes, MCP     | https://github.com/Ariel-GonzAguer/skills-and-agents |
 
 ### Flujo de datos en la aplicación
 
@@ -96,10 +96,10 @@ El estado del hook `useReviewStream` tiene esta estructura:
 ```typescript
 interface ReviewState {
   status: 'idle' | 'loading' | 'streaming' | 'done' | 'error';
-  rawText: string;        // Texto completo recibido del stream (JSON parseado al final)
+  rawText: string; // Texto completo recibido del stream (JSON parseado al final)
   result: ReviewResponse | null; // Objeto JSON final (summary, findings, verdict)
-  error: string | null;   // Mensaje de error si falló
-  code: string | null;    // Código de error especial (ej: 'injection_detected')
+  error: string | null; // Mensaje de error si falló
+  code: string | null; // Código de error especial (ej: 'injection_detected')
   cooldownUntil: number | null; // Timestamp (ms) hasta que el botón queda deshabilitado
 }
 ```
@@ -108,19 +108,25 @@ interface ReviewState {
 
 ```typescript
 interface ReviewResponse {
-  summary: string;        // Resumen ejecutivo (2-3 oraciones)
+  summary: string; // Resumen ejecutivo (2-3 oraciones)
   verdict: 'approve' | 'request_changes' | 'comment';
   findings: Finding[];
 }
 
 interface Finding {
-  id: string;           // Ej: 'SEC-1', 'PERF-2', 'A11Y-1'
+  id: string; // Ej: 'SEC-1', 'PERF-2', 'A11Y-1'
   severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
-  category: 'security' | 'performance' | 'type_safety' | 'accessibility' | 'correctness' | 'maintainability';
-  line: string;         // Ej: 'L42' o 'L42-L47'
-  title: string;        // Título corto (≤80 chars)
-  explanation: string;   // Por qué importa concretamente
-  fix: string;          // Código corregido, no pseudocódigo
+  category:
+    | 'security'
+    | 'performance'
+    | 'type_safety'
+    | 'accessibility'
+    | 'correctness'
+    | 'maintainability';
+  line: string; // Ej: 'L42' o 'L42-L47'
+  title: string; // Título corto (≤80 chars)
+  explanation: string; // Por qué importa concretamente
+  fix: string; // Código corregido, no pseudocódigo
 }
 ```
 
@@ -139,10 +145,10 @@ const calculateReviewCO2 = (inputLength: number, outputLength: number) => {
 ```
 
 Los valores `inputLength` y `outputLength` vienen de `props` en `ReviewOutput` y representan el número de tokens (aproximado por caracteres / 4).
-  ---
-  
-  ## Referencias
-  
-  - [Visión general del stack](backend/auth.md)
-  - [Arquitectura general](architecture/overview.md)
-  - [Proyectos data model](https://github.com/Ariel-GonzAguer/ariel-personal/blob/main/src/data/proyectos.ts)
+---
+
+## Referencias
+
+- [Visión general del stack](backend/auth.md)
+- [Arquitectura general](architecture/overview.md)
+- [Proyectos data model](https://github.com/Ariel-GonzAguer/ariel-personal/blob/main/src/data/proyectos.ts)

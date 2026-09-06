@@ -81,11 +81,11 @@ El AI Code Reviewer implementa **7 capas de seguridad en orden**, cada una actú
 
 Neutraliza vectores obvios sin romper diffs legítimos:
 
-| Regla | Implementación |
-| ----- | ------------- |
-| Escape triple backticks ``` → ʼʼʼ (Unicode) | `escapeTripleBackticks()` |
-| Quitar chars de control excepto `\n \t \r` | `stripControlChars()` regex `[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]` |
-| Truncar líneas a 2000 chars | `truncateLongLines()` (previene token stuffing) |
+| Regla                                       | Implementación                                                 |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| Escape triple backticks ``` → ʼʼʼ (Unicode) | `escapeTripleBackticks()`                                      |
+| Quitar chars de control excepto `\n \t \r`  | `stripControlChars()` regex `[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]` |
+| Truncar líneas a 2000 chars                 | `truncateLongLines()` (previene token stuffing)                |
 
 **Limitación conocida**: variantes con `snake_case` o `kebab-case` (ej: `ignore_previous_instructions`) NO son detectadas por las regex actuales de `detect-injection`. Mejora pendiente.
 
@@ -109,15 +109,16 @@ Neutraliza vectores obvios sin romper diffs legítimos:
 
 Aplican a **respuestas JSON (errores)** y **SSE (stream)**:
 
-| Header | Valor | Propósito |
-| -------- | ----- | --------- |
-| Strict-Transport-Security | `max-age=31536000; includeSubDomains` | HSTS — fuerza HTTPS |
-| X-Content-Type-Options | `nosniff` | Impide MIME-type sniffing |
-| X-Frame-Options | `DENY` | Protección contra clickjacking |
-| Referrer-Policy | `strict-origin-when-cross-origin` | Controla info de referrer |
-| Permissions-Policy | `geolocation=(), microphone=(), camera=()` | Bloquea acceso afeatures del navegador |
+| Header                    | Valor                                      | Propósito                              |
+| ------------------------- | ------------------------------------------ | -------------------------------------- |
+| Strict-Transport-Security | `max-age=31536000; includeSubDomains`      | HSTS — fuerza HTTPS                    |
+| X-Content-Type-Options    | `nosniff`                                  | Impide MIME-type sniffing              |
+| X-Frame-Options           | `DENY`                                     | Protección contra clickjacking         |
+| Referrer-Policy           | `strict-origin-when-cross-origin`          | Controla info de referrer              |
+| Permissions-Policy        | `geolocation=(), microphone=(), camera=()` | Bloquea acceso afeatures del navegador |
 
 **SSE headers** (adicionales):
+
 - Content-Type: `text/event-stream`
 - Cache-Control: `no-cache, no-transform`
 - Connection: `keep-alive`
@@ -130,7 +131,7 @@ Aplican a **respuestas JSON (errores)** y **SSE (stream)**:
 ## Referencias
 
 - [Documento relacionado](backend/database.md)
-- [Plan original](\_plan.md)
+- [Plan original](_plan.md)
 - [OpenAI Docs — Responses API](https://platform.openai.com/docs/api-reference/responses)
 - [OWASP Secure Headers Project](https://cheatsheetseries.owasp.org/cheatsheets/Secure_Headers_Cheat_Sheet.html)
 

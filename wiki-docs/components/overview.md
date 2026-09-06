@@ -4,28 +4,29 @@ Convención del portafolio: **un componente por carpeta** con su archivo `.tsx` 
 
 ## Catálogo de componentes
 
-| Componente | Archivo | Props principales | Estado de test |
-| ---------- | ------- | ----------------- | -------------- |
-| `Hero` | `src/components/Hero/Hero.tsx` | Ninguna (data inline) | `Hero.test.tsx` |
-| `Proyectos` | `src/components/Proyectos/Proyectos.tsx` | `proyectos` de `src/data/proyectos.ts` | `Proyectos.test.tsx` |
-| `IA` | `src/components/IA/IA.tsx` | `proyectosIA` de `src/data/proyectos.ts` | `IA.test.tsx` |
-| `SobreMi` | `src/components/SobreMi/SobreMi.tsx` | Ninguna (data inline) | `SobreMi.test.tsx` |
-| `OpenSource` | `src/components/OpenSource/OpenSource.tsx` | `openSource` de `src/data/proyectos.ts` | `OpenSource.test.tsx` |
-| `Certificados` | `src/components/Certificados/Certificados.tsx` | Ninguna (data inline) | `Certificados.test.tsx` |
-| `Contacto` | `src/components/Contacto/Contacto.tsx` | Ninguna (data inline) | `Contacto.test.tsx` |
-| `ReviewForm` | `src/components/review-form/ReviewForm.tsx` | `diff`, `onDiffChange`, `onSubmit`, `onExampleSelect`, `isLoading`, `cooldownUntil` | `ReviewForm.test.tsx`, `ReviewWorkspace.test.tsx`, `ExampleDiffs.test.ts` |
-| `ReviewOutput` | `src/components/review-output/ReviewOutput.tsx` | `review` (`ReviewResponse`), `outputLength`, `inputLength` | `ReviewOutput.test.tsx` |
-| `FindingCard` | `src/components/review-output/FindingCard.tsx` | `finding` (Finding) | `FindingCard.test.tsx` (implícita en ReviewOutput) |
-| `SeverityBadge` | `src/components/review-output/SeverityBadge.tsx` | `severity` (`critical`/`high/medium/low/info`), `title` | `SeverityBadge.test.tsx` |
-| `CodeBlock` | `src/components/review-output/CodeBlock.tsx` | `code` (string), `language` (string) | `CodeBlock.test.tsx` |
-| `IACard` | `src/components/IA/IA.tsx` (interno) | `proyecto` (`ProyectoIA`) | Parte de `IA.test.tsx` |
-| `ExampleSelector` | `src/components/review-form/ReviewForm.tsx` (interno) | `onSelect`, `disabled` | `ReviewForm.test.tsx` |
+| Componente        | Archivo                                               | Props principales                                                                   | Estado de test                                                            |
+| ----------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `Hero`            | `src/components/Hero/Hero.tsx`                        | Ninguna (data inline)                                                               | `Hero.test.tsx`                                                           |
+| `Proyectos`       | `src/components/Proyectos/Proyectos.tsx`              | `proyectos` de `src/data/proyectos.ts`                                              | `Proyectos.test.tsx`                                                      |
+| `IA`              | `src/components/IA/IA.tsx`                            | `proyectosIA` de `src/data/proyectos.ts`                                            | `IA.test.tsx`                                                             |
+| `SobreMi`         | `src/components/SobreMi/SobreMi.tsx`                  | Ninguna (data inline)                                                               | `SobreMi.test.tsx`                                                        |
+| `OpenSource`      | `src/components/OpenSource/OpenSource.tsx`            | `openSource` de `src/data/proyectos.ts`                                             | `OpenSource.test.tsx`                                                     |
+| `Certificados`    | `src/components/Certificados/Certificados.tsx`        | Ninguna (data inline)                                                               | `Certificados.test.tsx`                                                   |
+| `Contacto`        | `src/components/Contacto/Contacto.tsx`                | Ninguna (data inline)                                                               | `Contacto.test.tsx`                                                       |
+| `ReviewForm`      | `src/components/review-form/ReviewForm.tsx`           | `diff`, `onDiffChange`, `onSubmit`, `onExampleSelect`, `isLoading`, `cooldownUntil` | `ReviewForm.test.tsx`, `ReviewWorkspace.test.tsx`, `ExampleDiffs.test.ts` |
+| `ReviewOutput`    | `src/components/review-output/ReviewOutput.tsx`       | `review` (`ReviewResponse`), `outputLength`, `inputLength`                          | `ReviewOutput.test.tsx`                                                   |
+| `FindingCard`     | `src/components/review-output/FindingCard.tsx`        | `finding` (Finding)                                                                 | `FindingCard.test.tsx` (implícita en ReviewOutput)                        |
+| `SeverityBadge`   | `src/components/review-output/SeverityBadge.tsx`      | `severity` (`critical`/`high/medium/low/info`), `title`                             | `SeverityBadge.test.tsx`                                                  |
+| `CodeBlock`       | `src/components/review-output/CodeBlock.tsx`          | `code` (string), `language` (string)                                                | `CodeBlock.test.tsx`                                                      |
+| `IACard`          | `src/components/IA/IA.tsx` (interno)                  | `proyecto` (`ProyectoIA`)                                                           | Parte de `IA.test.tsx`                                                    |
+| `ExampleSelector` | `src/components/review-form/ReviewForm.tsx` (interno) | `onSelect`, `disabled`                                                              | `ReviewForm.test.tsx`                                                     |
 
 ## Patrones de diseño
 
 ### 1. Componente único por carpeta
 
 Cada sección tiene su propio directorio:
+
 - `src/components/Hero/` → `Hero.tsx` + `Hero.test.tsx`
 - `src/components/Proyectos/` → `Proyectos.tsx` + `Proyectos.test.tsx`
 - `src/components/review-form/` → `ReviewForm.tsx` + test + `ExampleDiffs.ts` + tests
@@ -40,6 +41,7 @@ Cada sección tiene su propio directorio:
 ### 3. Accesibilidad base
 
 Todos los componentes comparten estas características mínimas:
+
 - `focus-visible:outline-2 focus-visible:outline-offset-2 outline-red-400` (WCAG 2.4.7) vía `focusClassName()` utility.
 - `aria-label` descriptivos en inputs, buttons, selects.
 - Contraste AA+ (Tailwind colores: `text-white/90` sobre `bg-white/3`).
@@ -49,6 +51,7 @@ Todos los componentes comparten estas características mínimas:
 ### 4. Honeypot pattern (solo en ReviewForm)
 
 Checkbox doble:
+
 - **Visible**: "Los gatos son geniales" — requiere selección del usuario para habilitar el submit.
 - **Oculto** (`position: absolute; left: -9999px`): checkbox `name="website"` — si el backend recibe `website: true`, es un bot y devuelve 200 silencioso.
 
@@ -103,9 +106,9 @@ Usado en: `ReviewForm`, `ReviewOutput`, `ExampleSelector`, `CodeBlock`, `Finding
 │                    Contacto (fondo separado)                   │
 └─────────────────────────────────────────────────────────────────┘
   ---
-  
+
   ## Referencias
-  
+
   - [Arquitectura general](architecture/overview.md)
   - [Backend - Seguridad](backend/auth.md)
   - [Componentes UI](components/overview.md)

@@ -8,15 +8,15 @@
 
 ## Estructura planeada
 
-| Directorio | Contenido |
-| ---------- | --------- |
-| `architecture/` | Visión general,rutos, flujo de datos |
-| `backend/` | Autenticación, base de datos, seguridad |
-| `components/` | Sistema de componentes, accesibilidad |
-| `features/` | Funcionalidades destacadas (AI Code Reviewer, QR, etc.) |
-| `deployment/` | Plataforma, troubleshooting, PWA |
-| `ci-cd/` | Pipelines CI/CD |
-| `utils/` | Librerías y utilidades |
+| Directorio      | Contenido                                               |
+| --------------- | ------------------------------------------------------- |
+| `architecture/` | Visión general,rutos, flujo de datos                    |
+| `backend/`      | Autenticación, base de datos, seguridad                 |
+| `components/`   | Sistema de componentes, accesibilidad                   |
+| `features/`     | Funcionalidades destacadas (AI Code Reviewer, QR, etc.) |
+| `deployment/`   | Plataforma, troubleshooting, PWA                        |
+| `ci-cd/`        | Pipelines CI/CD                                         |
+| `utils/`        | Librerías y utilidades                                  |
 
 ---
 
@@ -44,13 +44,13 @@
 
 ## Variables de configuración
 
-| Variable | Descripción | Default |
-| -------- | ----------- | ------- |
-| `wiki_dir` | Directorio de documentación | `wiki-docs/` |
-| `language` | Idioma de la documentación | Español |
-| `include_code_examples` | Incluir ejemplos de código | `true` |
-| `include_diagrams` | Incluir diagramas ASCII | `true` |
-| `detail_level` | Nivel de detalle | `intermedio` |
+| Variable                | Descripción                 | Default      |
+| ----------------------- | --------------------------- | ------------ |
+| `wiki_dir`              | Directorio de documentación | `wiki-docs/` |
+| `language`              | Idioma de la documentación  | Español      |
+| `include_code_examples` | Incluir ejemplos de código  | `true`       |
+| `include_diagrams`      | Incluir diagramas ASCII     | `true`       |
+| `detail_level`          | Nivel de detalle            | `intermedio` |
 
 ---
 
@@ -79,10 +79,11 @@ Sin importar el framework, la documentación debe cubrir:
 3. ¿Hay secciones específicas que quieras incluir/excluir?
 4. ¿El proyecto tiene documentación existente que respetar? (README.md con 50%+ de info)
 5. ¿En qué idioma debe estar la documentación? (default: Español)
-  ---
-  
-  ## Referencias
-  
-  - [Plan de documentación completa](_plan.md)
-  - [Arquitectura general](architecture/overview.md)
-  - [Guía rápida](quickstart.md)
+
+---
+
+## Referencias
+
+- [Plan de documentación completa](_plan.md)
+- [Arquitectura general](architecture/overview.md)
+- [Guía rápida](quickstart.md)

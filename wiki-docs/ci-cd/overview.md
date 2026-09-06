@@ -20,14 +20,14 @@ bash scripts/deploy-netlify.sh  # deploy a Netlify
 
 ### Pasos implicados (según `scripts/deploy-netlify.sh` y `package.json`)
 
-| Step | Comando | Propósito |
-| ---- | ------- | --------- |
-| Install | `pnpm install` | Dependencias (openai, @netlify/blobs, etc.) |
-| Build | `pnpm build` | Generar HTML/CSS/JS estático |
-| Test | `pnpm test` | Suite de tests Vitest (151 tests, 24 archivos) |
-| Lint | `pnpm lint` | ESLint + autofix |
-| Format | `pnpm format:fix` | Prettier |
-| Deploy | `pnpm deploy:netlify` | Audit + test + format + lint + deploy Netlify |
+| Step    | Comando               | Propósito                                      |
+| ------- | --------------------- | ---------------------------------------------- |
+| Install | `pnpm install`        | Dependencias (openai, @netlify/blobs, etc.)    |
+| Build   | `pnpm build`          | Generar HTML/CSS/JS estático                   |
+| Test    | `pnpm test`           | Suite de tests Vitest (151 tests, 24 archivos) |
+| Lint    | `pnpm lint`           | ESLint + autofix                               |
+| Format  | `pnpm format:fix`     | Prettier                                       |
+| Deploy  | `pnpm deploy:netlify` | Audit + test + format + lint + deploy Netlify  |
 
 ### Consideraciones para agregar GitHub Actions en el futuro
 
@@ -47,9 +47,8 @@ Si en el futuro se desean agregar workflows de CI/CD a `.github/workflows/`:
 - `ci-cd/{workflow}.md` — un archivo por workflow relevante.
 - Cada archivo incluiría: triggers, jobs, steps, secretos, artefactos, diagrama de ejecución.
   ---
-  
+
   ## Referencias
-  
   - [Flujo de deploy manual](deployment/platform.md)
   - [Arquitectura general](architecture/overview.md)
   - [Netlify Docs — Deploying site changes](https://docs.netlify.com/continuous-deployment/)

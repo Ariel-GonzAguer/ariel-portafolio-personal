@@ -2,26 +2,26 @@
 
 ## Stack resumido
 
-| Tecnología | Versión | Propósito |
-| ---------- | ------- | --------- |
-| **Waku** | 1 beta | React Server Components + React 19 |
-| **TypeScript** | 6.0.3 | Tipado estricto |
-| **Tailwind CSS** | v4 | Estilizado utility-first |
-| **OpenAI** | `gpt-5.6-luna` | Respuestas API para AI Code Reviewer |
-| **Netlify** | — | Despliegue + Blobs (rate limit) |
-| **Vitest** | 4.1.11 | Suite de tests (151 tests) |
+| Tecnología       | Versión        | Propósito                            |
+| ---------------- | -------------- | ------------------------------------ |
+| **Waku**         | 1 beta         | React Server Components + React 19   |
+| **TypeScript**   | 6.0.3          | Tipado estricto                      |
+| **Tailwind CSS** | v4             | Estilizado utility-first             |
+| **OpenAI**       | `gpt-5.6-luna` | Respuestas API para AI Code Reviewer |
+| **Netlify**      | —              | Despliegue + Blobs (rate limit)      |
+| **Vitest**       | 4.1.11         | Suite de tests (151 tests)           |
 
 ## Mapa rápido de documentos
 
-| Dominio | Documento |
-| -------- | --------- |
-| **Arquitectura** | `architecture/overview.md`, `architecture/data-flow.md` |
-| **Backend / Seguridad** | `backend/auth.md`, `backend/database.md` |
-| **Componentes** | `components/overview.md` |
-| **Funcionalidades destacadas** | `features/ai-code-reviewer.md` |
-| **Despliegue** | `deployment/platform.md`, `deployment/troubleshooting.md` |
-| **CI/CD** | `ci-cd/overview.md` |
-| **Utilidades** | `utils/overview.md` |
+| Dominio                        | Documento                                                 |
+| ------------------------------ | --------------------------------------------------------- |
+| **Arquitectura**               | `architecture/overview.md`, `architecture/data-flow.md`   |
+| **Backend / Seguridad**        | `backend/auth.md`, `backend/database.md`                  |
+| **Componentes**                | `components/overview.md`                                  |
+| **Funcionalidades destacadas** | `features/ai-code-reviewer.md`                            |
+| **Despliegue**                 | `deployment/platform.md`, `deployment/troubleshooting.md` |
+| **CI/CD**                      | `ci-cd/overview.md`                                       |
+| **Utilidades**                 | `utils/overview.md`                                       |
 
 ## Inicio rápido (3 pasos)
 
@@ -67,27 +67,28 @@ Si existen features documentadas en `features/`, aparecen aquí con enlace y des
 
 Todas las variables deben configurarse en **Netlify UI** (Site settings > Environment variables), **no** en el repo (`.env` está en `.gitignore`):
 
-| Variable | Requerido | Descripción |
-| -------- | --------- | ----------- |
-| `OPENAI_API_KEY` | **Sí** | API key de OpenAI (solo server-side) |
-| `ALLOWED_ORIGINS` | No (aditivo) | CSV de orígenes adicionales |
+| Variable          | Requerido    | Descripción                          |
+| ----------------- | ------------ | ------------------------------------ |
+| `OPENAI_API_KEY`  | **Sí**       | API key de OpenAI (solo server-side) |
+| `ALLOWED_ORIGINS` | No (aditivo) | CSV de orígenes adicionales          |
 
 ## Scripts disponibles
 
-| Script | Descripción |
-| ------ | ----------- |
-| `pnpm install` | Dependencias |
-| `pnpm dev` | Desarrollo en http://localhost:3000 |
-| `pnpm build` | Build estático (SSG) |
-| `pnpm start` | Servir build localmente |
-| `pnpm test` | Ejecutar tests Vitest (151 tests, 24 archivos) |
-| `pnpm lint` | ESLint con autofix |
-| `pnpm format:fix` | Prettier auto-fix |
+| Script                | Descripción                                     |
+| --------------------- | ----------------------------------------------- |
+| `pnpm install`        | Dependencias                                    |
+| `pnpm dev`            | Desarrollo en http://localhost:3000             |
+| `pnpm build`          | Build estático (SSG)                            |
+| `pnpm start`          | Servir build localmente                         |
+| `pnpm test`           | Ejecutar tests Vitest (151 tests, 24 archivos)  |
+| `pnpm lint`           | ESLint con autofix                              |
+| `pnpm format:fix`     | Prettier auto-fix                               |
 | `pnpm deploy:netlify` | Audit + test + format + lint + deploy a Netlify |
-  ---
-  
-  ## Referencias
-  
-  - [Visión general del stack](backend/auth.md)
-  - [Arquitectura general](architecture/overview.md)
-  - [Guía rápida de inicio](quickstart.md)
+
+---
+
+## Referencias
+
+- [Visión general del stack](backend/auth.md)
+- [Arquitectura general](architecture/overview.md)
+- [Guía rápida de inicio](quickstart.md)

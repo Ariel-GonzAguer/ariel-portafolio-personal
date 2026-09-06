@@ -40,6 +40,20 @@ describe('ReviewOutput', () => {
     expect(screen.getByRole('heading', { name: /findings \(2\)/i })).toBeInTheDocument();
   });
 
+  it('muestra el rango climático solo con el uso real de la API', () => {
+    render(
+      <ReviewOutput
+        review={sampleReview}
+        usage={{ inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 }}
+      />,
+    );
+
+    expect(screen.getByText(/impacto climático estimado: 0\.03–0\.6 gco₂e/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/incluye entrada, salida y razonamiento reportado/i),
+    ).toBeInTheDocument();
+  });
+
   it('renderiza un FindingCard por cada finding', () => {
     render(<ReviewOutput review={sampleReview} />);
     expect(screen.getByRole('heading', { name: /sql injection/i })).toBeInTheDocument();

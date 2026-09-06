@@ -132,19 +132,17 @@ interface Finding {
 
 ### Flujo de CO₂
 
-La métrica de huella de carbono se calcula en el cliente con:
+La métrica de impacto climático se calcula en el cliente con el uso final que la Responses API transmite por SSE:
 
 ```typescript
-const calculateReviewCO2 = (inputLength: number, outputLength: number) => {
-  // Estimación: ~0.0004 kg CO₂ por token (aproximación estándar de OpenAI)
-  const inputTokens = Math.ceil(inputLength / 4); // promedio 4 chars/token
-  const outputTokens = Math.ceil(outputLength / 4);
-  const kgCO2 = (inputTokens + outputTokens) * 0.0004;
-  return `${kgCO2.toFixed(4)} kg`;
+const calculateReviewCO2Range = (totalTokens: number) => {
+  const min = (totalTokens / 1000) * 0.15;
+  const max = (totalTokens / 1000) * 2.85;
+  return `${min}–${max} gCO₂e`;
 };
 ```
 
-Los valores `inputLength` y `outputLength` vienen de `props` en `ReviewOutput` y representan el número de tokens (aproximado por caracteres / 4).
+`totalTokens` incluye el prompt de sistema, el diff, el wrapper de la solicitud, el schema, la salida y los tokens de razonamiento que el proveedor contabiliza. Es un rango proxy conservador, no una medición específica de OpenAI.
 ---
 
 ## Referencias

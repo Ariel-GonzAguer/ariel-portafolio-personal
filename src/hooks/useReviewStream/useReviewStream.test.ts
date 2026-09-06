@@ -175,6 +175,10 @@ describe('useReviewStream (hook)', () => {
     const review = { summary: 'ok', verdict: 'approve', findings: [] };
     const chunks = [
       JSON.stringify({ type: 'delta', text: JSON.stringify(review) }),
+      JSON.stringify({
+        type: 'usage',
+        usage: { inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 },
+      }),
       JSON.stringify({ type: 'done' }),
     ];
     const fetchMock = vi.fn().mockResolvedValue(sseResponse(chunks));
@@ -189,5 +193,11 @@ describe('useReviewStream (hook)', () => {
       expect(result.current.state.status).toBe('done');
     });
     expect(result.current.state.code).toBeNull();
+    expect(result.current.state.usage).toEqual({
+      inputTokens: 120,
+      outputTokens: 80,
+      reasoningTokens: 40,
+      totalTokens: 200,
+    });
   });
 });

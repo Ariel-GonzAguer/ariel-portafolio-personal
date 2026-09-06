@@ -61,7 +61,7 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
    │   - Verdict: Aprobar / Solicitar cambios / Solo comentarios (badges de color: green/red/white)
    │   - Summary: resumen ejecutivo (2-3 oraciones)
    │   - Findings: cards con severity (critical/high/medium/low/info), category, línea, título, explicación, fix
-   │   - CO₂ estimado: calculateReviewCO2(inputLength, outputLength)
+   │   - Impacto climático estimado: rango gCO₂e basado en totalTokens de la API
    │   - Botón copy-to-clipboard del review como JSON
    │   - Countdown cooldown si code === 'injection_detected' (6 minutos)
    │

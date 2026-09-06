@@ -25,6 +25,18 @@ export interface ReviewResponse {
   findings: Finding[];
 }
 
+/**
+ * Uso contabilizado por la Responses API al finalizar el stream.
+ * `reasoningTokens` es un desglose de `outputTokens`, por lo que no se suma
+ * de nuevo a `totalTokens`.
+ */
+export interface ReviewUsage {
+  inputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  totalTokens: number;
+}
+
 export type ReviewStatus = 'idle' | 'loading' | 'streaming' | 'done' | 'error';
 
 /**
@@ -43,6 +55,7 @@ export interface ReviewState {
   status: ReviewStatus;
   rawText: string;
   result: ReviewResponse | null;
+  usage: ReviewUsage | null;
   error: string | null;
   /**
    * Code estructurado del error, si el server lo proveyó.

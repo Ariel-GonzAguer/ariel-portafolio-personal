@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import type { ReviewResponse } from '../../hooks/useReviewStream/types';
+import type { ReviewResponse, ReviewUsage } from '../../hooks/useReviewStream/types';
 import { focusClassName } from '../../utils/a11y/a11y';
-import { calculateReviewCO2 } from '../../utils/co2/co2';
+import { calculateReviewCO2Range } from '../../utils/co2/co2';
 import FindingCard from './FindingCard';
 
 interface ReviewOutputProps {
   review: ReviewResponse;
-  outputLength?: number;
-  inputLength?: number;
+  usage?: ReviewUsage | null;
 }
 
 const VERDICT_LABEL: Record<ReviewResponse['verdict'], string> = {
@@ -27,13 +26,9 @@ const VERDICT_STYLE: Record<ReviewResponse['verdict'], string> = {
  *
  * Incluye botón para copiar el review como JSON al clipboard.
  */
-export default function ReviewOutput({
-  review,
-  outputLength = 0,
-  inputLength = 0,
-}: ReviewOutputProps) {
+export default function ReviewOutput({ review, usage = null }: ReviewOutputProps) {
   const [copied, setCopied] = useState(false);
-  const co2 = calculateReviewCO2(inputLength, outputLength);
+  const co2Range = usage ? calculateReviewCO2Range(usage.totalTokens) : null;
 
   const handleCopy = async () => {
     try {
@@ -64,9 +59,15 @@ export default function ReviewOutput({
         </button>
       </div>
       <p className="text-gris-claro">{review.summary}</p>
-      <p className="text-xs text-white/40" aria-label="Huella de carbono estimada">
-        CO₂ estimado: {co2}
-      </p>
+      {co2Range && (
+        <div className=" text-green-200">
+          <p aria-label="Impacto climático estimado">Impacto climático estimado: {co2Range}</p>
+          <p>
+            Rango conservador basado en los tokens procesados por la API; incluye entrada, salida y
+            razonamiento reportado. No es una medición de OpenAI.
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-4">
         <h3 className="text-xl font-bold">Findings ({review.findings.length})</h3>

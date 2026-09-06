@@ -7,6 +7,17 @@ const mockStream = {
     yield { type: 'response.output_text.delta', delta: '{"summary":' };
     yield { type: 'response.output_text.delta', delta: '"test",' };
     yield { type: 'response.output_text.delta', delta: '"verdict":"approve","findings":[]}' };
+    yield {
+      type: 'response.completed',
+      response: {
+        usage: {
+          input_tokens: 120,
+          output_tokens: 80,
+          total_tokens: 200,
+          output_tokens_details: { reasoning_tokens: 40 },
+        },
+      },
+    };
   },
   controller: { abort: vi.fn() },
 };
@@ -101,14 +112,14 @@ describe('handleReview (streaming)', () => {
     expect(res.headers.get('X-Accel-Buffering')).toBe('no');
   });
 
-  it('el stream emite eventos delta y done', async () => {
+  it('el stream emite los deltas, el uso total y done', async () => {
     const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.body).not.toBeNull();
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
     const events: string[] = [];
-    while (events.length < 4) {
+    while (true) {
       const { value, done } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
@@ -120,8 +131,8 @@ describe('handleReview (streaming)', () => {
     }
     reader.releaseLock();
 
-    // 3 deltas + 1 done = 4 eventos
-    expect(events.length).toBeGreaterThanOrEqual(3);
+    // 3 deltas + 1 usage + 1 done = 5 eventos.
+    expect(events.length).toBe(5);
     const dataEvents = events.filter((e) => e.startsWith('data: '));
     expect(dataEvents.length).toBeGreaterThanOrEqual(3);
 
@@ -132,6 +143,20 @@ describe('handleReview (streaming)', () => {
     };
     expect(firstDelta.type).toBe('delta');
     expect(firstDelta.text).toBeTruthy();
+
+    const usageEvent = JSON.parse((dataEvents[dataEvents.length - 2] ?? '{}').slice(5)) as {
+      type: string;
+      usage: {
+        inputTokens: number;
+        outputTokens: number;
+        reasoningTokens: number;
+        totalTokens: number;
+      };
+    };
+    expect(usageEvent).toEqual({
+      type: 'usage',
+      usage: { inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 },
+    });
 
     // El último evento es done.
     const lastEvent = JSON.parse(

@@ -77,7 +77,7 @@ Componentes renderizan con props (única fuente de verdad)
    │   - Verdict: Aprobar / Solicitar cambios / Solo comentarios
    │   - Summary: resumen ejecutivo (2-3 oraciones)
    │   - Findings: cards con severity (critical/high/medium/low/info), category, line, title, explanation, fix
-   │   - CO₂ estimado: calculateReviewCO2(inputLength, outputLength)
+   │   - Impacto climático estimado: rango gCO₂e basado en totalTokens de la API
    │   - Botón copy-to-clipboard del review como JSON
    │   - Countdown cooldown si code === 'injection_detected' (6 min)
    │

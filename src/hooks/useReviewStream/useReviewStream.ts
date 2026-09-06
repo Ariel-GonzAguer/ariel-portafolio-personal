@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import type { ReviewErrorCode, ReviewResponse, ReviewState } from './types';
+import type { ReviewErrorCode, ReviewResponse, ReviewState, ReviewUsage } from './types';
 
 /**
  * Cooldown que se activa cuando el server rechaza por prompt injection.
@@ -32,6 +32,7 @@ export function useReviewStream() {
     status: 'idle',
     rawText: '',
     result: null,
+    usage: null,
     error: null,
     code: null,
     cooldownUntil: null,
@@ -48,6 +49,7 @@ export function useReviewStream() {
       status: 'loading',
       rawText: '',
       result: null,
+      usage: null,
       error: null,
       code: null,
       cooldownUntil: null,
@@ -72,6 +74,7 @@ export function useReviewStream() {
         status: 'error',
         rawText: '',
         result: null,
+        usage: null,
         error: message,
         code: null,
         cooldownUntil: null,
@@ -94,6 +97,7 @@ export function useReviewStream() {
         status: 'error',
         rawText: '',
         result: null,
+        usage: null,
         error: message,
         code,
         // Activar el cooldown solo si el server rechazó por injection.
@@ -110,6 +114,7 @@ export function useReviewStream() {
     const decoder = new TextDecoder();
     let buffer = '';
     let rawText = '';
+    let usage: ReviewUsage | null = null;
     let hadError = false;
 
     const processEvent = (rawEvent: string) => {
@@ -119,16 +124,22 @@ export function useReviewStream() {
       if (payload === '[DONE]') return;
       try {
         const parsed = JSON.parse(payload) as
-          { type: 'delta'; text: string } | { type: 'done' } | { type: 'error'; message: string };
+          | { type: 'delta'; text: string }
+          | { type: 'usage'; usage: ReviewUsage }
+          | { type: 'done' }
+          | { type: 'error'; message: string };
         if (parsed.type === 'delta') {
           rawText += parsed.text;
           setState((s) => ({ ...s, rawText, status: 'streaming' }));
+        } else if (parsed.type === 'usage' && isReviewUsage(parsed.usage)) {
+          usage = parsed.usage;
         } else if (parsed.type === 'error') {
           hadError = true;
           setState({
             status: 'error',
             rawText,
             result: null,
+            usage: null,
             error: parsed.message,
             code: null,
             cooldownUntil: null,
@@ -164,6 +175,7 @@ export function useReviewStream() {
           status: 'error',
           rawText,
           result: null,
+          usage: null,
           error: 'El modelo no devolvió JSON válido.',
           code: null,
           cooldownUntil: null,
@@ -171,7 +183,15 @@ export function useReviewStream() {
         return;
       }
 
-      setState({ status: 'done', rawText, result, error: null, code: null, cooldownUntil: null });
+      setState({
+        status: 'done',
+        rawText,
+        result,
+        usage,
+        error: null,
+        code: null,
+        cooldownUntil: null,
+      });
     } catch (err) {
       const message =
         err instanceof Error && err.name === 'AbortError'
@@ -202,6 +222,7 @@ export function useReviewStream() {
       status: 'idle',
       rawText: '',
       result: null,
+      usage: null,
       error: null,
       code: null,
       cooldownUntil: null,
@@ -209,4 +230,10 @@ export function useReviewStream() {
   }, []);
 
   return { state, start, abort, reset };
+}
+
+function isReviewUsage(value: ReviewUsage): boolean {
+  return [value.inputTokens, value.outputTokens, value.reasoningTokens, value.totalTokens].every(
+    (tokenCount) => Number.isFinite(tokenCount) && tokenCount >= 0,
+  );
 }

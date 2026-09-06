@@ -177,6 +177,19 @@ function createSSEResponse(upstream: Awaited<ReturnType<typeof createStream>>): 
         for await (const event of upstream) {
           if (event.type === 'response.output_text.delta') {
             send({ type: 'delta', text: event.delta });
+          } else if (event.type === 'response.completed') {
+            const usage = event.response.usage;
+            if (usage) {
+              send({
+                type: 'usage',
+                usage: {
+                  inputTokens: usage.input_tokens,
+                  outputTokens: usage.output_tokens,
+                  reasoningTokens: usage.output_tokens_details.reasoning_tokens,
+                  totalTokens: usage.total_tokens,
+                },
+              });
+            }
           }
         }
         send({ type: 'done' });

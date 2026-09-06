@@ -72,6 +72,10 @@ describe('ReviewWorkspace', () => {
     const chunks = [
       JSON.stringify({ type: 'delta', text: json.slice(0, halfway) }),
       JSON.stringify({ type: 'delta', text: json.slice(halfway) }),
+      JSON.stringify({
+        type: 'usage',
+        usage: { inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 },
+      }),
       JSON.stringify({ type: 'done' }),
     ];
 
@@ -101,6 +105,7 @@ describe('ReviewWorkspace', () => {
     await waitFor(() => {
       expect(screen.getByText(/cambio aceptable/i)).toBeInTheDocument();
     });
+    expect(screen.getByText(/impacto climático estimado/i)).toBeInTheDocument();
   });
 
   it('muestra mensaje de error si el stream devuelve un error event', async () => {

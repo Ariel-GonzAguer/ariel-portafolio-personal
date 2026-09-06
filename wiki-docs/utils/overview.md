@@ -19,24 +19,21 @@ export function focusClassName(color: 'red' | 'white' = 'red'): string {
 ## `src/utils/co2/co2.ts` — Estimación de CO₂
 
 ```typescript
-export function calculateReviewCO2(inputLength: number, outputLength: number): string {
-  // Estimación: ~0.0004 kg CO₂ por token (aproximación estándar de OpenAI)
-  const inputTokens = Math.ceil(inputLength / 4); // promedio 4 chars/token
-  const outputTokens = Math.ceil(outputLength / 4);
-  const kgCO2 = (inputTokens + outputTokens) * 0.0004;
-  return `${kgCO2.toFixed(4)} kg`;
+export function calculateReviewCO2Range(totalTokens: number): string {
+  const min = (totalTokens / 1000) * 0.15;
+  const max = (totalTokens / 1000) * 2.85;
+  return `${min}–${max} gCO₂e`;
 }
 ```
 
 **Uso en `ReviewOutput`**:
 
-- `inputLength`: caracteres del diff pegado por el usuario.
-- `outputLength`: caracteres del review generado (aproximado por el número de tokens * 4).
+- `totalTokens`: uso final reportado por la Responses API; incluye los tokens de entrada, salida y el razonamiento que el proveedor contabiliza dentro de la salida.
 
-**Fórmula**: `(inputTokens + outputTokens) * 0.0004 kg CO₂`.
+**Fórmula**: `totalTokens / 1000 * 0.15–2.85 gCO₂e`.
 
-- Promedio de 4 caracteres por token es estándar de la industria para modelos de lenguaje.
-- El resultado se muestra en `ReviewOutput.tsx` dentro de un `<p aria-label="Huella de carbono estimada">`.
+- Es un rango conservador, no una medición de OpenAI. El extremo alto se basa en la estimación de ciclo de vida publicada por Mistral para una respuesta de 400 tokens.
+- El resultado se muestra en `ReviewOutput.tsx` dentro de un `<p aria-label="Impacto climático estimado">`.
 
 ---
 

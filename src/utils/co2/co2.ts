@@ -1,49 +1,29 @@
 /**
- * Estimación de CO2 generado por una llamada a la API de OpenAI.
+ * Rango proxy para inferencia de LLM con infraestructura completa, en gCO2e
+ * por mil tokens. No es una medición de OpenAI ni del modelo desplegado.
  *
- * Basado en:
- * - Un token ≈ 0.000000075 kg CO2 para modelos cloud (estimación conservadora).
- * - Referencia: https://www.technologyreview.com/2023/12/05/1084365/ai-carbon-emissions/
- *
- * La fórmula es simplificada: no cuenta infraestructura, cooling, etc.
- * Sirve como indicador relativo, no absoluto.
+ * El extremo alto (2.85 gCO2e/1k tokens) se redondea de la estimación de
+ * ciclo de vida publicada por Mistral para una respuesta de 400 tokens
+ * (1.14 gCO2e): https://mistral.ai/news/our-contribution-to-a-global-environmental-standard-for-ai/
+ * El extremo bajo conserva un escenario de serving eficiente, pero incluye
+ * infraestructura; debe revisarse si OpenAI publica factores propios.
  */
+const MIN_GCO2E_PER_THOUSAND_TOKENS = 0.15;
+const MAX_GCO2E_PER_THOUSAND_TOKENS = 2.85;
 
-const CO2_PER_TOKEN_KG = 0.000000075;
-
-/**
- * Estima tokens a partir de caracteres (aprox: 1 token ≈ 4 chars en inglés/code).
- */
-export function estimateTokens(charCount: number): number {
-  return Math.ceil(charCount / 4);
+function formatGrams(grams: number): string {
+  return grams < 0.1 ? grams.toFixed(2) : grams.toFixed(1);
 }
 
 /**
- * Calcula CO2 estimado en gramos para una cantidad de tokens.
+ * Calcula un rango de impacto climático a partir de los tokens totales que
+ * reporta la Responses API. `totalTokens` ya incluye entrada, salida y los
+ * tokens de razonamiento que el proveedor contabiliza dentro de la salida.
  */
-export function estimateCO2Grams(totalTokens: number): number {
-  return totalTokens * CO2_PER_TOKEN_KG * 1000;
-}
+export function calculateReviewCO2Range(totalTokens: number): string {
+  const safeTokens = Math.max(0, totalTokens);
+  const minGrams = (safeTokens / 1000) * MIN_GCO2E_PER_THOUSAND_TOKENS;
+  const maxGrams = (safeTokens / 1000) * MAX_GCO2E_PER_THOUSAND_TOKENS;
 
-/**
- * Formatea CO2 para mostrar al usuario.
- * - < 1g: "0.XX g"
- * - >= 1g: "X.X g"
- */
-export function formatCO2(grams: number): string {
-  if (grams < 1) {
-    return `${grams.toFixed(2)} g`;
-  }
-  return `${grams.toFixed(1)} g`;
-}
-
-/**
- * Calcula CO2 total de un review: input + output.
- */
-export function calculateReviewCO2(inputChars: number, outputChars: number): string {
-  const inputTokens = estimateTokens(inputChars);
-  const outputTokens = estimateTokens(outputChars);
-  const totalTokens = inputTokens + outputTokens;
-  const grams = estimateCO2Grams(totalTokens);
-  return formatCO2(grams);
+  return `${formatGrams(minGrams)}–${formatGrams(maxGrams)} gCO₂e`;
 }

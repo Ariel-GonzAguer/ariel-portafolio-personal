@@ -69,6 +69,10 @@ export default function ReviewOutput({ review, usage = null }: ReviewOutputProps
               Costo API estimado: {apiCost} (usando {REVIEW_MODEL_ID})
             </p>
           )}
+          <p>
+            Rango conservador basado en los tokens procesados por la API. El costo usa tarifas
+            públicas de OpenAI y no incluye impuestos.
+          </p>
         </div>
       )}
 

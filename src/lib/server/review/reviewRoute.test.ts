@@ -12,6 +12,7 @@ const mockStream = {
       response: {
         usage: {
           input_tokens: 120,
+          input_tokens_details: { cached_tokens: 20, cache_write_tokens: 10 },
           output_tokens: 80,
           total_tokens: 200,
           output_tokens_details: { reasoning_tokens: 40 },
@@ -148,6 +149,8 @@ describe('handleReview (streaming)', () => {
       type: string;
       usage: {
         inputTokens: number;
+        cachedInputTokens: number;
+        cacheWriteInputTokens: number;
         outputTokens: number;
         reasoningTokens: number;
         totalTokens: number;
@@ -155,7 +158,14 @@ describe('handleReview (streaming)', () => {
     };
     expect(usageEvent).toEqual({
       type: 'usage',
-      usage: { inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 },
+      usage: {
+        inputTokens: 120,
+        cachedInputTokens: 20,
+        cacheWriteInputTokens: 10,
+        outputTokens: 80,
+        reasoningTokens: 40,
+        totalTokens: 200,
+      },
     });
 
     // El último evento es done.

@@ -9,6 +9,7 @@ import type { ReviewErrorCode, ReviewResponse, ReviewState, ReviewUsage } from '
  * bloquear al usuario legítimo que tipeó accidentalmente un patrón.
  */
 const INJECTION_COOLDOWN_MS = 6 * 60 * 1000;
+const INJECTION_COOLDOWN_STORAGE_KEY = 'review:injectionCooldownUntil';
 
 /**
  * Hook que maneja el streaming de un review desde /api/review.
@@ -22,25 +23,32 @@ const INJECTION_COOLDOWN_MS = 6 * 60 * 1000;
  * state para que la UI reaccione según el tipo. Caso especial:
  * `injection_detected` activa un cooldown de 6 minutos vía `cooldownUntil`.
  *
- * Decisión arquitectónica: el cooldown vive en el state del hook, no
- * en un useEffect del componente. Esto evita las reglas nuevas de
- * React 19 (`react-hooks/set-state-in-effect`) y mantiene la lógica
- * de seguridad encapsulada donde ya corre el flujo del fetch.
+ * Decisión arquitectónica: el cooldown vive en el hook y se persiste
+ * en localStorage para sobrevivir refresh. No usa un useEffect del
+ * componente, así evitamos las reglas nuevas de React 19
+ * (`react-hooks/set-state-in-effect`) y mantenemos la lógica de
+ * seguridad encapsulada donde ya corre el flujo del fetch.
  */
 export function useReviewStream() {
-  const [state, setState] = useState<ReviewState>({
+  const [state, setState] = useState<ReviewState>(() => ({
     status: 'idle',
     rawText: '',
     result: null,
     usage: null,
     error: null,
     code: null,
-    cooldownUntil: null,
-  });
+    cooldownUntil: getStoredInjectionCooldownUntil(),
+  }));
 
   const abortRef = useRef<AbortController | null>(null);
 
   const start = useCallback(async (diff: string, botTrap = false) => {
+    const activeCooldownUntil = getStoredInjectionCooldownUntil();
+    if (activeCooldownUntil !== null) {
+      setState((current) => ({ ...current, cooldownUntil: activeCooldownUntil }));
+      return;
+    }
+
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
@@ -93,6 +101,10 @@ export function useReviewStream() {
         // Body no era JSON; mantener el fallback.
       }
       const isInjection = code === 'injection_detected';
+      const cooldownUntil = isInjection ? Date.now() + INJECTION_COOLDOWN_MS : null;
+      if (cooldownUntil !== null) {
+        storeInjectionCooldownUntil(cooldownUntil);
+      }
       setState({
         status: 'error',
         rawText: '',
@@ -103,7 +115,7 @@ export function useReviewStream() {
         // Activar el cooldown solo si el server rechazó por injection.
         // El timestamp se setea acá (no en un effect) porque es el
         // momento exacto del rechazo, no una reacción a un re-render.
-        cooldownUntil: isInjection ? Date.now() + INJECTION_COOLDOWN_MS : null,
+        cooldownUntil,
       });
       return;
     }
@@ -225,7 +237,7 @@ export function useReviewStream() {
       usage: null,
       error: null,
       code: null,
-      cooldownUntil: null,
+      cooldownUntil: getStoredInjectionCooldownUntil(),
     });
   }, []);
 
@@ -233,7 +245,41 @@ export function useReviewStream() {
 }
 
 function isReviewUsage(value: ReviewUsage): boolean {
-  return [value.inputTokens, value.outputTokens, value.reasoningTokens, value.totalTokens].every(
-    (tokenCount) => Number.isFinite(tokenCount) && tokenCount >= 0,
-  );
+  return [
+    value.inputTokens,
+    value.cachedInputTokens ?? 0,
+    value.cacheWriteInputTokens ?? 0,
+    value.outputTokens,
+    value.reasoningTokens,
+    value.totalTokens,
+  ].every((tokenCount) => Number.isFinite(tokenCount) && tokenCount >= 0);
+}
+
+function getStoredInjectionCooldownUntil(): number | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const rawValue = window.localStorage.getItem(INJECTION_COOLDOWN_STORAGE_KEY);
+    if (rawValue === null) return null;
+
+    const cooldownUntil = Number(rawValue);
+    if (!Number.isFinite(cooldownUntil) || cooldownUntil <= Date.now()) {
+      window.localStorage.removeItem(INJECTION_COOLDOWN_STORAGE_KEY);
+      return null;
+    }
+
+    return cooldownUntil;
+  } catch {
+    return null;
+  }
+}
+
+function storeInjectionCooldownUntil(cooldownUntil: number): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(INJECTION_COOLDOWN_STORAGE_KEY, String(cooldownUntil));
+  } catch {
+    // Si storage no está disponible, el cooldown en memoria sigue activo.
+  }
 }

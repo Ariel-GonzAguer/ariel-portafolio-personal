@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReviewResponse, ReviewUsage } from '../../hooks/useReviewStream/types';
 import { focusClassName } from '../../utils/a11y/a11y';
 import { calculateReviewCO2Range } from '../../utils/co2/co2';
+import { formatReviewApiCostUSD, REVIEW_MODEL_ID } from '../../utils/review-cost/review-cost';
 import FindingCard from './FindingCard';
 
 interface ReviewOutputProps {
@@ -29,6 +30,7 @@ const VERDICT_STYLE: Record<ReviewResponse['verdict'], string> = {
 export default function ReviewOutput({ review, usage = null }: ReviewOutputProps) {
   const [copied, setCopied] = useState(false);
   const co2Range = usage ? calculateReviewCO2Range(usage.totalTokens) : null;
+  const apiCost = usage ? formatReviewApiCostUSD(usage) : null;
 
   const handleCopy = async () => {
     try {
@@ -60,17 +62,18 @@ export default function ReviewOutput({ review, usage = null }: ReviewOutputProps
       </div>
       <p className="text-gris-claro">{review.summary}</p>
       {co2Range && (
-        <div className=" text-green-200">
+        <div className="text-green-200">
           <p aria-label="Impacto climático estimado">Impacto climático estimado: {co2Range}</p>
-          <p>
-            Rango conservador basado en los tokens procesados por la API; incluye entrada, salida y
-            razonamiento reportado. No es una medición de OpenAI.
-          </p>
+          {apiCost && (
+            <p aria-label="Costo API estimado" className="text-orange-200">
+              Costo API estimado: {apiCost} (usando {REVIEW_MODEL_ID})
+            </p>
+          )}
         </div>
       )}
 
       <div className="flex flex-col gap-4">
-        <h3 className="text-xl font-bold">Findings ({review.findings.length})</h3>
+        <h3 className="text-xl font-bold">Hallazgos ({review.findings.length})</h3>
         {review.findings.length === 0 ? (
           <p className="text-gris-claro">No se encontraron hallazgos.</p>
         ) : (

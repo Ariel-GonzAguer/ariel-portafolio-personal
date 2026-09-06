@@ -78,6 +78,7 @@ Componentes renderizan con props (única fuente de verdad)
    │   - Summary: resumen ejecutivo (2-3 oraciones)
    │   - Findings: cards con severity (critical/high/medium/low/info), category, line, title, explanation, fix
    │   - Impacto climático estimado: rango gCO₂e basado en totalTokens de la API
+   │   - Costo API estimado: USD basado en input/output/cached tokens reportados
    │   - Botón copy-to-clipboard del review como JSON
    │   - Countdown cooldown si code === 'injection_detected' (6 min)
    │
@@ -105,7 +106,7 @@ Componentes renderizan con props (única fuente de verdad)
 │ 5. Parsear JSON     │              │ 6. Eventos: delta  │
 │ 6. Mostrar UI       │              │ 7. Eventos: done   │
 │   (verdict, findings│              │ 8. Eventos: error  │
-│    + CO₂)           │              │    + usage         │
+│    + CO₂ + costo)   │              │    + usage         │
  └─────────────────────┘              └─────────────────────┘
   ---
 

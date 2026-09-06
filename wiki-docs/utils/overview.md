@@ -37,6 +37,28 @@ export function calculateReviewCO2Range(totalTokens: number): string {
 
 ---
 
+## `src/utils/review-cost/review-cost.ts` — Estimación de costo API
+
+```typescript
+export function formatReviewApiCostUSD(usage: ReviewCostUsage): string {
+  // Calcula costo con tarifas públicas de gpt-5.6-luna.
+}
+```
+
+**Uso en `ReviewOutput`**:
+
+- `inputTokens`: tokens de entrada reportados por la Responses API.
+- `cachedInputTokens`: tokens de entrada servidos desde cache, si OpenAI los reporta.
+- `cacheWriteInputTokens`: tokens escritos a cache, si OpenAI los reporta.
+- `outputTokens`: tokens de salida reportados por la Responses API.
+
+**Fórmula**: `(standardInput * 0.20 + cachedInput * 0.02 + cacheWriteInput * 0.25 + output * 1.20) / 1_000_000`.
+
+- El resultado se muestra en `ReviewOutput.tsx` dentro de un `<p aria-label="Costo API estimado">`.
+- Se etiqueta como estimado porque no consulta el ledger de facturación ni incluye impuestos.
+
+---
+
 ## `src/styles.css` — Estilos globales y Tailwind v4
 
 ### `@import 'tailwindcss';`

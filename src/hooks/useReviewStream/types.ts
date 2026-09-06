@@ -32,6 +32,8 @@ export interface ReviewResponse {
  */
 export interface ReviewUsage {
   inputTokens: number;
+  cachedInputTokens?: number;
+  cacheWriteInputTokens?: number;
   outputTokens: number;
   reasoningTokens: number;
   totalTokens: number;

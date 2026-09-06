@@ -4,6 +4,7 @@ import ReviewWorkspace from './ReviewWorkspace';
 import { EXAMPLE_DIFFS } from './ExampleDiffs';
 
 afterEach(() => {
+  window.localStorage.clear();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -74,7 +75,14 @@ describe('ReviewWorkspace', () => {
       JSON.stringify({ type: 'delta', text: json.slice(halfway) }),
       JSON.stringify({
         type: 'usage',
-        usage: { inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 },
+        usage: {
+          inputTokens: 120,
+          cachedInputTokens: 20,
+          cacheWriteInputTokens: 10,
+          outputTokens: 80,
+          reasoningTokens: 40,
+          totalTokens: 200,
+        },
       }),
       JSON.stringify({ type: 'done' }),
     ];
@@ -106,6 +114,7 @@ describe('ReviewWorkspace', () => {
       expect(screen.getByText(/cambio aceptable/i)).toBeInTheDocument();
     });
     expect(screen.getByText(/impacto climático estimado/i)).toBeInTheDocument();
+    expect(screen.getByText(/costo api estimado/i)).toBeInTheDocument();
   });
 
   it('muestra mensaje de error si el stream devuelve un error event', async () => {
@@ -169,7 +178,7 @@ describe('ReviewWorkspace', () => {
     alertSpy.mockRestore();
   });
 
-  it('elegir un ejemplo después del cooldown limpia el bloqueo', async () => {
+  it('elegir un ejemplo durante el cooldown no limpia el bloqueo', async () => {
     const errorBody = JSON.stringify({
       error: 'Se detectó un intento de inyección de prompt.',
       code: 'injection_detected',
@@ -197,8 +206,8 @@ describe('ReviewWorkspace', () => {
       expect(alertSpy).toHaveBeenCalled();
     });
 
-    // Cargar otro ejemplo limpia el bloqueo: cooldownUntil pasa a null,
-    // por lo que el botón vuelve a estar habilitado con diff nuevo.
+    // Intentar cargar otro ejemplo no limpia el bloqueo activo: el
+    // selector está deshabilitado y el cooldown sigue visible.
     const example2 = EXAMPLE_DIFFS[1] ?? EXAMPLE_DIFFS[0];
     if (!example2) throw new Error('No examples available');
     fireEvent.change(screen.getByLabelText(/cargar un ejemplo/i), {
@@ -206,9 +215,8 @@ describe('ReviewWorkspace', () => {
     });
 
     const textarea = screen.getByLabelText(/pega tu unified diff/i) as HTMLTextAreaElement;
-    expect(textarea.value).toBe(example2.diff);
-    // El botón de bloqueo desaparece.
-    expect(screen.queryByRole('button', { name: /bloqueado por seguridad/i })).toBeNull();
+    expect(textarea.value).toBe('');
+    expect(screen.getByRole('button', { name: /bloqueado por seguridad/i })).toBeDisabled();
 
     alertSpy.mockRestore();
   });

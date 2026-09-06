@@ -100,7 +100,7 @@ interface ReviewState {
   result: ReviewResponse | null; // Objeto JSON final (summary, findings, verdict)
   error: string | null; // Mensaje de error si falló
   code: string | null; // Código de error especial (ej: 'injection_detected')
-  cooldownUntil: number | null; // Timestamp (ms) hasta que el botón queda deshabilitado
+  cooldownUntil: number | null; // Timestamp (ms) hasta que el botón queda deshabilitado; se restaura desde localStorage si sigue activo
 }
 ```
 
@@ -143,6 +143,18 @@ const calculateReviewCO2Range = (totalTokens: number) => {
 ```
 
 `totalTokens` incluye el prompt de sistema, el diff, el wrapper de la solicitud, el schema, la salida y los tokens de razonamiento que el proveedor contabiliza. Es un rango proxy conservador, no una medición específica de OpenAI.
+
+### Flujo de costo API
+
+El costo API estimado se calcula en el cliente con el mismo evento `usage`, separando entrada, entrada cacheada, cache writes y salida. Para `gpt-5.6-luna`, las tarifas usadas son:
+
+- Input: `$0.20 / 1M tokens`
+- Cached input: `$0.02 / 1M tokens`
+- Cache writes: `1.25x` sobre input normal
+- Output: `$1.20 / 1M tokens`
+
+La UI lo muestra como estimación porque usa tarifas públicas en código, no el ledger de facturación de OpenAI ni impuestos.
+
 ---
 
 ## Referencias

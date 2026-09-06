@@ -49,6 +49,8 @@ export default function ReviewWorkspace() {
   };
 
   const handleExampleSelect = (example: ExampleDiff) => {
+    if (state.cooldownUntil !== null && state.cooldownUntil > Date.now()) return;
+
     setDiff(example.diff);
     reset();
   };

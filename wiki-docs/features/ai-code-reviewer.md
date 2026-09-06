@@ -55,6 +55,7 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
    │   - Buffer de eventos: buffer.split('\n\n'), pop() último incompleto
    │   - Parsea JSON: {type: 'delta', text} | {type: 'done'} | {type: 'error'}
    │   - Estado acumulado: rawText, status, result, error, code, cooldownUntil
+   │   - Cooldown de prompt injection persistido en localStorage para sobrevivir refresh
    │
    ▼
 6. UI muestra resultado:
@@ -62,8 +63,9 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
    │   - Summary: resumen ejecutivo (2-3 oraciones)
    │   - Findings: cards con severity (critical/high/medium/low/info), category, línea, título, explicación, fix
    │   - Impacto climático estimado: rango gCO₂e basado en totalTokens de la API
+   │   - Costo API estimado: USD basado en input/output/cached tokens reportados
    │   - Botón copy-to-clipboard del review como JSON
-   │   - Countdown cooldown si code === 'injection_detected' (6 minutos)
+   │   - Countdown cooldown si code === 'injection_detected' o hay cooldown persistido activo (6 minutos)
    │
    ▼
 7. Browser renderiza ReviewOutput con findings, verdict, syntax highlighting (shiki), copy feedback
@@ -83,7 +85,7 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
 | `src/lib/server/review/security-headers.ts` | Security headers (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) + SSE headers |
 | `src/hooks/useReviewStream/useReviewStream.ts` | Hook cliente: lectura incremental de SSE, parseo, state management, cooldown |
 | `src/components/review-form/ReviewForm.tsx` | Formulario: textarea, 3 ejemplos precargados, honeypot doble checkbox, countdown cooldown |
-| `src/components/review-output/ReviewOutput.tsx` | Render del resultado: verdict, summary, findings cards, CO₂, copy-to-clipboard |
+| `src/components/review-output/ReviewOutput.tsx` | Render del resultado: verdict, summary, findings cards, CO₂, costo API, copy-to-clipboard |
 | `src/components/IA/IA.tsx` | Sección del portafolio: integra IACard con la entrada ai-code-reviewer de proyectosIA |
 | `src/data/proyectos.ts` | Datos: entrada proyectosIA (incluye ai-code-reviewer con tecnologías y enlace) |
 | `src/pages/_api/api/review.ts` | API route fina: POST handler que llama a handleReview |
@@ -100,7 +102,7 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
 start(diff: string, botTrap?: boolean): Promise<void>
 // Inicia el fetch POST /api/review con AbortController
 // Maneja: loading → streaming → done/error
-// Features: cooldown 6 min en injection_detected, AbortController para cancelar
+// Features: cooldown 6 min en injection_detected persistido en localStorage, AbortController para cancelar
 
 abort(): void
 // Aborta la request en curso
@@ -122,11 +124,10 @@ reset(): void
 
 ### `ReviewOutput` props
 
-| Prop           | Tipo                | Descripción                                  | Requerido |
-| -------------- | ------------------- | -------------------------------------------- | --------- |
-| `review`       | `ReviewResponse`    | Objeto JSON con summary, verdict, findings   | Sí        |
-| `outputLength` | `number` (opcional) | Longitud del output (usado para cálculo CO₂) | No        |
-| `inputLength`  | `number` (opcional) | Longitud del input (usado para cálculo CO₂)  | No        |
+| Prop     | Tipo                  | Descripción                                                     | Requerido |
+| -------- | --------------------- | --------------------------------------------------------------- | --------- |
+| `review` | `ReviewResponse`      | Objeto JSON con summary, verdict, findings                      | Sí        |
+| `usage`  | `ReviewUsage \| null` | Tokens reales reportados por la API para cálculo de CO₂ y costo | No        |
 
 ### `Finding` (individual finding del review)
 
@@ -169,7 +170,7 @@ interface Finding {
 
 ## Limitaciones y consideraciones
 
-- **Costo de OpenAI**: modelo `gpt-5.6-luna` (costo más bajo que `gpt-4.1-mini`), pero el rate limit de 3 requests/día por IP evita gastos descontrolados en demo pública.
+- **Costo de OpenAI**: modelo `gpt-5.6-luna`; la UI muestra costo estimado con tarifas públicas y tokens reales reportados por la API. El rate limit de 3 requests/día por IP evita gastos descontrolados en demo pública.
 - **Timeout de Netlify**: free plan tiene límite de 26s por function; Pro plan 60s. El stream tiene timeout de 60_000 ms en el cliente. Si el review es muy largo, el modelo puede cortar antes.
 - **Stream cortado a mitad**: detectar `done === true` sin evento `done` → mostrar error al usuario.
 - **CSP**: el edge function `csp-nonce` permite `connect-src 'self'`, lo cual cubre el fetch a `/api/review` desde el mismo origen. No se necesita configuración adicional.

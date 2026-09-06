@@ -60,7 +60,7 @@ Checkbox doble:
 - Hook `useReviewStream` usa `ReadableStream.getReader()` — **NUNCA** `res.json()` con SSE.
 - Buffer de eventos: `buffer.split('\n\n')`, `pop()` el último incompleto.
 - Eventos parseados: `{type: 'delta', text}`, `{type: 'done'}`, `{type: 'error'}`.
-- Countdown cooldown: vive en state del hook, no en useEffect (decisión arquitectónica por reglas React 19).
+- Countdown cooldown: vive en el hook y se persiste en localStorage para sobrevivir refresh; no depende de un useEffect del componente.
 
 ## Utilidades de estilo
 

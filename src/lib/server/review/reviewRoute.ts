@@ -9,6 +9,7 @@ import { isOriginAllowed } from './validate-origin';
 import { SSE_HEADERS, jsonError, withSecurityHeaders } from './security-headers';
 import { checkRateLimit, getRetryAfterHeader } from './rate-limit';
 import { checkInMemoryRateLimit } from './in-memory-rate-limit';
+import { REVIEW_MODEL_ID } from '../../../utils/review-cost/review-cost';
 
 const STREAM_TIMEOUT_MS = 60_000;
 
@@ -140,7 +141,7 @@ function getServerEnv(key: string): string | undefined {
 async function createStream(client: OpenAI, diff: string) {
   return client.responses.stream(
     {
-      model: 'gpt-5.6-luna',
+      model: REVIEW_MODEL_ID,
       instructions: SYSTEM_PROMPT,
       input: [
         {
@@ -180,10 +181,14 @@ function createSSEResponse(upstream: Awaited<ReturnType<typeof createStream>>): 
           } else if (event.type === 'response.completed') {
             const usage = event.response.usage;
             if (usage) {
+              const inputTokenDetails = usage.input_tokens_details as
+                { cached_tokens?: number; cache_write_tokens?: number } | undefined;
               send({
                 type: 'usage',
                 usage: {
                   inputTokens: usage.input_tokens,
+                  cachedInputTokens: inputTokenDetails?.cached_tokens ?? 0,
+                  cacheWriteInputTokens: inputTokenDetails?.cache_write_tokens ?? 0,
                   outputTokens: usage.output_tokens,
                   reasoningTokens: usage.output_tokens_details.reasoning_tokens,
                   totalTokens: usage.total_tokens,

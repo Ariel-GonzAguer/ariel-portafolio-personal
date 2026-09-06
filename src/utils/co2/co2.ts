@@ -25,5 +25,5 @@ export function calculateReviewCO2Range(totalTokens: number): string {
   const minGrams = (safeTokens / 1000) * MIN_GCO2E_PER_THOUSAND_TOKENS;
   const maxGrams = (safeTokens / 1000) * MAX_GCO2E_PER_THOUSAND_TOKENS;
 
-  return `${formatGrams(minGrams)}–${formatGrams(maxGrams)} gCO₂e`;
+  return `${formatGrams(minGrams)}–${formatGrams(maxGrams)}g CO₂e`;
 }

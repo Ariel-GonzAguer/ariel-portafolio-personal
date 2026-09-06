@@ -4,6 +4,7 @@ import { useReviewStream } from './useReviewStream';
 import type { ReviewResponse, Severity, Category, Verdict } from './types';
 
 afterEach(() => {
+  window.localStorage.clear();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -104,6 +105,44 @@ describe('useReviewStream (hook)', () => {
     expect(result.current.state.status).toBe('error');
     expect(result.current.state.code).toBe('injection_detected');
     expect(result.current.state.error).toMatch(/inyección de prompt/i);
+    expect(result.current.state.cooldownUntil).toBeGreaterThan(Date.now());
+    expect(Number(window.localStorage.getItem('review:injectionCooldownUntil'))).toBe(
+      result.current.state.cooldownUntil,
+    );
+  });
+
+  it('restaura un cooldown activo desde localStorage al refrescar la página', () => {
+    const cooldownUntil = Date.now() + 120_000;
+    window.localStorage.setItem('review:injectionCooldownUntil', String(cooldownUntil));
+
+    const { result } = renderHook(() => useReviewStream());
+
+    expect(result.current.state.status).toBe('idle');
+    expect(result.current.state.cooldownUntil).toBe(cooldownUntil);
+  });
+
+  it('ignora y limpia un cooldown expirado guardado en localStorage', () => {
+    window.localStorage.setItem('review:injectionCooldownUntil', String(Date.now() - 1_000));
+
+    const { result } = renderHook(() => useReviewStream());
+
+    expect(result.current.state.cooldownUntil).toBeNull();
+    expect(window.localStorage.getItem('review:injectionCooldownUntil')).toBeNull();
+  });
+
+  it('no inicia fetch si existe un cooldown activo persistido', async () => {
+    const cooldownUntil = Date.now() + 120_000;
+    window.localStorage.setItem('review:injectionCooldownUntil', String(cooldownUntil));
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useReviewStream());
+    await act(async () => {
+      await result.current.start('--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b');
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(result.current.state.cooldownUntil).toBe(cooldownUntil);
   });
 
   it('cuando el server responde 400 sin code, el state.code queda null', async () => {
@@ -145,7 +184,7 @@ describe('useReviewStream (hook)', () => {
     expect(result.current.state.error).toBe('HTTP 500');
   });
 
-  it('reset limpia code y vuelve a idle', async () => {
+  it('reset limpia code y vuelve a idle sin borrar un cooldown activo', async () => {
     const errorBody = JSON.stringify({
       error: 'inyección',
       code: 'injection_detected',
@@ -169,6 +208,7 @@ describe('useReviewStream (hook)', () => {
     });
     expect(result.current.state.status).toBe('idle');
     expect(result.current.state.code).toBeNull();
+    expect(result.current.state.cooldownUntil).toBeGreaterThan(Date.now());
   });
 
   it('stream exitoso no expone code', async () => {
@@ -177,7 +217,14 @@ describe('useReviewStream (hook)', () => {
       JSON.stringify({ type: 'delta', text: JSON.stringify(review) }),
       JSON.stringify({
         type: 'usage',
-        usage: { inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 },
+        usage: {
+          inputTokens: 120,
+          cachedInputTokens: 20,
+          cacheWriteInputTokens: 10,
+          outputTokens: 80,
+          reasoningTokens: 40,
+          totalTokens: 200,
+        },
       }),
       JSON.stringify({ type: 'done' }),
     ];
@@ -195,6 +242,8 @@ describe('useReviewStream (hook)', () => {
     expect(result.current.state.code).toBeNull();
     expect(result.current.state.usage).toEqual({
       inputTokens: 120,
+      cachedInputTokens: 20,
+      cacheWriteInputTokens: 10,
       outputTokens: 80,
       reasoningTokens: 40,
       totalTokens: 200,

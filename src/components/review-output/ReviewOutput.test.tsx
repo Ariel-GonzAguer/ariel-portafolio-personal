@@ -37,21 +37,27 @@ describe('ReviewOutput', () => {
 
   it('muestra el conteo de findings correcto', () => {
     render(<ReviewOutput review={sampleReview} />);
-    expect(screen.getByRole('heading', { name: /findings \(2\)/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /hallazgos \(2\)/i })).toBeInTheDocument();
   });
 
   it('muestra el rango climático solo con el uso real de la API', () => {
     render(
       <ReviewOutput
         review={sampleReview}
-        usage={{ inputTokens: 120, outputTokens: 80, reasoningTokens: 40, totalTokens: 200 }}
+        usage={{
+          inputTokens: 120,
+          cachedInputTokens: 20,
+          cacheWriteInputTokens: 10,
+          outputTokens: 80,
+          reasoningTokens: 40,
+          totalTokens: 200,
+        }}
       />,
     );
 
     expect(screen.getByText(/impacto climático estimado: 0\.03–0\.6 gco₂e/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/incluye entrada, salida y razonamiento reportado/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/costo api estimado: \$0\.00012 usd/i)).toBeInTheDocument();
+    expect(screen.getByText(/el costo usa tarifas públicas de openai/i)).toBeInTheDocument();
   });
 
   it('renderiza un FindingCard por cada finding', () => {

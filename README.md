@@ -1,13 +1,13 @@
 # ariel-personal
 
 Bienvenidas, bienvenidos a mi portafolio personal.  
-Soy Ariel GonzAgüer, Frontend/Product Engineer + IA. Me enfoco en accesibilidad, sostenibilidad y en poner a la persona usuaria en el centro de la experiencia.  
+Soy Ariel GonzAgüer, Frontend/Product Engineer + IA. Me enfoco en accesibilidad, sostenibilidad y en poner a la persona usuaria en el centro de la experiencia.
 
 Creo que la internet es parte esencial del futuro, y quiero ayudar a construirla de forma clara, accesible y sostenible.
 
 Mi portafolio es un sitio estático, con secciones de proyectos destacados, experiencia con IA/LLMs, código abierto, certificaciones y contacto.
 
-Vea el sitio desplegado acá → [arielgonzaguer.gatorojolab.com](https://arielgonzaguer.gatorojolab.com)  
+Vea el sitio desplegado acá → [arielgonzaguer.gatorojolab.com](https://arielgonzaguer.gatorojolab.com)
 
 Para ver el sitio de mi estudio de Desarrollo web visite → [gatorojolab.com](https://gatorojolab.com)
 

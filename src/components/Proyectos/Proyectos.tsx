@@ -55,7 +55,7 @@ function ProyectoCard({ proyecto }: { proyecto: Proyecto }) {
  */
 export default function Proyectos() {
   return (
-    <section id="proyectos" className="scroll-mt-8 px-6 py-20">
+    <section id="proyectos" className="scroll-mt-8 px-6 py-16">
       <div className="mx-auto max-w-5xl text-center">
         <p className="font-semibold uppercase tracking-[0.18em] text-red-400">
           Trabajo seleccionado

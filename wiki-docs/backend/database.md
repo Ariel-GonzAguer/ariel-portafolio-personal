@@ -2,7 +2,7 @@
 
 ## `src/data/proyectos.ts` — Single source of truth
 
-Este archivo es la **única fuente de verdad** para los datos del portafolio. Los componentes solo consumen e renderizan; la lógica de negocio o persistencia no reside aquí.
+Este archivo es la **única fuente de verdad** para los datos del portafolio. Los componentes solo consumen y renderizan; la lógica de negocio o persistencia no reside aquí.
 
 ### Interfaces definidas
 
@@ -57,7 +57,7 @@ export interface RepoOpenSource {
 
 | ID            | Nombre           | Tecnologías                       | Enfoque                           | Impacto                                                                                                                   |
 | ------------- | ---------------- | --------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `superkeg`    | SUPER KEG        | React, Zustand, Waka, Firebase    | SaaS, Estado global, UX operativa | Producto SaaS real en uso diario: dominio operativo complejo, inventario en tiempo real y flujos de estado avanzados.     |
+| `superkeg`    | SUPER KEG        | React, Zustand, Waku, Firebase    | SaaS, Estado global, UX operativa | Producto SaaS real en uso diario: dominio operativo complejo, inventario en tiempo real y flujos de estado avanzados.     |
 | `gluten-corp` | Gluten Corp      | React, Zustand, Sonner, Firebase  | Flujo de compra, Estado global    | Arquitectura de estado compleja con flujo de compra completo e integración bidireccional con panel administrativo propio. |
 | `shuttle506`  | Shuttle 506 Jaco | Astro, React, EmailJS             | SEO, Conversión, Performance      | Alta performance y flujo de conversión directo que genera contactos reales para el negocio.                               |
 | `pasaporte`   | Pasaporte.app    | Waku, TailwindCSS, QRCode, Motion | QR, Mobile-first, Eventos         | Producto físico-digital: integración QR y UX mobile-first pensada para miles de asistentes por evento.                    |
@@ -72,7 +72,7 @@ export interface RepoOpenSource {
 | `ai-code-reviewer`   | AI Code Reviewer              | Producto con IA     | OpenAI Responses API, Waku, Netlify Functions, TypeScript | https://arielgonzaguer.gatorojolab.com/review        |
 | `patchwork`          | Patchwork - WebMCP            | Producto con IA     | WebMCP, OpenAI, Google, Michi-Router                      | https://patchwork-webmcp-challenge.netlify.app/      |
 
-#### `openSource` (3 repositorios públicos verificables)
+#### `openSource` (4 repositorios públicos verificables)
 
 | ID                       | Nombre                 | Tipo                   | Tecnologías                              | Licencia                                             |
 | ------------------------ | ---------------------- | ---------------------- | ---------------------------------------- | ---------------------------------------------------- |
@@ -83,26 +83,70 @@ export interface RepoOpenSource {
 
 ### Flujo de datos en la aplicación
 
-1. **Build time**: `proyectos.ts` se lee y los datos se injectan en los componentes.
-2. **Runtime**: Los componentes leen de `proyectos.ts` (es un módulo ESM estático).
-3. **Página de inicio** (`/`): `index.tsx` compone todas las secciones pasando los datos como props.
-4. **Sección IA** (`/ia`): `IA.tsx` mapea `proyectosIA` y renderiza `IACard` por cada uno.
+```
+Build time (SSG):
+  src/data/proyectos.ts ──► index.tsx / IA.tsx / OpenSource.tsx
+                                 │
+                                 ▼
+                        HTML estático servido por Netlify
+
+Runtime (solo AI Code Reviewer):
+  /review (estática) ──► ReviewWorkspace ──► POST /api/review (SSE)
+```
+
+1. **Build time**: `proyectos.ts` se lee y los datos se injectan en los componentes durante el build estático.
+2. **Página de inicio** (`/`): `index.tsx` compone todas las secciones (Hero, Badge, Proyectos, IA, OpenSource, SobreMi, Certificados, Contacto).
+3. **Sección Proyectos**: `Proyectos.tsx` mapea `proyectos` y renderiza `ProyectoCard` por cada uno.
+4. **Sección IA**: `IA.tsx` mapea `proyectosIA` y renderiza `IACard` por cada uno.
 5. **Sección Open Source**: `OpenSource.tsx` mapea `openSource` y renderiza cards de cada repositorio.
 
 ## Flujo de datos del AI Code Reviewer (estado del cliente)
 
-El estado del hook `useReviewStream` tiene esta estructura:
+El estado del hook `useReviewStream` (definido en `src/hooks/useReviewStream/types.ts`) tiene esta estructura:
 
 ```typescript
 interface ReviewState {
   status: 'idle' | 'loading' | 'streaming' | 'done' | 'error';
   rawText: string; // Texto completo recibido del stream (JSON parseado al final)
   result: ReviewResponse | null; // Objeto JSON final (summary, findings, verdict)
+  usage: ReviewUsage | null; // Tokens reportados por la API en el evento usage
   error: string | null; // Mensaje de error si falló
-  code: string | null; // Código de error especial (ej: 'injection_detected')
-  cooldownUntil: number | null; // Timestamp (ms) hasta que el botón queda deshabilitado; se restaura desde localStorage si sigue activo
+  code: ReviewErrorCode | null; // Código de error estable (ej: 'injection_detected')
+  cooldownUntil: number | null; // Timestamp (ms) hasta el cual el envío queda bloqueado; se restaura desde localStorage si sigue activo
 }
 ```
+
+### `ReviewUsage` (evento `usage` del SSE)
+
+```typescript
+interface ReviewUsage {
+  inputTokens: number;
+  cachedInputTokens?: number;
+  cacheWriteInputTokens?: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  totalTokens: number;
+}
+```
+
+- `reasoningTokens` es un desglose de `outputTokens` (`usage.output_tokens_details.reasoning_tokens`), NO se suma de nuevo a `totalTokens`.
+- `cachedInputTokens` y `cacheWriteInputTokens` provienen de `usage.input_tokens_details` (pueden no existir; el server los rellena con `0`).
+- El server emite este evento desde `response.completed` en `createSSEResponse` (`reviewRoute.ts`).
+- El cliente valida con `isReviewUsage()` que todos los campos sean finitos y ≥ 0 antes de aceptarlos.
+
+### `ReviewErrorCode`
+
+```typescript
+type ReviewErrorCode =
+  | 'injection_detected'
+  | 'rate_limit'
+  | 'origin_not_allowed'
+  | 'diff_invalid'
+  | 'service_unavailable'
+  | (string & {});
+```
+
+Codes estables que el server puede devolver en `{ error, code }`. El cliente los usa para reaccionar distinto según el tipo (ej. prompt injection → alert + vaciar textarea + cooldown vs error genérico). Actualmente solo `injection_detected` se emite explícitamente desde `reviewRoute.ts`.
 
 ### `ReviewResponse` (schema JSON devuelto por OpenAI)
 
@@ -132,26 +176,32 @@ interface Finding {
 
 ### Flujo de CO₂
 
-La métrica de impacto climático se calcula en el cliente con el uso final que la Responses API transmite por SSE:
+La métrica de impacto climático se calcula en el cliente con `usage.totalTokens` (`src/utils/co2/co2.ts`):
 
 ```typescript
-const calculateReviewCO2Range = (totalTokens: number) => {
-  const min = (totalTokens / 1000) * 0.15;
-  const max = (totalTokens / 1000) * 2.85;
-  return `${min}–${max} gCO₂e`;
-};
+const MIN_GCO2E_PER_THOUSAND_TOKENS = 0.15;
+const MAX_GCO2E_PER_THOUSAND_TOKENS = 2.85;
+
+export function calculateReviewCO2Range(totalTokens: number): string {
+  const safeTokens = Math.max(0, totalTokens);
+  const minGrams = (safeTokens / 1000) * MIN_GCO2E_PER_THOUSAND_TOKENS;
+  const maxGrams = (safeTokens / 1000) * MAX_GCO2E_PER_THOUSAND_TOKENS;
+  return `${formatGrams(minGrams)}–${formatGrams(maxGrams)}g CO₂e`;
+}
 ```
 
-`totalTokens` incluye el prompt de sistema, el diff, el wrapper de la solicitud, el schema, la salida y los tokens de razonamiento que el proveedor contabiliza. Es un rango proxy conservador, no una medición específica de OpenAI.
+`totalTokens` incluye entrada, salida y los tokens de razonamiento que el proveedor contabiliza dentro de la salida. Es un rango proxy conservador para inferencia de LLM con infraestructura completa (el extremo alto se redondea de la estimación de Mistral), no una medición de OpenAI.
 
 ### Flujo de costo API
 
-El costo API estimado se calcula en el cliente con el mismo evento `usage`, separando entrada, entrada cacheada, cache writes y salida. Para `gpt-5.6-luna`, las tarifas usadas son:
+El costo estimado se calcula en el cliente con el mismo `usage` (`src/utils/review-cost/review-cost.ts`), separando entrada, entrada cacheada, cache writes y salida. Para `gpt-5.6-luna`, las tarifas públicas son:
 
-- Input: `$0.20 / 1M tokens`
-- Cached input: `$0.02 / 1M tokens`
-- Cache writes: `1.25x` sobre input normal
-- Output: `$1.20 / 1M tokens`
+| Componente    | Tarifa USD / 1M tokens |
+| ------------- | ---------------------- |
+| Input         | `$0.20`                |
+| Cached input  | `$0.02`                |
+| Cache write   | `$0.20 × 1.25`         |
+| Output        | `$1.20`                |
 
 La UI lo muestra como estimación porque usa tarifas públicas en código, no el ledger de facturación de OpenAI ni impuestos.
 
@@ -159,6 +209,8 @@ La UI lo muestra como estimación porque usa tarifas públicas en código, no el
 
 ## Referencias
 
-- [Visión general del stack](backend/auth.md)
-- [Arquitectura general](architecture/overview.md)
-- [Proyectos data model](https://github.com/Ariel-GonzAguer/ariel-personal/blob/main/src/data/proyectos.ts)
+- [Capas de seguridad](auth.md)
+- [Arquitectura general](../architecture/overview.md)
+- [AI Code Reviewer](../features/ai-code-reviewer.md)
+- [Utilidades (CO₂ y costo)](../utils/overview.md)
+- Fuente: `src/data/proyectos.ts`

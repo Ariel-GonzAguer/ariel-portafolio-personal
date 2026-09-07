@@ -5,6 +5,7 @@ import OpenSource from '../components/OpenSource/OpenSource';
 import SobreMi from '../components/SobreMi/SobreMi';
 import Certificados from '../components/Certificados/Certificados';
 import Contacto from '../components/Contacto/Contacto';
+import Badge from '../components/Badge/Badge';
 
 export default function HomePage() {
   return (
@@ -18,6 +19,11 @@ export default function HomePage() {
       </>
       <main id="main">
         <Hero />
+        <Badge
+          link="https://www.websitecarbon.com/website/arielgonzaguer-gatorojolab-com/"
+          text={['0.1g de CO2/Vista', 'WebSiteCarbon', '98% más limpia que otras páginas']}
+          ariaLabel="Huella de carbono de este sitio según Website Carbon, se abre en una pestaña nueva"
+        />
         <Proyectos />
         <IA />
         <OpenSource />

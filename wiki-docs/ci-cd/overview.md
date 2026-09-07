@@ -10,24 +10,24 @@ El deploy se realiza manualmente mediante la línea de comando:
 
 ```bash
 # Desde la raíz del proyecto
-pnpm install       # instalar dependencias
-pnpm build         # build estático (SSG) con Waku
-pnpm test          # ejecutar tests (151/151 deben pasar)
-pnpm format:fix    # Prettier auto-fix
-pnpm lint          # ESLint con autofix (.netlify/** ignorado)
-bash scripts/deploy-netlify.sh  # deploy a Netlify
+pnpm install               # instalar dependencias
+pnpm build                 # build estático (SSG) con Waku → dist/public
+pnpm test                  # ejecutar tests (181/181 deben pasar)
+pnpm format:fix            # Prettier auto-fix
+pnpm lint                  # ESLint con autofix
+pnpm deploy:netlify        # audit + test + format:fix + lint + deploy
 ```
 
-### Pasos implicados (según `scripts/deploy-netlify.sh` y `package.json`)
+### Pasos implicados (según `package.json` y `scripts/deploy-netlify.sh`)
 
-| Step    | Comando               | Propósito                                      |
-| ------- | --------------------- | ---------------------------------------------- |
-| Install | `pnpm install`        | Dependencias (openai, @netlify/blobs, etc.)    |
-| Build   | `pnpm build`          | Generar HTML/CSS/JS estático                   |
-| Test    | `pnpm test`           | Suite de tests Vitest (151 tests, 24 archivos) |
-| Lint    | `pnpm lint`           | ESLint + autofix                               |
-| Format  | `pnpm format:fix`     | Prettier                                       |
-| Deploy  | `pnpm deploy:netlify` | Audit + test + format + lint + deploy Netlify  |
+| Step    | Comando                           | Propósito                                          |
+| ------- | --------------------------------- | -------------------------------------------------- |
+| Install | `pnpm install`                    | Dependencias (openai, @netlify/blobs, dompurify…)  |
+| Build   | `pnpm build` (con `NETLIFY=1`)    | Generar HTML/CSS/JS estático + server de Waku      |
+| Test    | `pnpm test`                       | Suite de tests Vitest (181 tests, 27 archivos)     |
+| Lint    | `pnpm lint`                       | ESLint + autofix                                   |
+| Format  | `pnpm format:fix`                 | Prettier                                          |
+| Deploy  | `netlify deploy --prod`           | CLI de Netlify (usa `NETLIFY_SITE_ID` de `.env` si existe) |
 
 ### Consideraciones para agregar GitHub Actions en el futuro
 
@@ -43,12 +43,14 @@ Si en el futuro se desean agregar workflows de CI/CD a `.github/workflows/`:
 
 ### Documentación recomendada (a crear cuando existan workflows)
 
-- `ci-cd/overview.md` — resumen de todos los workflows (actualmente vacío por ausencia).
+- `ci-cd/overview.md` — resumen de todos los workflows (actualmente documenta la ausencia).
 - `ci-cd/{workflow}.md` — un archivo por workflow relevante.
 - Cada archivo incluiría: triggers, jobs, steps, secretos, artefactos, diagrama de ejecución.
-  ---
 
-  ## Referencias
-  - [Flujo de deploy manual](deployment/platform.md)
-  - [Arquitectura general](architecture/overview.md)
-  - [Netlify Docs — Deploying site changes](https://docs.netlify.com/continuous-deployment/)
+---
+
+## Referencias
+
+- [Flujo de deploy manual](../deployment/platform.md)
+- [Arquitectura general](../architecture/overview.md)
+- [Netlify Docs — Deploying site changes](https://docs.netlify.com/continuous-deployment/)

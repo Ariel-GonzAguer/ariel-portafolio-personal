@@ -12,49 +12,71 @@ export function focusClassName(color: 'red' | 'white' = 'red'): string {
 - `focusClassName('red')` → `focus-visible:outline-2 focus-visible:outline-offset-2 outline-red-400`
 - `focusClassName('white')` → `focus-visible:outline-2 focus-visible:outline-offset-2 outline-white`
 
-**Uso en componentes**: `ReviewForm`, `ReviewOutput`, `ExampleSelector`, `CodeBlock`, `FindingCard`, `SeverityBadge`.
+**Uso en componentes**: `ReviewForm`, `ReviewOutput`, `ExampleSelector`, `CodeBlock`, `FindingCard`, `SeverityBadge`, `Badge`, `Proyectos`.
 
 ---
 
 ## `src/utils/co2/co2.ts` — Estimación de CO₂
 
 ```typescript
+const MIN_GCO2E_PER_THOUSAND_TOKENS = 0.15;
+const MAX_GCO2E_PER_THOUSAND_TOKENS = 2.85;
+
 export function calculateReviewCO2Range(totalTokens: number): string {
-  const min = (totalTokens / 1000) * 0.15;
-  const max = (totalTokens / 1000) * 2.85;
-  return `${min}–${max} gCO₂e`;
+  const safeTokens = Math.max(0, totalTokens);
+  const minGrams = (safeTokens / 1000) * MIN_GCO2E_PER_THOUSAND_TOKENS;
+  const maxGrams = (safeTokens / 1000) * MAX_GCO2E_PER_THOUSAND_TOKENS;
+  return `${formatGrams(minGrams)}–${formatGrams(maxGrams)}g CO₂e`;
 }
 ```
 
-**Uso en `ReviewOutput`**:
+**Detalles**:
 
-- `totalTokens`: uso final reportado por la Responses API; incluye los tokens de entrada, salida y el razonamiento que el proveedor contabiliza dentro de la salida.
-
-**Fórmula**: `totalTokens / 1000 * 0.15–2.85 gCO₂e`.
-
-- Es un rango conservador, no una medición de OpenAI. El extremo alto se basa en la estimación de ciclo de vida publicada por Mistral para una respuesta de 400 tokens.
-- El resultado se muestra en `ReviewOutput.tsx` dentro de un `<p aria-label="Impacto climático estimado">`.
+- `totalTokens`: uso final reportado por la Responses API en el evento `usage`; incluye entrada, salida y los tokens de razonamiento que el proveedor contabiliza dentro de la salida.
+- `formatGrams(grams)`: `grams < 0.1 ? grams.toFixed(2) : grams.toFixed(1)`.
+- Es un **rango proxy conservador** para inferencia de LLM con infraestructura completa (gCO₂e por mil tokens), no una medición de OpenAI ni del modelo desplegado.
+- El extremo alto (`2.85`) se redondea de la estimación de ciclo de vida publicada por Mistral para una respuesta de 400 tokens (`1.14` gCO₂e). El extremo bajo conserva un escenario de serving eficiente con infraestructura. Debe revisarse si OpenAI publica factores propios.
+- El resultado se muestra en `ReviewOutput.tsx` dentro de `<p aria-label="Impacto climático estimado">`.
 
 ---
 
 ## `src/utils/review-cost/review-cost.ts` — Estimación de costo API
 
 ```typescript
-export function formatReviewApiCostUSD(usage: ReviewCostUsage): string {
-  // Calcula costo con tarifas públicas de gpt-5.6-luna.
-}
+export const REVIEW_MODEL_ID = 'gpt-5.6-luna';
+
+const INPUT_USD_PER_MILLION_TOKENS = 0.2;
+const CACHED_INPUT_USD_PER_MILLION_TOKENS = 0.02;
+const CACHE_WRITE_INPUT_MULTIPLIER = 1.25;
+const OUTPUT_USD_PER_MILLION_TOKENS = 1.2;
+
+export function calculateReviewApiCostUSD(usage: ReviewCostUsage): number;
+export function formatReviewApiCostUSD(usage: ReviewCostUsage): string;
 ```
 
-**Uso en `ReviewOutput`**:
+**Interface `ReviewCostUsage`** (subconjunto de `ReviewUsage`):
 
-- `inputTokens`: tokens de entrada reportados por la Responses API.
-- `cachedInputTokens`: tokens de entrada servidos desde cache, si OpenAI los reporta.
-- `cacheWriteInputTokens`: tokens escritos a cache, si OpenAI los reporta.
-- `outputTokens`: tokens de salida reportados por la Responses API.
+| Campo                  | Tipo     | Descripción                                                        |
+| ---------------------- | -------- | ------------------------------------------------------------------ |
+| `inputTokens`          | `number` | Tokens de entrada reportados por la Responses API                  |
+| `outputTokens`         | `number` | Tokens de salida reportados por la Responses API                   |
+| `cachedInputTokens`    | `number` | Opcional. Tokens de entrada servidos desde cache                   |
+| `cacheWriteInputTokens`| `number` | Opcional. Tokens de entrada escritos a cache                       |
 
-**Fórmula**: `(standardInput * 0.20 + cachedInput * 0.02 + cacheWriteInput * 0.25 + output * 1.20) / 1_000_000`.
+**Cálculo** (tarifas públicas de `gpt-5.6-luna` por 1M tokens):
 
-- El resultado se muestra en `ReviewOutput.tsx` dentro de un `<p aria-label="Costo API estimado">`.
+```
+standardInput = max(0, inputTokens - cachedInput - cacheWrite)
+costo = standardInput * 0.20
+      + cachedInput  * 0.02
+      + cacheWrite   * 0.20 * 1.25
+      + output       * 1.20
+```
+
+- `cachedInputTokens` se acota a `min(cached, inputTokens)`; `cacheWriteInputTokens` a `min(cacheWrite, inputTokens - cached)`.
+- `clampTokens`: valores no numéricos o negativos → `0`.
+- `formatReviewApiCostUSD`: `$0.00 USD` si 0; `<$0.00001 USD`; `toFixed(5)` si `< 0.01`; `toFixed(4)` si `< 1`; `toFixed(2)` si `>= 1`. Quita ceros finales (`trimTrailingZeros`).
+- El resultado se muestra en `ReviewOutput.tsx` dentro de `<p aria-label="Costo API estimado">` junto al `REVIEW_MODEL_ID`.
 - Se etiqueta como estimado porque no consulta el ledger de facturación ni incluye impuestos.
 
 ---
@@ -117,7 +139,7 @@ h3 {
 ```
 
 - `--color-gris-claro`: usado para texto secundario (`text-gris-claro`).
-- `--color-fondo`: color de fondo base (`bg-fondo` o similar).
+- `--color-fondo`: color de fondo base (`bg-fondo`).
 
 ### Options `<select>` en modo oscuro
 
@@ -132,13 +154,24 @@ select option {
 
 ---
 
-## `middleware/no-trailing-slash.ts` — Middleware de trailing slash
+## `src/middleware/no-trailing-slash.ts` — Middleware de trailing slash
 
-_Nota: este middleware está configurado pero revisar su implementación actual si es necesario. Su propósito es asegurar que las URLs no tengan slash trailing innecesario._
+```typescript
+import { trimTrailingSlash } from 'hono/trailing-slash';
+
+export default () => trimTrailingSlash({ alwaysRedirect: true });
+```
+
+- Redirige cualquier URL con trailing slash a su versión sin slash (`alwaysRedirect: true`).
+- Usa `trimTrailingSlash` de `hono/trailing-slash` (Hono viene como dependencia de Waku).
+- Nota: `netlify.toml` deshabilita además `pretty_urls` en el procesamiento HTML para evitar trailing slashes en rutas dinámicas.
+
 ---
 
 ## Referencias
 
-- [Arquitectura general](architecture/overview.md)
-- [Backend - Seguridad](backend/auth.md)
-- [Netlify Docs — Middleware](https://docs.netlify.com/functions/edge-functions/#middleware)
+- [Arquitectura general](../architecture/overview.md)
+- [Backend - Seguridad](../backend/auth.md)
+- [AI Code Reviewer](../features/ai-code-reviewer.md)
+- [Componentes UI](../components/overview.md)
+- Fuente Mistral (estimación gCO₂e): <https://mistral.ai/news/our-contribution-to-a-global-environmental-standard-for-ai/>

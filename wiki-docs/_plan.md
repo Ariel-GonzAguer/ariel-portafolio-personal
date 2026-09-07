@@ -1,84 +1,69 @@
 # Plan: Documentación del proyecto ariel-personal
 
-> **Estado**: documentación inicial completa (17 archivos, 7 directorios)
+> **Estado**: documentación actualizada al commit `e423868` (2026-09-07). 12 documentos + `.last-update.json`.
 > **Propósito**: que un desarrollador senior externo pueda entender el proyecto y hacer un deploy a producción usando solo esta wiki.
 > **Stack**: Waku 1 beta + React 19 + TypeScript estricto + Tailwind CSS v4 + Netlify + OpenAI Responses API
 
 ---
 
-## Estructura planeada
+## Estructura de la wiki
 
-| Directorio      | Contenido                                               |
-| --------------- | ------------------------------------------------------- |
-| `architecture/` | Visión general,rutos, flujo de datos                    |
-| `backend/`      | Autenticación, base de datos, seguridad                 |
-| `components/`   | Sistema de componentes, accesibilidad                   |
-| `features/`     | Funcionalidades destacadas (AI Code Reviewer, QR, etc.) |
-| `deployment/`   | Plataforma, troubleshooting, PWA                        |
-| `ci-cd/`        | Pipelines CI/CD                                         |
-| `utils/`        | Librerías y utilidades                                  |
-
----
-
-## Documentos por crear (checklist de 17 items)
-
-- [ ] `architecture/overview.md` — Visión general del stack y arquitectura
-- [ ] `architecture/data-flow.md` — Diagramas de flujo de datos clave
-- [ ] `backend/auth.md` — Capas de seguridad (honeypot, rate limit, injection, sanitization, headers, origin)
-- [ ] `backend/database.md` — Modelos de datos, `src/data/proyectos.ts`, ProyectoIA
-- [ ] `components/overview.md` — Catálogo de componentes UI, props, patrones
-- [ ] `features/ai-code-reviewer.md` — Funcionalidad destacada: AI Code Reviewer completo
-- [ ] `deployment/platform.md` — Plataforma Netlify, variables de entorno, edge functions
-- [ ] `deployment/troubleshooting.md` — Errores comunes (rate limit, streaming, CSP, API key)
-- [ ] `ci-cd/overview.md` — Nota: no hay GitHub Actions; flujo de deploy manual
-- [ ] `utils/overview.md` — Utilidades (a11y, CO2, focusClassName)
-- [ ] `quickstart.md` — Punto de entrada, stack resumido, mapa rápido, features destacadas
-- [ ] `.last-update.json` — Metadata de actualización
-- [ ] Cross-link validation — verificar que todos los links internos funcionan
-- [ ] Diagramas ASCII en documentos de flujo/arquitectura (obligatorio)
-- [ ] Ejemplos de código son del proyecto real (no inventados)
-- [ ] Referencias cruzadas son correctas (0 links rotos)
-- [ ] Cada archivo tiene contenido relevante (no plantillas vacías)
+| Directorio      | Documentos                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------ |
+| `architecture/` | `overview.md`, `data-flow.md`                                                                    |
+| `backend/`      | `auth.md` (7 capas de seguridad), `database.md` (modelos de datos y estado del reviewer)         |
+| `components/`   | `overview.md` (catálogo completo de componentes y patrones)                                      |
+| `features/`     | `ai-code-reviewer.md` (funcionalidad destacada, incluye costo API y CO₂)                         |
+| `deployment/`   | `platform.md` (Netlify), `troubleshooting.md` (10 entradas)                                      |
+| `ci-cd/`        | `overview.md` (no hay GitHub Actions; flujo de deploy manual)                                    |
+| `utils/`        | `overview.md` (a11y, co2, review-cost, styles.css, middleware)                                   |
 
 ---
 
-## Variables de configuración
+## Cambios reflejados en esta actualización
 
-| Variable                | Descripción                 | Default      |
-| ----------------------- | --------------------------- | ------------ |
-| `wiki_dir`              | Directorio de documentación | `wiki-docs/` |
-| `language`              | Idioma de la documentación  | Español      |
-| `include_code_examples` | Incluir ejemplos de código  | `true`       |
-| `include_diagrams`      | Incluir diagramas ASCII     | `true`       |
-| `detail_level`          | Nivel de detalle            | `intermedio` |
+Respecto a la versión anterior de la wiki (commit `371b544`), se incorporaron los cambios de los commits `61afc15`, `0c49f4b` y `e423868`:
+
+| Cambio en el código                                  | Documentos actualizados                                        |
+| ---------------------------------------------------- | -------------------------------------------------------------- |
+| Seguimiento de tokens (`ReviewUsage`) por SSE        | `features/ai-code-reviewer.md`, `backend/database.md`, `architecture/data-flow.md`, `utils/overview.md` |
+| Cálculo de impacto climático (`calculateReviewCO2Range`) | `utils/overview.md`, `features/ai-code-reviewer.md`, `backend/database.md` |
+| Cálculo de costo API (`review-cost.ts`)              | `utils/overview.md`, `features/ai-code-reviewer.md`            |
+| Cooldown de 6 min persistido en localStorage         | `features/ai-code-reviewer.md`, `backend/database.md`, `components/overview.md` |
+| Detección de injection ahora RECHAZA (antes solo logueaba) | `backend/auth.md`, `features/ai-code-reviewer.md`, `architecture/data-flow.md` |
+| Patrones `flex()` tolerantes a snake/kebab-case      | `backend/auth.md`                                              |
+| Nuevo componente `Badge` (WebSiteCarbon)             | `components/overview.md`, `architecture/overview.md`           |
+| Rate limit secundario en memoria (10/min)            | `backend/auth.md`, `architecture/overview.md`                  |
+| `netlify.toml` real documentado                      | `deployment/platform.md`                                       |
+| Tests: 181 en 27 archivos (antes 151 en 24)          | `quickstart.md`, `architecture/overview.md`, `ci-cd/overview.md`, `deployment/troubleshooting.md` |
+
+---
+
+## Checklist de calidad (Quality Gate)
+
+- [x] `_plan.md` existe y está actualizado.
+- [x] `quickstart.md` existe y enlaza todos los documentos.
+- [x] `.last-update.json` actualizado con `gitHead` real.
+- [x] Cada documento tiene al menos una tabla.
+- [x] Documentos de flujo/arquitectura tienen diagrama ASCII.
+- [x] Cada documento tiene sección `Referencias` con links válidos.
+- [x] Ejemplos de código extraídos del proyecto real.
+- [x] `deployment/troubleshooting.md` tiene 10 entradas reales del proyecto.
+- [x] Todos los links internos apuntan a archivos existentes.
+- [x] Funcionalidad destacada (`ai-code-reviewer`) documentada en `features/`.
 
 ---
 
 ## Adaptación por framework
 
-Sin importar el framework, la documentación debe cubrir:
-
-- Stack tecnológico (Waku 1 beta, React 19, TypeScript estricto, Tailwind CSS v4)
-- Render estático (SSG): todo el sitio se genera en build; AI Code Reviewer es una página estática que llama a una Netlify Function
-- Routing: `src/pages/` con `_layout.tsx` y `_root.tsx` como shell
-- Documentar Server Components y RSC donde aplican
-- Explicar endpoints de API (`/api/review`) y actions
-- Documentar plugins y configuración (Tailwind v4 `@theme`)
-- Seguridad y validaciones (7 capas: honeypot → rate limit → validate → detect injection → sanitize → OpenAI → headers)
-- Base de datos: `src/data/proyectos.ts` como única fuente de verdad para proyectos y repos
-- `deployment/troubleshooting.md` con errores comunes del stack usado (obligatorio)
-- `ci-cd/overview.md` con todos los workflows de GitHub Actions (si existen)
-- `features/` con una entrada por funcionalidad destacada encontrada en el codigo
-
----
-
-## Preguntas al usuario
-
-1. ¿Qué directorio usar para la documentación? (default: `wiki-docs/`)
-2. ¿Qué nivel de detalle necesitas? (básico/intermedio/avanzado; default: intermedio)
-3. ¿Hay secciones específicas que quieras incluir/excluir?
-4. ¿El proyecto tiene documentación existente que respetar? (README.md con 50%+ de info)
-5. ¿En qué idioma debe estar la documentación? (default: Español)
+- Stack: Waku 1 beta, React 19, TypeScript estricto, Tailwind CSS v4.
+- Render estático (SSG): todo el sitio se genera en build; el AI Code Reviewer es una página estática que llama a una Netlify Function.
+- Routing: `src/pages/` con `_root.tsx` y `_layout.tsx` como shell; `/review` es página estática.
+- Endpoint API: `POST /api/review` (`src/pages/_api/api/review.ts` → `handleReview`).
+- Seguridad: 7 capas documentadas en `backend/auth.md`.
+- Datos: `src/data/proyectos.ts` como única fuente de verdad.
+- `deployment/troubleshooting.md` con errores comunes del stack.
+- `ci-cd/overview.md` documenta la ausencia de GitHub Actions y el flujo manual.
 
 ---
 

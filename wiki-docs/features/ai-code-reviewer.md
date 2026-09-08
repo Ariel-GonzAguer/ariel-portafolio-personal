@@ -73,30 +73,30 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
 
 ## Archivos involucrados
 
-| Archivo                                          | Rol en esta funcionalidad                                                                                                      |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| `src/lib/server/review/reviewRoute.ts`           | Handler principal (`handleReview`) con SSE y 7 capas de seguridad; emite evento `usage` desde `response.completed`             |
-| `src/lib/server/review/system-prompt.ts`         | System prompt del revisor (6 categorías, 5 severidades, reglas anti-genéricas)                                                 |
-| `src/lib/server/review/review-schema.ts`         | JSON Schema estricto (CodeReview: summary, findings, verdict)                                                                  |
-| `src/lib/server/review/validate-diff.ts`         | Valida estructura del diff: vacío, ≤50 KB, headers `--- a/` / `+++ b/`, no binario                                             |
-| `src/lib/server/review/sanitize.ts`              | Neutraliza vectores: escape ```, quita chars de control, trunca líneas a 2000 chars                                            |
-| `src/lib/server/review/detect-injection.ts`      | Detecta 7 patrones de prompt injection con `flex()` tolerante a separadores; el handler RECHAZA con 400 + `injection_detected` |
-| `src/lib/server/review/rate-limit.ts`            | Rate limit 3/día por IP via Netlify Blobs (tolerante a errores)                                                                |
-| `src/lib/server/review/in-memory-rate-limit.ts`  | Rate limit secundario en memoria: 10/min por IP                                                                                |
-| `src/lib/server/review/validate-origin.ts`       | Validador de origen CSRF (allowlist aditiva: dev + producción)                                                                 |
-| `src/lib/server/review/security-headers.ts`      | Security headers + SSE headers + `jsonError` con `code` opcional                                                               |
+| Archivo                                          | Rol en esta funcionalidad                                                                                                           |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/server/review/reviewRoute.ts`           | Handler principal (`handleReview`) con SSE y 7 capas de seguridad; emite evento `usage` desde `response.completed`                  |
+| `src/lib/server/review/system-prompt.ts`         | System prompt del revisor (6 categorías, 5 severidades, reglas anti-genéricas)                                                      |
+| `src/lib/server/review/review-schema.ts`         | JSON Schema estricto (CodeReview: summary, findings, verdict)                                                                       |
+| `src/lib/server/review/validate-diff.ts`         | Valida estructura del diff: vacío, ≤50 KB, headers `--- a/` / `+++ b/`, no binario                                                  |
+| `src/lib/server/review/sanitize.ts`              | Neutraliza vectores: escape ```, quita chars de control, trunca líneas a 2000 chars                                                 |
+| `src/lib/server/review/detect-injection.ts`      | Detecta 7 patrones de prompt injection con `flex()` tolerante a separadores; el handler RECHAZA con 400 + `injection_detected`      |
+| `src/lib/server/review/rate-limit.ts`            | Rate limit 3/día por IP via Netlify Blobs (tolerante a errores)                                                                     |
+| `src/lib/server/review/in-memory-rate-limit.ts`  | Rate limit secundario en memoria: 10/min por IP                                                                                     |
+| `src/lib/server/review/validate-origin.ts`       | Validador de origen CSRF (allowlist aditiva: dev + producción)                                                                      |
+| `src/lib/server/review/security-headers.ts`      | Security headers + SSE headers + `jsonError` con `code` opcional                                                                    |
 | `src/hooks/useReviewStream/useReviewStream.ts`   | Hook cliente: lectura incremental de SSE, parseo de `usage`, state management, cooldown persistido, cancelación con guard anti-race |
-| `src/hooks/useReviewStream/types.ts`             | Tipos compartidos: `ReviewState`, `ReviewUsage`, `ReviewErrorCode`, `Finding`, etc.                                            |
-| `src/components/review-form/ReviewForm.tsx`      | Formulario: textarea, 3 ejemplos precargados, honeypot doble checkbox, countdown cooldown                                      |
-| `src/components/review-form/ReviewWorkspace.tsx` | Orquesta form + hook + output; alert nativo y vaciado de textarea en injection                                                 |
-| `src/components/review-output/ReviewOutput.tsx`  | Render del resultado: verdict, summary, findings cards, CO₂, costo API, copy-to-clipboard                                      |
-| `src/components/review-output/CodeBlock.tsx`     | Syntax highlighting (shiki) + sanitización (DOMPurify) del fix                                                                 |
-| `src/components/review-output/FindingCard.tsx`   | Tarjeta por finding: severity badge, category, línea, título, explicación, fix                                                 |
-| `src/utils/co2/co2.ts`                           | `calculateReviewCO2Range(totalTokens)`: rango proxy gCO₂e                                                                      |
-| `src/utils/review-cost/review-cost.ts`           | `REVIEW_MODEL_ID`, `formatReviewApiCostUSD(usage)`: costo estimado USD                                                         |
-| `src/components/IA/IA.tsx`                       | Sección del portafolio: integra `IACard` con la entrada ai-code-reviewer de `proyectosIA`                                      |
-| `src/data/proyectos.ts`                          | Datos: entrada `proyectosIA` (incluye ai-code-reviewer con tecnologías y enlace)                                               |
-| `src/pages/_api/api/review.ts`                   | API route fina: `POST` llama a `handleReview`; `GET` devuelve 405                                                              |
+| `src/hooks/useReviewStream/types.ts`             | Tipos compartidos: `ReviewState`, `ReviewUsage`, `ReviewErrorCode`, `Finding`, etc.                                                 |
+| `src/components/review-form/ReviewForm.tsx`      | Formulario: textarea, 3 ejemplos precargados, honeypot doble checkbox, countdown cooldown                                           |
+| `src/components/review-form/ReviewWorkspace.tsx` | Orquesta form + hook + output; alert nativo y vaciado de textarea en injection                                                      |
+| `src/components/review-output/ReviewOutput.tsx`  | Render del resultado: verdict, summary, findings cards, CO₂, costo API, copy-to-clipboard                                           |
+| `src/components/review-output/CodeBlock.tsx`     | Syntax highlighting (shiki) + sanitización (DOMPurify) del fix                                                                      |
+| `src/components/review-output/FindingCard.tsx`   | Tarjeta por finding: severity badge, category, línea, título, explicación, fix                                                      |
+| `src/utils/co2/co2.ts`                           | `calculateReviewCO2Range(totalTokens)`: rango proxy gCO₂e                                                                           |
+| `src/utils/review-cost/review-cost.ts`           | `REVIEW_MODEL_ID`, `formatReviewApiCostUSD(usage)`: costo estimado USD                                                              |
+| `src/components/IA/IA.tsx`                       | Sección del portafolio: integra `IACard` con la entrada ai-code-reviewer de `proyectosIA`                                           |
+| `src/data/proyectos.ts`                          | Datos: entrada `proyectosIA` (incluye ai-code-reviewer con tecnologías y enlace)                                                    |
+| `src/pages/_api/api/review.ts`                   | API route fina: `POST` llama a `handleReview`; `GET` devuelve 405                                                                   |
 
 ## API / Interfaz pública
 

@@ -37,8 +37,8 @@ export default function ReviewWorkspace() {
     if (state.code === 'injection_detected') {
       alert(
         'Se detectó un intento de inyección de prompt. El intento fue registrado ' +
-        '(IP, patrón y timestamp) en los logs de Netlify. Por seguridad, el ' +
-        'textarea fue vaciado y el envío queda deshabilitado por 6 minutos.',
+          '(IP, patrón y timestamp) en los logs de Netlify. Por seguridad, el ' +
+          'textarea fue vaciado y el envío queda deshabilitado por 6 minutos.',
       );
       setDiff('');
     }
@@ -81,7 +81,6 @@ export default function ReviewWorkspace() {
         )}
 
         {state.status === 'streaming' && state.rawText.length !== 0 && (
-
           <p className="text-gris-claro" role="status" aria-live="polite">
             Streameando respuesta… {state.rawText.length} caracteres recibidos.
           </p>

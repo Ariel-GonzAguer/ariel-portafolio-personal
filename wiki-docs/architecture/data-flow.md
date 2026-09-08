@@ -2,13 +2,13 @@
 
 ## Resumen de flujos
 
-| Flujo                   | Origen                    | Destino                        | Tecnología                         |
-| ----------------------- | ------------------------- | ------------------------------ | ---------------------------------- |
-| Página de inicio        | `src/data/proyectos.ts`   | HTML estático (SSG)            | Waku build (`render: 'static'`)    |
-| AI Code Reviewer        | `ReviewForm` (cliente)    | `POST /api/review` (Netlify)   | fetch + SSE (ReadableStream)       |
-| Stream del modelo       | OpenAI Responses API      | Cliente (`useReviewStream`)    | SSE: `delta` → `usage` → `done`    |
-| Métricas de costo/clima | `usage` (evento SSE)      | `ReviewOutput` (UI)            | `review-cost.ts` + `co2.ts`        |
-| Cooldown de seguridad   | Server (`injection_detected`) | `localStorage` (cliente)   | `review:injectionCooldownUntil`    |
+| Flujo                   | Origen                        | Destino                      | Tecnología                      |
+| ----------------------- | ----------------------------- | ---------------------------- | ------------------------------- |
+| Página de inicio        | `src/data/proyectos.ts`       | HTML estático (SSG)          | Waku build (`render: 'static'`) |
+| AI Code Reviewer        | `ReviewForm` (cliente)        | `POST /api/review` (Netlify) | fetch + SSE (ReadableStream)    |
+| Stream del modelo       | OpenAI Responses API          | Cliente (`useReviewStream`)  | SSE: `delta` → `usage` → `done` |
+| Métricas de costo/clima | `usage` (evento SSE)          | `ReviewOutput` (UI)          | `review-cost.ts` + `co2.ts`     |
+| Cooldown de seguridad   | Server (`injection_detected`) | `localStorage` (cliente)     | `review:injectionCooldownUntil` |
 
 ## Flujo: Página de inicio (`/`)
 
@@ -24,7 +24,7 @@ Componentes renderizan (única fuente de verdad)
 
 ## Flujo: AI Code Reviewer (`/review`)
 
-```
+````
 1. Usuario visita /review (página estática, getConfig({ render: 'static' }))
    │
    ▼
@@ -101,7 +101,7 @@ Componentes renderizan (única fuente de verdad)
    │
    ▼
 7. Browser renderiza ReviewOutput con findings, verdict badges, syntax highlighting (shiki + DOMPurify)
-```
+````
 
 ## Diagrama ASCII: Flujo completo AI Code Reviewer
 

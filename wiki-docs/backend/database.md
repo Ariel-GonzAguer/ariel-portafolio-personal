@@ -196,12 +196,12 @@ export function calculateReviewCO2Range(totalTokens: number): string {
 
 El costo estimado se calcula en el cliente con el mismo `usage` (`src/utils/review-cost/review-cost.ts`), separando entrada, entrada cacheada, cache writes y salida. Para `gpt-5.6-luna`, las tarifas públicas son:
 
-| Componente    | Tarifa USD / 1M tokens |
-| ------------- | ---------------------- |
-| Input         | `$0.20`                |
-| Cached input  | `$0.02`                |
-| Cache write   | `$0.20 × 1.25`         |
-| Output        | `$1.20`                |
+| Componente   | Tarifa USD / 1M tokens |
+| ------------ | ---------------------- |
+| Input        | `$0.20`                |
+| Cached input | `$0.02`                |
+| Cache write  | `$0.20 × 1.25`         |
+| Output       | `$1.20`                |
 
 La UI lo muestra como estimación porque usa tarifas públicas en código, no el ledger de facturación de OpenAI ni impuestos.
 

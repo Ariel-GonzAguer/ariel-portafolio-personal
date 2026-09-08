@@ -56,12 +56,12 @@ export function formatReviewApiCostUSD(usage: ReviewCostUsage): string;
 
 **Interface `ReviewCostUsage`** (subconjunto de `ReviewUsage`):
 
-| Campo                  | Tipo     | Descripción                                                        |
-| ---------------------- | -------- | ------------------------------------------------------------------ |
-| `inputTokens`          | `number` | Tokens de entrada reportados por la Responses API                  |
-| `outputTokens`         | `number` | Tokens de salida reportados por la Responses API                   |
-| `cachedInputTokens`    | `number` | Opcional. Tokens de entrada servidos desde cache                   |
-| `cacheWriteInputTokens`| `number` | Opcional. Tokens de entrada escritos a cache                       |
+| Campo                   | Tipo     | Descripción                                       |
+| ----------------------- | -------- | ------------------------------------------------- |
+| `inputTokens`           | `number` | Tokens de entrada reportados por la Responses API |
+| `outputTokens`          | `number` | Tokens de salida reportados por la Responses API  |
+| `cachedInputTokens`     | `number` | Opcional. Tokens de entrada servidos desde cache  |
+| `cacheWriteInputTokens` | `number` | Opcional. Tokens de entrada escritos a cache      |
 
 **Cálculo** (tarifas públicas de `gpt-5.6-luna` por 1M tokens):
 

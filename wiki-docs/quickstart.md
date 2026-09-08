@@ -2,28 +2,28 @@
 
 ## Stack resumido
 
-| Tecnología       | Versión          | Propósito                            |
-| ---------------- | ---------------- | ------------------------------------ |
-| **Waku**         | `1.0.0-beta.9`   | React Server Components + React 19   |
-| **React**        | `19.2.8`         | Framework UI                         |
-| **TypeScript**   | `6.0.3`          | Tipado estricto                      |
-| **Tailwind CSS** | `4.3.3` (v4)     | Estilizado utility-first             |
-| **OpenAI**       | `openai@^7.7.0`, modelo `gpt-5.6-luna` | Responses API para AI Code Reviewer |
-| **Netlify**      | —                | Despliegue + Functions + Blobs + Edge Functions (CSP nonce) |
-| **Vitest**       | `4.1.11`         | Suite de tests (181 tests, 27 archivos) |
+| Tecnología       | Versión                                | Propósito                                                   |
+| ---------------- | -------------------------------------- | ----------------------------------------------------------- |
+| **Waku**         | `1.0.0-beta.9`                         | React Server Components + React 19                          |
+| **React**        | `19.2.8`                               | Framework UI                                                |
+| **TypeScript**   | `6.0.3`                                | Tipado estricto                                             |
+| **Tailwind CSS** | `4.3.3` (v4)                           | Estilizado utility-first                                    |
+| **OpenAI**       | `openai@^7.7.0`, modelo `gpt-5.6-luna` | Responses API para AI Code Reviewer                         |
+| **Netlify**      | —                                      | Despliegue + Functions + Blobs + Edge Functions (CSP nonce) |
+| **Vitest**       | `4.1.11`                               | Suite de tests (181 tests, 27 archivos)                     |
 
 ## Mapa rápido de documentos
 
-| Dominio                        | Documento                                                                                |
-| ------------------------------ | ---------------------------------------------------------------------------------------- |
-| **Arquitectura**               | [architecture/overview.md](architecture/overview.md), [architecture/data-flow.md](architecture/data-flow.md) |
-| **Backend / Seguridad**        | [backend/auth.md](backend/auth.md), [backend/database.md](backend/database.md)           |
-| **Componentes**                | [components/overview.md](components/overview.md)                                         |
-| **Funcionalidades destacadas** | [features/ai-code-reviewer.md](features/ai-code-reviewer.md)                             |
+| Dominio                        | Documento                                                                                                        |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| **Arquitectura**               | [architecture/overview.md](architecture/overview.md), [architecture/data-flow.md](architecture/data-flow.md)     |
+| **Backend / Seguridad**        | [backend/auth.md](backend/auth.md), [backend/database.md](backend/database.md)                                   |
+| **Componentes**                | [components/overview.md](components/overview.md)                                                                 |
+| **Funcionalidades destacadas** | [features/ai-code-reviewer.md](features/ai-code-reviewer.md)                                                     |
 | **Despliegue**                 | [deployment/platform.md](deployment/platform.md), [deployment/troubleshooting.md](deployment/troubleshooting.md) |
-| **CI/CD**                      | [ci-cd/overview.md](ci-cd/overview.md)                                                   |
-| **Utilidades**                 | [utils/overview.md](utils/overview.md)                                                   |
-| **Plan de documentación**      | [_plan.md](_plan.md)                                                                     |
+| **CI/CD**                      | [ci-cd/overview.md](ci-cd/overview.md)                                                                           |
+| **Utilidades**                 | [utils/overview.md](utils/overview.md)                                                                           |
+| **Plan de documentación**      | [_plan.md](_plan.md)                                                                                             |
 
 ## Inicio rápido
 
@@ -76,17 +76,17 @@ Todas las variables deben configurarse en **Netlify UI** (Site settings > Enviro
 
 ## Scripts disponibles
 
-| Script                | Comando                                                        | Cuándo ejecutarlo                     |
-| --------------------- | -------------------------------------------------------------- | ------------------------------------- |
-| `pnpm install`        | —                                                              | Instalar dependencias                 |
-| `pnpm dev`            | `waku dev`                                                     | Desarrollo en http://localhost:3000   |
-| `pnpm dev:netlify`    | `netlify dev`                                                  | Simular entorno Netlify localmente    |
-| `pnpm build`          | `waku build`                                                   | Build estático (SSG) → `dist/public`  |
-| `pnpm start`          | `waku start`                                                   | Servir build localmente               |
-| `pnpm test`           | `vitest --run`                                                 | Tests (181 tests, 27 archivos)        |
-| `pnpm lint`           | `eslint . --ext .ts,.tsx --fix`                                | ESLint con autofix                    |
-| `pnpm format:fix`     | `prettier --write .`                                           | Prettier auto-fix                     |
-| `pnpm deploy:netlify` | `pnpm audit && pnpm test && pnpm format:fix && pnpm lint && bash scripts/deploy-netlify.sh` | Deploy a Netlify    |
+| Script                | Comando                                                                                     | Cuándo ejecutarlo                    |
+| --------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `pnpm install`        | —                                                                                           | Instalar dependencias                |
+| `pnpm dev`            | `waku dev`                                                                                  | Desarrollo en http://localhost:3000  |
+| `pnpm dev:netlify`    | `netlify dev`                                                                               | Simular entorno Netlify localmente   |
+| `pnpm build`          | `waku build`                                                                                | Build estático (SSG) → `dist/public` |
+| `pnpm start`          | `waku start`                                                                                | Servir build localmente              |
+| `pnpm test`           | `vitest --run`                                                                              | Tests (181 tests, 27 archivos)       |
+| `pnpm lint`           | `eslint . --ext .ts,.tsx --fix`                                                             | ESLint con autofix                   |
+| `pnpm format:fix`     | `prettier --write .`                                                                        | Prettier auto-fix                    |
+| `pnpm deploy:netlify` | `pnpm audit && pnpm test && pnpm format:fix && pnpm lint && bash scripts/deploy-netlify.sh` | Deploy a Netlify                     |
 
 ---
 

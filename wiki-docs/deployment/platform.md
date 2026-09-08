@@ -49,14 +49,13 @@ Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
 ### `netlify-functions/serve.js` (wrapper de Waku)
 
 ```javascript
-const { INTERNAL_runFetch } = await import("../dist/server/index.js");
+const { INTERNAL_runFetch } = await import('../dist/server/index.js');
 
-export default async (request, context) =>
-  INTERNAL_runFetch(process.env, request, { context });
+export default async (request, context) => INTERNAL_runFetch(process.env, request, { context });
 
 export const config = {
   preferStatic: true,
-  path: ['/', '/*', "/RSC/**/*"],
+  path: ['/', '/*', '/RSC/**/*'],
 };
 ```
 
@@ -75,12 +74,12 @@ export const config = {
 
 Todas las variables deben configurarse en **Netlify UI** (Site settings > Environment variables), **no** en el repo (`.env` está en `.gitignore`).
 
-| Variable                | Requerido    | Descripción                                                       | Default      |
-| ----------------------- | ------------ | ----------------------------------------------------------------- | ------------ |
-| `OPENAI_API_KEY`        | **Sí**       | API key de OpenAI (solo server-side, vía `getServerEnv`)          | —            |
-| `ALLOWED_ORIGINS`       | No (aditivo) | CSV de orígenes adicionales (los por defecto siempre se permiten) | `''` (vacío) |
+| Variable                | Requerido    | Descripción                                                                | Default      |
+| ----------------------- | ------------ | -------------------------------------------------------------------------- | ------------ |
+| `OPENAI_API_KEY`        | **Sí**       | API key de OpenAI (solo server-side, vía `getServerEnv`)                   | —            |
+| `ALLOWED_ORIGINS`       | No (aditivo) | CSV de orígenes adicionales (los por defecto siempre se permiten)          | `''` (vacío) |
 | `NODE_ENV`              | No           | Entorno de ejecución (la allowlist localhost solo aplica en `development`) | `production` |
-| `NETLIFY_BLOBS_CONTEXT` | No (auto)    | Contexto de Netlify Blobs (se inicializa automáticamente)         | —            |
+| `NETLIFY_BLOBS_CONTEXT` | No (auto)    | Contexto de Netlify Blobs (se inicializa automáticamente)                  | —            |
 
 ### Flujo de deploy manual
 

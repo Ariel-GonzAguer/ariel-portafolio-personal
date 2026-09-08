@@ -4,25 +4,25 @@ Convención del portafolio: **un componente por carpeta** con su archivo `.tsx` 
 
 ## Catálogo de componentes
 
-| Componente        | Archivo                                               | Props principales                                                                    | Estado de test                                                            |
-| ----------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| `Hero`            | `src/components/Hero/Hero.tsx`                        | Ninguna (data inline)                                                                | `Hero.test.tsx`                                                           |
-| `Proyectos`       | `src/components/Proyectos/Proyectos.tsx`              | Ninguna (lee `proyectos` de `src/data/proyectos.ts`)                                 | `Proyectos.test.tsx`                                                      |
-| `IA`              | `src/components/IA/IA.tsx`                            | Ninguna (lee `proyectosIA` de `src/data/proyectos.ts`)                               | `IA.test.tsx`                                                             |
-| `SobreMi`         | `src/components/SobreMi/SobreMi.tsx`                  | Ninguna (data inline)                                                                | `SobreMi.test.tsx`                                                        |
-| `OpenSource`      | `src/components/OpenSource/OpenSource.tsx`            | Ninguna (lee `openSource` de `src/data/proyectos.ts`)                                | `OpenSource.test.tsx`                                                     |
-| `Certificados`    | `src/components/Certificados/Certificados.tsx`        | Ninguna (data inline)                                                                | `Certificados.test.tsx`                                                   |
-| `Contacto`        | `src/components/Contacto/Contacto.tsx`                | Ninguna (data inline)                                                                | `Contacto.test.tsx`                                                       |
-| `Badge`           | `src/components/Badge/Badge.tsx`                      | `text: string[]`, `link: string`, `ariaLabel?: string`                               | `Badge.test.tsx`                                                          |
-| `ReviewForm`      | `src/components/review-form/ReviewForm.tsx`           | `diff`, `onDiffChange`, `onSubmit`, `onExampleSelect`, `isLoading`, `cooldownUntil`  | `ReviewForm.test.tsx`                                                     |
-| `ReviewWorkspace` | `src/components/review-form/ReviewWorkspace.tsx`      | Ninguna (orquesta form + hook + output)                                              | `ReviewWorkspace.test.tsx`                                                |
-| `ReviewOutput`    | `src/components/review-output/ReviewOutput.tsx`       | `review` (`ReviewResponse`), `usage` (`ReviewUsage \| null`)                         | `ReviewOutput.test.tsx`                                                   |
-| `FindingCard`     | `src/components/review-output/FindingCard.tsx`        | `finding` (`Finding`)                                                                | `FindingCard.test.tsx`                                                    |
-| `SeverityBadge`   | `src/components/review-output/SeverityBadge.tsx`      | `severity` (`critical`/`high`/`medium`/`low`/`info`), `title`                        | `SeverityBadge.test.tsx`                                                  |
-| `CodeBlock`       | `src/components/review-output/CodeBlock.tsx`          | `code: string`, `lang?: string` (default `typescript`)                               | `CodeBlock.test.tsx`                                                      |
-| `IACard`          | `src/components/IA/IA.tsx` (interno)                  | `proyecto` (`ProyectoIA`)                                                            | Parte de `IA.test.tsx`                                                    |
-| `ExampleSelector` | `src/components/review-form/ReviewForm.tsx` (interno) | `onSelect`, `disabled`                                                               | `ReviewForm.test.tsx`                                                     |
-| `ProyectoCard`    | `src/components/Proyectos/Proyectos.tsx` (interno)    | `proyecto` (`Proyecto`)                                                              | `Proyectos.test.tsx`                                                      |
+| Componente        | Archivo                                               | Props principales                                                                   | Estado de test             |
+| ----------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------- |
+| `Hero`            | `src/components/Hero/Hero.tsx`                        | Ninguna (data inline)                                                               | `Hero.test.tsx`            |
+| `Proyectos`       | `src/components/Proyectos/Proyectos.tsx`              | Ninguna (lee `proyectos` de `src/data/proyectos.ts`)                                | `Proyectos.test.tsx`       |
+| `IA`              | `src/components/IA/IA.tsx`                            | Ninguna (lee `proyectosIA` de `src/data/proyectos.ts`)                              | `IA.test.tsx`              |
+| `SobreMi`         | `src/components/SobreMi/SobreMi.tsx`                  | Ninguna (data inline)                                                               | `SobreMi.test.tsx`         |
+| `OpenSource`      | `src/components/OpenSource/OpenSource.tsx`            | Ninguna (lee `openSource` de `src/data/proyectos.ts`)                               | `OpenSource.test.tsx`      |
+| `Certificados`    | `src/components/Certificados/Certificados.tsx`        | Ninguna (data inline)                                                               | `Certificados.test.tsx`    |
+| `Contacto`        | `src/components/Contacto/Contacto.tsx`                | Ninguna (data inline)                                                               | `Contacto.test.tsx`        |
+| `Badge`           | `src/components/Badge/Badge.tsx`                      | `text: string[]`, `link: string`, `ariaLabel?: string`                              | `Badge.test.tsx`           |
+| `ReviewForm`      | `src/components/review-form/ReviewForm.tsx`           | `diff`, `onDiffChange`, `onSubmit`, `onExampleSelect`, `isLoading`, `cooldownUntil` | `ReviewForm.test.tsx`      |
+| `ReviewWorkspace` | `src/components/review-form/ReviewWorkspace.tsx`      | Ninguna (orquesta form + hook + output)                                             | `ReviewWorkspace.test.tsx` |
+| `ReviewOutput`    | `src/components/review-output/ReviewOutput.tsx`       | `review` (`ReviewResponse`), `usage` (`ReviewUsage \| null`)                        | `ReviewOutput.test.tsx`    |
+| `FindingCard`     | `src/components/review-output/FindingCard.tsx`        | `finding` (`Finding`)                                                               | `FindingCard.test.tsx`     |
+| `SeverityBadge`   | `src/components/review-output/SeverityBadge.tsx`      | `severity` (`critical`/`high`/`medium`/`low`/`info`), `title`                       | `SeverityBadge.test.tsx`   |
+| `CodeBlock`       | `src/components/review-output/CodeBlock.tsx`          | `code: string`, `lang?: string` (default `typescript`)                              | `CodeBlock.test.tsx`       |
+| `IACard`          | `src/components/IA/IA.tsx` (interno)                  | `proyecto` (`ProyectoIA`)                                                           | Parte de `IA.test.tsx`     |
+| `ExampleSelector` | `src/components/review-form/ReviewForm.tsx` (interno) | `onSelect`, `disabled`                                                              | `ReviewForm.test.tsx`      |
+| `ProyectoCard`    | `src/components/Proyectos/Proyectos.tsx` (interno)    | `proyecto` (`Proyecto`)                                                             | `Proyectos.test.tsx`       |
 
 ## Patrones de diseño
 

@@ -2,19 +2,19 @@
 
 ## Índice de entradas
 
-| # | Problema                                   | Componente involucrado                  |
-| - | ------------------------------------------ | --------------------------------------- |
-| 1 | 502 Bad Gateway en `/api/review`           | `reviewRoute.ts`, wrapper Waku          |
-| 2 | Rate limit bloqueando desarrollo local     | `in-memory-rate-limit.ts`, Blobs        |
-| 3 | Streaming cortado por timeout              | `reviewRoute.ts` (`STREAM_TIMEOUT_MS`)  |
-| 4 | CSP bloqueando connect-src                 | `csp-nonce.ts` (edge function)          |
-| 5 | API key filtrada en el bundle              | `getServerEnv`, bundling                |
-| 6 | Headers SSE no aplicándose                 | `security-headers.ts`                   |
-| 7 | Honeypot no funcionando                    | `ReviewForm.tsx`, `reviewRoute.ts`      |
-| 8 | Prompt injection no detectado              | `detect-injection.ts` (`flex()`)        |
-| 9 | Error 403 Origin not allowed               | `validate-origin.ts`                    |
-| 10 | Tests fallan tras cambiar dependencias     | `package.json`, `pnpm-lock.yaml`        |
-| 11 | Métricas de CO₂/costo no aparecen          | `useReviewStream.ts`, `ReviewOutput.tsx` |
+| #   | Problema                               | Componente involucrado                   |
+| --- | -------------------------------------- | ---------------------------------------- |
+| 1   | 502 Bad Gateway en `/api/review`       | `reviewRoute.ts`, wrapper Waku           |
+| 2   | Rate limit bloqueando desarrollo local | `in-memory-rate-limit.ts`, Blobs         |
+| 3   | Streaming cortado por timeout          | `reviewRoute.ts` (`STREAM_TIMEOUT_MS`)   |
+| 4   | CSP bloqueando connect-src             | `csp-nonce.ts` (edge function)           |
+| 5   | API key filtrada en el bundle          | `getServerEnv`, bundling                 |
+| 6   | Headers SSE no aplicándose             | `security-headers.ts`                    |
+| 7   | Honeypot no funcionando                | `ReviewForm.tsx`, `reviewRoute.ts`       |
+| 8   | Prompt injection no detectado          | `detect-injection.ts` (`flex()`)         |
+| 9   | Error 403 Origin not allowed           | `validate-origin.ts`                     |
+| 10  | Tests fallan tras cambiar dependencias | `package.json`, `pnpm-lock.yaml`         |
+| 11  | Métricas de CO₂/costo no aparecen      | `useReviewStream.ts`, `ReviewOutput.tsx` |
 
 ## 1. 502 Bad Gateway en `/api/review`
 

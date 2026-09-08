@@ -114,12 +114,12 @@ Neutraliza vectores obvios sin romper diffs legítimos:
 
 Aplican a **respuestas JSON (errores)** y **SSE (stream)**:
 
-| Header                    | Valor                                      | Propósito                              |
-| ------------------------- | ------------------------------------------ | -------------------------------------- |
-| Strict-Transport-Security | `max-age=31536000; includeSubDomains`      | HSTS — fuerza HTTPS                    |
-| X-Content-Type-Options    | `nosniff`                                  | Impide MIME-type sniffing              |
-| X-Frame-Options           | `DENY`                                     | Protección contra clickjacking         |
-| Referrer-Policy           | `strict-origin-when-cross-origin`          | Controla info de referrer              |
+| Header                    | Valor                                      | Propósito                               |
+| ------------------------- | ------------------------------------------ | --------------------------------------- |
+| Strict-Transport-Security | `max-age=31536000; includeSubDomains`      | HSTS — fuerza HTTPS                     |
+| X-Content-Type-Options    | `nosniff`                                  | Impide MIME-type sniffing               |
+| X-Frame-Options           | `DENY`                                     | Protección contra clickjacking          |
+| Referrer-Policy           | `strict-origin-when-cross-origin`          | Controla info de referrer               |
 | Permissions-Policy        | `geolocation=(), microphone=(), camera=()` | Bloquea acceso a features del navegador |
 
 **SSE headers** (adicionales):

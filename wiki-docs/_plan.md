@@ -8,15 +8,15 @@
 
 ## Estructura de la wiki
 
-| Directorio      | Documentos                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------ |
-| `architecture/` | `overview.md`, `data-flow.md`                                                                    |
-| `backend/`      | `auth.md` (7 capas de seguridad), `database.md` (modelos de datos y estado del reviewer)         |
-| `components/`   | `overview.md` (catálogo completo de componentes y patrones)                                      |
-| `features/`     | `ai-code-reviewer.md` (funcionalidad destacada, incluye costo API y CO₂)                         |
-| `deployment/`   | `platform.md` (Netlify), `troubleshooting.md` (10 entradas)                                      |
-| `ci-cd/`        | `overview.md` (no hay GitHub Actions; flujo de deploy manual)                                    |
-| `utils/`        | `overview.md` (a11y, co2, review-cost, styles.css, middleware)                                   |
+| Directorio      | Documentos                                                                               |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| `architecture/` | `overview.md`, `data-flow.md`                                                            |
+| `backend/`      | `auth.md` (7 capas de seguridad), `database.md` (modelos de datos y estado del reviewer) |
+| `components/`   | `overview.md` (catálogo completo de componentes y patrones)                              |
+| `features/`     | `ai-code-reviewer.md` (funcionalidad destacada, incluye costo API y CO₂)                 |
+| `deployment/`   | `platform.md` (Netlify), `troubleshooting.md` (10 entradas)                              |
+| `ci-cd/`        | `overview.md` (no hay GitHub Actions; flujo de deploy manual)                            |
+| `utils/`        | `overview.md` (a11y, co2, review-cost, styles.css, middleware)                           |
 
 ---
 
@@ -24,18 +24,18 @@
 
 Respecto a la versión anterior de la wiki (commit `371b544`), se incorporaron los cambios de los commits `61afc15`, `0c49f4b` y `e423868`:
 
-| Cambio en el código                                  | Documentos actualizados                                        |
-| ---------------------------------------------------- | -------------------------------------------------------------- |
-| Seguimiento de tokens (`ReviewUsage`) por SSE        | `features/ai-code-reviewer.md`, `backend/database.md`, `architecture/data-flow.md`, `utils/overview.md` |
-| Cálculo de impacto climático (`calculateReviewCO2Range`) | `utils/overview.md`, `features/ai-code-reviewer.md`, `backend/database.md` |
-| Cálculo de costo API (`review-cost.ts`)              | `utils/overview.md`, `features/ai-code-reviewer.md`            |
-| Cooldown de 6 min persistido en localStorage         | `features/ai-code-reviewer.md`, `backend/database.md`, `components/overview.md` |
-| Detección de injection ahora RECHAZA (antes solo logueaba) | `backend/auth.md`, `features/ai-code-reviewer.md`, `architecture/data-flow.md` |
-| Patrones `flex()` tolerantes a snake/kebab-case      | `backend/auth.md`                                              |
-| Nuevo componente `Badge` (WebSiteCarbon)             | `components/overview.md`, `architecture/overview.md`           |
-| Rate limit secundario en memoria (10/min)            | `backend/auth.md`, `architecture/overview.md`                  |
-| `netlify.toml` real documentado                      | `deployment/platform.md`                                       |
-| Tests: 181 en 27 archivos (antes 151 en 24)          | `quickstart.md`, `architecture/overview.md`, `ci-cd/overview.md`, `deployment/troubleshooting.md` |
+| Cambio en el código                                        | Documentos actualizados                                                                                 |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Seguimiento de tokens (`ReviewUsage`) por SSE              | `features/ai-code-reviewer.md`, `backend/database.md`, `architecture/data-flow.md`, `utils/overview.md` |
+| Cálculo de impacto climático (`calculateReviewCO2Range`)   | `utils/overview.md`, `features/ai-code-reviewer.md`, `backend/database.md`                              |
+| Cálculo de costo API (`review-cost.ts`)                    | `utils/overview.md`, `features/ai-code-reviewer.md`                                                     |
+| Cooldown de 6 min persistido en localStorage               | `features/ai-code-reviewer.md`, `backend/database.md`, `components/overview.md`                         |
+| Detección de injection ahora RECHAZA (antes solo logueaba) | `backend/auth.md`, `features/ai-code-reviewer.md`, `architecture/data-flow.md`                          |
+| Patrones `flex()` tolerantes a snake/kebab-case            | `backend/auth.md`                                                                                       |
+| Nuevo componente `Badge` (WebSiteCarbon)                   | `components/overview.md`, `architecture/overview.md`                                                    |
+| Rate limit secundario en memoria (10/min)                  | `backend/auth.md`, `architecture/overview.md`                                                           |
+| `netlify.toml` real documentado                            | `deployment/platform.md`                                                                                |
+| Tests: 181 en 27 archivos (antes 151 en 24)                | `quickstart.md`, `architecture/overview.md`, `ci-cd/overview.md`, `deployment/troubleshooting.md`       |
 
 ---
 

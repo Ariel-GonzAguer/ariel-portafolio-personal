@@ -20,14 +20,14 @@ pnpm deploy:netlify        # audit + test + format:fix + lint + deploy
 
 ### Pasos implicados (según `package.json` y `scripts/deploy-netlify.sh`)
 
-| Step    | Comando                           | Propósito                                          |
-| ------- | --------------------------------- | -------------------------------------------------- |
-| Install | `pnpm install`                    | Dependencias (openai, @netlify/blobs, dompurify…)  |
-| Build   | `pnpm build` (con `NETLIFY=1`)    | Generar HTML/CSS/JS estático + server de Waku      |
-| Test    | `pnpm test`                       | Suite de tests Vitest (181 tests, 27 archivos)     |
-| Lint    | `pnpm lint`                       | ESLint + autofix                                   |
-| Format  | `pnpm format:fix`                 | Prettier                                          |
-| Deploy  | `netlify deploy --prod`           | CLI de Netlify (usa `NETLIFY_SITE_ID` de `.env` si existe) |
+| Step    | Comando                        | Propósito                                                  |
+| ------- | ------------------------------ | ---------------------------------------------------------- |
+| Install | `pnpm install`                 | Dependencias (openai, @netlify/blobs, dompurify…)          |
+| Build   | `pnpm build` (con `NETLIFY=1`) | Generar HTML/CSS/JS estático + server de Waku              |
+| Test    | `pnpm test`                    | Suite de tests Vitest (181 tests, 27 archivos)             |
+| Lint    | `pnpm lint`                    | ESLint + autofix                                           |
+| Format  | `pnpm format:fix`              | Prettier                                                   |
+| Deploy  | `netlify deploy --prod`        | CLI de Netlify (usa `NETLIFY_SITE_ID` de `.env` si existe) |
 
 ### Consideraciones para agregar GitHub Actions en el futuro
 

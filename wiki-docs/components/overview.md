@@ -67,6 +67,7 @@ Checkbox doble:
 - Al terminar el stream, el hook parsea `rawText` como JSON (`ReviewResponse`) y expone `usage` en el state.
 - `ReviewOutput` recibe `usage` y calcula CO₂ (`calculateReviewCO2Range`) y costo API (`formatReviewApiCostUSD`).
 - Cooldown de prompt injection: vive en el hook y se persiste en localStorage (`review:injectionCooldownUntil`) para sobrevivir refresh; no depende de un useEffect del componente.
+- Cancelación y carreras: `abortRef` guarda el `AbortController` vigente. Las continuaciones asíncronas de un request reemplazado por otro `start()` o anulado por `reset()` retornan sin tocar el state (guard `isStale()` en los catch y en el loop de lectura). El `abort()` manual sí escribe "Cancelado".
 - Countdown del cooldown en `ReviewForm`: `useSyncExternalStore` sobre un reloj singleton (`setInterval` 250 ms compartido) para cumplir las reglas de React 19 (`react-hooks/set-state-in-effect`).
 
 ### 6. Defensa en profundidad en CodeBlock

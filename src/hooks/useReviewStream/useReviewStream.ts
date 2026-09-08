@@ -14,20 +14,26 @@ const INJECTION_COOLDOWN_STORAGE_KEY = 'review:injectionCooldownUntil';
 /**
  * Hook que maneja el streaming de un review desde /api/review.
  *
- * FASE 4: implementa la lectura de Server-Sent Events con
- * ReadableStream.getReader(), parseo incremental del JSON del schema,
- * y cancelación vía AbortController.
+ * Lee Server-Sent Events con ReadableStream.getReader(), parsea
+ * incrementalmente el JSON del schema y permite cancelar la request
+ * vía AbortController.
  *
- * FASE 5 (seguridad): cuando el server devuelve un error estructurado
+ * Seguridad: cuando el server devuelve un error estructurado
  * (HTTP 4xx/5xx con `{ error, code }`), el hook expone el `code` en el
  * state para que la UI reaccione según el tipo. Caso especial:
  * `injection_detected` activa un cooldown de 6 minutos vía `cooldownUntil`.
  *
  * Decisión arquitectónica: el cooldown vive en el hook y se persiste
  * en localStorage para sobrevivir refresh. No usa un useEffect del
- * componente, así evitamos las reglas nuevas de React 19
- * (`react-hooks/set-state-in-effect`) y mantenemos la lógica de
- * seguridad encapsulada donde ya corre el flujo del fetch.
+ * componente. Mantiene la lógica de seguridad encapsulada donde ya corre
+ * el flujo del fetch.
+ *
+ * Cancelación y carreras: `abortRef` guarda el AbortController del
+ * request vigente. Cuando un request deja de ser vigente (un `start()`
+ * nuevo lo reemplaza o `reset()` anula el ref), sus continuaciones
+ * asíncronas retornan sin tocar el state — el request más reciente es el
+ * único dueño del estado. El `abort()` manual sí escribe "Cancelado"
+ * porque en ese caso el ref sigue apuntando al controller abortado.
  */
 export function useReviewStream() {
   const [state, setState] = useState<ReviewState>(() => ({
@@ -53,6 +59,13 @@ export function useReviewStream() {
     const ac = new AbortController();
     abortRef.current = ac;
 
+    // Un request es "stale" cuando su controller ya no es el vigente en
+    // abortRef: un start() nuevo lo reemplazó o reset() anuló el ref.
+    // Las continuaciones asíncronas de un request stale no deben tocar
+    // el state; el request más reciente es su único dueño. El abort()
+    // manual no anula el ref, así que su catch sí escribe "Cancelado".
+    const isStale = () => abortRef.current !== ac;
+
     setState({
       status: 'loading',
       rawText: '',
@@ -72,6 +85,7 @@ export function useReviewStream() {
         signal: ac.signal,
       });
     } catch (err) {
+      if (isStale()) return;
       const message =
         err instanceof Error && err.name === 'AbortError'
           ? 'Cancelado'
@@ -100,6 +114,7 @@ export function useReviewStream() {
       } catch {
         // Body no era JSON; mantener el fallback.
       }
+      if (isStale()) return;
       const isInjection = code === 'injection_detected';
       const cooldownUntil = isInjection ? Date.now() + INJECTION_COOLDOWN_MS : null;
       if (cooldownUntil !== null) {
@@ -120,6 +135,7 @@ export function useReviewStream() {
       return;
     }
 
+    if (isStale()) return;
     setState((s) => ({ ...s, status: 'streaming' }));
 
     const reader = response.body.getReader();
@@ -165,6 +181,10 @@ export function useReviewStream() {
     try {
       while (true) {
         const { value, done } = await reader.read();
+        // Un read() resuelto justo antes de que otro start()/reset()
+        // aborte este stream seguiría procesando eventos viejos; el guard
+        // corta acá para que no lleguen al state.
+        if (isStale()) return;
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
         const events = buffer.split('\n\n');
@@ -205,6 +225,7 @@ export function useReviewStream() {
         cooldownUntil: null,
       });
     } catch (err) {
+      if (isStale()) return;
       const message =
         err instanceof Error && err.name === 'AbortError'
           ? 'Cancelado'
@@ -230,6 +251,9 @@ export function useReviewStream() {
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
+    // Anular el ref marca al request en curso como stale: su catch de
+    // AbortError no debe escribir "Cancelado" sobre el estado idle.
+    abortRef.current = null;
     setState({
       status: 'idle',
       rawText: '',

@@ -30,9 +30,49 @@ function sseResponse(chunks: string[], status = 200): Response {
 }
 
 /**
+ * Crea una Response SSE cuyo stream se controla manualmente desde el test:
+ * permite retener la llegada de eventos y forzar el interleaving exacto
+ * entre requests para reproducir las carreras de cancelación.
+ * Replica la integración signal↔body de fetch: abortar el signal erra el
+ * stream para que reader.read() rechace con AbortError.
+ */
+function controlledSseResponse(signal?: AbortSignal | null): {
+  response: Response;
+  enqueue: (chunk: string) => void;
+  close: () => void;
+} {
+  const encoder = new TextEncoder();
+  let controller: ReadableStreamDefaultController<Uint8Array> | null = null;
+  const stream = new ReadableStream<Uint8Array>({
+    start(c) {
+      controller = c;
+    },
+  });
+  signal?.addEventListener('abort', () => {
+    // Error plano en vez de DOMException: en jsdom DOMException no es
+    // instanceof Error y el hook lo clasificaría como error genérico.
+    const err = new Error('Aborted');
+    err.name = 'AbortError';
+    controller?.error(err);
+  });
+  return {
+    response: new Response(stream, {
+      status: 200,
+      headers: { 'Content-Type': 'text/event-stream' },
+    }),
+    enqueue: (chunk) => {
+      controller?.enqueue(encoder.encode(`data: ${chunk}\n\n`));
+    },
+    close: () => {
+      controller?.close();
+    },
+  };
+}
+
+/**
  * Tests del módulo de tipos del reviewer.
  * Validamos que los tipos compilan y los union literals
- * cubren los valores esperados. En fases siguientes se testea el hook real.
+ * cubren los valores esperados.
  */
 describe('useReviewStream (tipos)', () => {
   it('Severity cubre los 5 niveles', () => {
@@ -248,5 +288,116 @@ describe('useReviewStream (hook)', () => {
       reasoningTokens: 40,
       totalTokens: 200,
     });
+  });
+
+  it('un start() nuevo no deja que el request previo abortado pise el state', async () => {
+    // El primer fetch nunca resuelve: rechaza recién cuando lo abortan,
+    // como un request real en vuelo.
+    const firstFetch = (_url: string, init: RequestInit) =>
+      new Promise<Response>((_resolve, reject) => {
+        init.signal?.addEventListener('abort', () => {
+          const err = new Error('Aborted');
+          err.name = 'AbortError';
+          reject(err);
+        });
+      });
+    let controlled!: ReturnType<typeof controlledSseResponse>;
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(firstFetch)
+      .mockImplementationOnce((_url: string, init: RequestInit) => {
+        controlled = controlledSseResponse(init.signal);
+        return Promise.resolve(controlled.response);
+      });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useReviewStream());
+
+    act(() => {
+      void result.current.start('diff viejo');
+    });
+    act(() => {
+      void result.current.start('diff nuevo');
+    });
+
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('streaming');
+    });
+    // Flush de microtasks: el catch AbortError del primer request ya corrió.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(result.current.state.error).toBeNull();
+
+    const review = { summary: 'ok', verdict: 'approve', findings: [] };
+    act(() => {
+      controlled.enqueue(JSON.stringify({ type: 'delta', text: JSON.stringify(review) }));
+      controlled.close();
+    });
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('done');
+    });
+    expect(result.current.state.error).toBeNull();
+    expect(result.current.state.result).toEqual(review);
+  });
+
+  it('reset() durante un stream no deja el state en Cancelado', async () => {
+    let controlled!: ReturnType<typeof controlledSseResponse>;
+    const fetchMock = vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+      controlled = controlledSseResponse(init.signal);
+      return Promise.resolve(controlled.response);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useReviewStream());
+
+    act(() => {
+      void result.current.start('diff');
+    });
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('streaming');
+    });
+
+    act(() => {
+      result.current.reset();
+    });
+    expect(result.current.state.status).toBe('idle');
+    expect(result.current.state.error).toBeNull();
+
+    // Flush de microtasks: el catch del stream abortado por reset() ya corrió.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(result.current.state.status).toBe('idle');
+    expect(result.current.state.error).toBeNull();
+  });
+
+  it('abort() manual escribe Cancelado en el state', async () => {
+    let controlled!: ReturnType<typeof controlledSseResponse>;
+    const fetchMock = vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+      controlled = controlledSseResponse(init.signal);
+      return Promise.resolve(controlled.response);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useReviewStream());
+
+    act(() => {
+      void result.current.start('diff');
+    });
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('streaming');
+    });
+
+    act(() => {
+      result.current.abort();
+    });
+
+    await waitFor(() => {
+      expect(result.current.state.status).toBe('error');
+    });
+    expect(result.current.state.error).toBe('Cancelado');
   });
 });

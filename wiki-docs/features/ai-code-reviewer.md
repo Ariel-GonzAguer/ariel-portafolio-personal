@@ -29,8 +29,8 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
    │      │                       │
    │       allowlist default   env ALLOWED_ORIGINS (CSV opcional)
    │
-   │   b. Honeypot check
-   │      │   Si checkbox oculto "website" está marcado → bot → 200 silencioso
+   │   b. security anti-bot step
+   │      │   paso que indentifica bots para evitar abuso
    │
    │   c. Rate limit secundario EN MEMORIA (10/min por IP) → 429 con Retry-After
    │      │   (corre primero; en serverless es soft, útil en dev)
@@ -55,6 +55,7 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
    │   - Parsea JSON: {type: 'delta', text} | {type: 'usage', usage} | {type: 'done'} | {type: 'error'}
    │   - Estado acumulado: rawText, status, result, usage, error, code, cooldownUntil
    │   - Cooldown de prompt injection (6 min) persistido en localStorage para sobrevivir refresh
+   │   - Cancelación: AbortController en abortRef; un request reemplazado por otro start() o anulado por reset() no toca el state
    │
    ▼
 6. UI muestra resultado:
@@ -84,7 +85,7 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
 | `src/lib/server/review/in-memory-rate-limit.ts`  | Rate limit secundario en memoria: 10/min por IP                                                                                |
 | `src/lib/server/review/validate-origin.ts`       | Validador de origen CSRF (allowlist aditiva: dev + producción)                                                                 |
 | `src/lib/server/review/security-headers.ts`      | Security headers + SSE headers + `jsonError` con `code` opcional                                                               |
-| `src/hooks/useReviewStream/useReviewStream.ts`   | Hook cliente: lectura incremental de SSE, parseo de `usage`, state management, cooldown persistido                             |
+| `src/hooks/useReviewStream/useReviewStream.ts`   | Hook cliente: lectura incremental de SSE, parseo de `usage`, state management, cooldown persistido, cancelación con guard anti-race |
 | `src/hooks/useReviewStream/types.ts`             | Tipos compartidos: `ReviewState`, `ReviewUsage`, `ReviewErrorCode`, `Finding`, etc.                                            |
 | `src/components/review-form/ReviewForm.tsx`      | Formulario: textarea, 3 ejemplos precargados, honeypot doble checkbox, countdown cooldown                                      |
 | `src/components/review-form/ReviewWorkspace.tsx` | Orquesta form + hook + output; alert nativo y vaciado de textarea en injection                                                 |
@@ -116,14 +117,18 @@ interface ReviewState {
 start(diff: string, botTrap?: boolean): Promise<void>
 // Inicia el fetch POST /api/review con AbortController
 // Maneja: loading → streaming → done/error
-// Features: cooldown 6 min en injection_detected persistido en localStorage, AbortController para cancelar
+// Features: cooldown 6 min en injection_detected persistido en localStorage, cancelación vía AbortController
+// Antes de arrancar aborta el request previo: solo el más reciente es dueño del state
 
 abort(): void
-// Aborta la request en curso
+// Aborta la request en curso (cancelación manual); el state queda en error con "Cancelado"
 
 reset(): void
-// Reinicia el state a idle
+// Reinicia el state a idle; anula el ref del controller para que el catch
+// del stream abortado no pise el estado con "Cancelado"
 ```
+
+**Cancelación y carreras**: `abortRef` guarda el `AbortController` del request vigente. Las continuaciones asíncronas de un request que ya no es vigente (reemplazado por otro `start()` o anulado por `reset()`) retornan sin tocar el state. Los puntos de guard son: catch del fetch, handler del error HTTP, antes del setState `streaming`, cada iteración del loop de lectura y catch del stream. El `abort()` manual sí escribe "Cancelado" porque el ref sigue apuntando al controller abortado. Los tests cubren los tres escenarios: doble `start()`, `reset()` durante un stream y `abort()` manual (`src/hooks/useReviewStream/useReviewStream.test.ts`).
 
 ### `ReviewUsage` — Uso de tokens reportado por la API
 

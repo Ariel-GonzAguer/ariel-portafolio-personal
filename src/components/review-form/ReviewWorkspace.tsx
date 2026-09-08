@@ -37,8 +37,8 @@ export default function ReviewWorkspace() {
     if (state.code === 'injection_detected') {
       alert(
         'Se detectó un intento de inyección de prompt. El intento fue registrado ' +
-          '(IP, patrón y timestamp) en los logs de Netlify. Por seguridad, el ' +
-          'textarea fue vaciado y el envío queda deshabilitado por 6 minutos.',
+        '(IP, patrón y timestamp) en los logs de Netlify. Por seguridad, el ' +
+        'textarea fue vaciado y el envío queda deshabilitado por 6 minutos.',
       );
       setDiff('');
     }
@@ -71,12 +71,22 @@ export default function ReviewWorkspace() {
             El resultado del review aparecerá aquí cuando envíes un diff.
           </p>
         )}
+
         {state.status === 'loading' && <p className="text-gris-claro">Conectando con el modelo…</p>}
-        {state.status === 'streaming' && (
+
+        {state.status === 'streaming' && state.rawText.length === 0 && (
+          <p className="text-gris-claro" role="status" aria-live="polite">
+            Esperando respuesta del modelo…
+          </p>
+        )}
+
+        {state.status === 'streaming' && state.rawText.length !== 0 && (
+
           <p className="text-gris-claro" role="status" aria-live="polite">
             Streameando respuesta… {state.rawText.length} caracteres recibidos.
           </p>
         )}
+
         {state.status === 'error' && (
           <div role="alert" className="border border-red-400 bg-red-400/10 p-4">
             <p className="font-bold text-red-300">Error</p>
@@ -93,6 +103,7 @@ export default function ReviewWorkspace() {
             )}
           </div>
         )}
+
         {state.status === 'done' && state.result && (
           <ReviewOutput review={state.result} usage={state.usage} />
         )}

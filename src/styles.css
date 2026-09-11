@@ -10,6 +10,15 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  ::view-transition-group(.page-transition),
+  ::view-transition-old(.page-transition),
+  ::view-transition-new(.page-transition),
+  ::view-transition-group(.ai-review-share),
+  ::view-transition-old(.ai-review-share),
+  ::view-transition-new(.ai-review-share) {
+    animation: none !important;
+  }
 }
 
 * {
@@ -27,6 +36,95 @@ html {
   height: 100%;
   overflow-x: hidden;
   scroll-behavior: smooth;
+}
+
+/* Entrada inicial: hace visible el ritmo de la página sin depender del router. */
+@media (prefers-reduced-motion: no-preference) {
+  #main > * {
+    animation: section-reveal 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  #main > *:nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  #main > *:nth-child(3) {
+    animation-delay: 170ms;
+  }
+
+  #main > *:nth-child(4) {
+    animation-delay: 240ms;
+  }
+
+  #main > *:nth-child(5) {
+    animation-delay: 310ms;
+  }
+
+  #main > *:nth-child(6) {
+    animation-delay: 380ms;
+  }
+
+  #main > *:nth-child(7) {
+    animation-delay: 450ms;
+  }
+
+  #main > *:nth-child(8) {
+    animation-delay: 520ms;
+  }
+}
+
+/* React View Transitions: continuidad entre páginas navegadas con Waku. */
+::view-transition-group(.page-transition) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+::view-transition-old(.page-transition) {
+  animation: page-transition-out 360ms ease-out both;
+}
+
+::view-transition-new(.page-transition) {
+  animation: page-transition-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Elemento compartido entre la tarjeta de IA y la página del reviewer. */
+::view-transition-group(.ai-review-share) {
+  animation-duration: 640ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+::view-transition-old(.ai-review-share),
+::view-transition-new(.ai-review-share) {
+  animation-duration: 640ms;
+}
+
+@keyframes page-transition-out {
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+@keyframes page-transition-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 body {

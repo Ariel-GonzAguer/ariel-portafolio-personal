@@ -37,13 +37,21 @@ describe('IA', () => {
 
   it('solo muestra enlaces en las entradas con enlace público', () => {
     render(<IA />);
-    const conEnlace = proyectosIA.filter((proyecto) => Boolean(proyecto.enlace));
+    const conEnlace = proyectosIA.filter(
+      (proyecto) => Boolean(proyecto.enlace) && proyecto.id !== 'ai-code-reviewer',
+    );
     const demos = screen.getAllByRole('link', { name: /^abrir /i });
     expect(demos).toHaveLength(conEnlace.length);
     for (const enlace of demos) {
       expect(enlace).toHaveAttribute('target', '_blank');
       expect(enlace).toHaveAttribute('rel', 'noopener noreferrer');
     }
+  });
+
+  it('ofrece navegación interna para AI Code Reviewer sin demo externa', () => {
+    render(<IA />);
+    expect(screen.getByRole('link', { name: /probar aquí/i })).toHaveAttribute('href', '/review');
+    expect(screen.queryByRole('link', { name: /abrir ai code reviewer/i })).not.toBeInTheDocument();
   });
 
   it('Mandarino enlaza al sitio del estudio', () => {
@@ -61,6 +69,7 @@ describe('IA', () => {
     expect(
       screen.getByRole('link', { name: /abrir skills y workflows de agentes/i }),
     ).toHaveAttribute('href', 'https://github.com/Ariel-GonzAguer/skills-and-agents');
+    expect(screen.getByText('Ver Repo')).toBeInTheDocument();
   });
 
   it('los productos privados no tienen botones de demo ni código', () => {

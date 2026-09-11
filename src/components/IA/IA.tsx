@@ -1,6 +1,8 @@
 import type { ProyectoIA } from '../../data/proyectos';
 import { proyectosIA } from '../../data/proyectos';
 import { focusClassName } from '../../utils/a11y/a11y';
+import ViewTransitionBoundary from '../ViewTransitionBoundary';
+import { Link } from 'waku';
 
 /**
  * Tarjeta de proyecto/experiencia con IA.
@@ -14,7 +16,13 @@ function IACard({ proyecto }: { proyecto: ProyectoIA }) {
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-400">
         {proyecto.tipo}
       </p>
-      <h3 className="mt-2 text-xl font-bold">{proyecto.nombre}</h3>
+      {proyecto.id === 'ai-code-reviewer' ? (
+        <ViewTransitionBoundary name="ai-code-reviewer-title" share="ai-review-share">
+          <h3 className="mt-2 text-xl font-bold">{proyecto.nombre}</h3>
+        </ViewTransitionBoundary>
+      ) : (
+        <h3 className="mt-2 text-xl font-bold">{proyecto.nombre}</h3>
+      )}
       <p className="mt-3 text-gris-claro">{proyecto.descripcion}</p>
       <ul className="mt-4 flex flex-wrap gap-2" aria-label={`Tecnologías de ${proyecto.nombre}`}>
         {proyecto.tecnologias.map((tech) => (
@@ -25,16 +33,26 @@ function IACard({ proyecto }: { proyecto: ProyectoIA }) {
       </ul>
       {proyecto.enlace && (
         <div className="mt-auto flex flex-wrap gap-3 pt-6">
-          <a
-            href={proyecto.enlace}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Abrir ${proyecto.nombre} en nueva pestaña`}
-            className={`inline-block bg-red-400 px-4 py-3 text-sm font-bold text-black transition hover:bg-white ${focusClassName('red')} cursor-pointer!`}
-          >
-            Ver demo
-            <span className="sr-only cursor-default"> de {proyecto.nombre}</span>
-          </a>
+          {proyecto.id !== 'ai-code-reviewer' && (
+            <a
+              href={proyecto.enlace}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Abrir ${proyecto.nombre} en nueva pestaña`}
+              className={`inline-block bg-red-400 px-4 py-3 text-sm font-bold text-black transition hover:bg-white ${focusClassName('red')} cursor-pointer!`}
+            >
+              {proyecto.id === 'skills-agentes' ? 'Ver Repo' : 'Ver demo'}
+              <span className="sr-only cursor-default"> de {proyecto.nombre}</span>
+            </a>
+          )}
+          {proyecto.id === 'ai-code-reviewer' && (
+            <Link
+              to="/review"
+              className={`inline-block border border-white px-4 py-3 text-sm font-bold transition hover:bg-white hover:text-black ${focusClassName('white')} cursor-pointer!`}
+            >
+              Probar aquí
+            </Link>
+          )}
         </div>
       )}
     </article>

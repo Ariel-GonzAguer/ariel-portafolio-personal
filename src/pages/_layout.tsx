@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { Link } from 'waku';
+import ViewTransitionBoundary from '../components/ViewTransitionBoundary';
 
 /**
  * Layout único del sitio: skip link accesible y footer mínimo.
@@ -21,9 +23,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
       >
         <ul className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 text-sm">
           <li>
-            <a href="/" className="font-lexend-mega font-bold hover:text-red-400 cursor-pointer!">
+            <Link to="/" className="font-lexend-mega font-bold hover:text-red-400 cursor-pointer!">
               Ariel GonzAgüer
-            </a>
+            </Link>
           </li>
           <li className="flex flex-wrap gap-4">
             <a href="/#proyectos" className="hover:text-red-400 cursor-pointer!">
@@ -41,7 +43,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
           </li>
         </ul>
       </nav>
-      {children}
+      <ViewTransitionBoundary default="none" update="page-transition">
+        {children}
+      </ViewTransitionBoundary>
       <footer className="border-t border-white/10 px-6 py-10 text-center text-sm text-gris-claro">
         <p>
           © {new Date().getFullYear()} Ariel GonzAgüer ·{' '}

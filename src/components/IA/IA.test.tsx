@@ -1,7 +1,21 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { describe, expect, it, vi } from 'vitest';
 import { proyectosIA } from '../../data/proyectos';
 import IA from './IA';
+
+vi.mock('waku', async () => {
+  const React = await import('react');
+
+  return {
+    Link: ({
+      to,
+      children,
+      ...props
+    }: { to: string; children: ReactNode } & AnchorHTMLAttributes<HTMLAnchorElement>) =>
+      React.createElement('a', { href: to, ...props }, children),
+  };
+});
 
 describe('IA', () => {
   it('renderiza la sección con el posicionamiento Frontend + IA', () => {
@@ -66,10 +80,12 @@ describe('IA', () => {
 
   it('Skills y workflows de agentes enlaza al repo público', () => {
     render(<IA />);
-    expect(
-      screen.getByRole('link', { name: /abrir skills y workflows de agentes/i }),
-    ).toHaveAttribute('href', 'https://github.com/Ariel-GonzAguer/skills-and-agents');
-    expect(screen.getByText('Ver Repo')).toBeInTheDocument();
+    const repoLink = screen.getByRole('link', { name: /abrir skills y workflows de agentes/i });
+    expect(repoLink).toHaveAttribute(
+      'href',
+      'https://github.com/Ariel-GonzAguer/skills-and-agents',
+    );
+    expect(repoLink).toHaveTextContent('Ver Repo');
   });
 
   it('los productos privados no tienen botones de demo ni código', () => {

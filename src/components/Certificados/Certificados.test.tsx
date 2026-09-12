@@ -20,16 +20,27 @@ describe('Certificados', () => {
     expect(screen.getByText(/green digital certificate program/i)).toBeInTheDocument();
     expect(screen.getByText(/habilidades humanas en la era de la ia/i)).toBeInTheDocument();
     expect(screen.getByText(/tecnología sostenible/i)).toBeInTheDocument();
+    expect(screen.getByText(/governing ai agents/i)).toBeInTheDocument();
+    expect(screen.getByText(/carbon aware computing/i)).toBeInTheDocument();
+    expect(screen.getByText(/spec-driven development/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/ai code review/i).length).toBe(1);
   });
 
-  it('cada certificado tiene enlace accesible a su PDF local', () => {
+  it('cada certificado tiene enlace accesible a su PDF o URL externa', () => {
     render(<Certificados />);
     const enlaces = screen.getAllByRole('link', { name: /ver certificado/i });
-    expect(enlaces).toHaveLength(8);
+    expect(enlaces).toHaveLength(12);
     for (const enlace of enlaces) {
-      expect(enlace).toHaveAttribute('href', expect.stringContaining('/certificados/'));
       expect(enlace).toHaveAttribute('target', '_blank');
       expect(enlace).toHaveAttribute('rel', 'noopener noreferrer');
     }
+    const locales = enlaces.filter((e) =>
+      e.getAttribute('href')?.startsWith('/certificados/'),
+    );
+    const externos = enlaces.filter(
+      (e) => !e.getAttribute('href')?.startsWith('/certificados/'),
+    );
+    expect(locales).toHaveLength(8);
+    expect(externos).toHaveLength(4);
   });
 });

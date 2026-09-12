@@ -16,7 +16,7 @@ const certificados: Certificado[] = [
     titulo: 'Prompt Engineering',
     emisor: 'CodeCademy',
     link: '/certificados/certificado-prompt-engineering.pdf',
-    categorias: ['IA para Desarrollo'],
+    categorias: ['Inteligencia Artificial'],
   },
   {
     titulo: 'UX Designer',
@@ -34,19 +34,19 @@ const certificados: Certificado[] = [
     titulo: 'OpenAI API - Coding with JavaScript',
     emisor: 'CodeCademy',
     link: '/certificados/certificado-openai-api-javascript.pdf',
-    categorias: ['IA para Desarrollo'],
+    categorias: ['Inteligencia Artificial'],
   },
   {
     titulo: 'Recognizing Hallucinations, Inaccuracies, and Bias in AI',
     emisor: 'CodeCademy',
     link: '/certificados/certificado-hallucinations-bias-ia.pdf',
-    categorias: ['IA General'],
+    categorias: ['Inteligencia Artificial'],
   },
   {
     titulo: 'Habilidades humanas en la era de la IA',
     emisor: 'Microsoft / LinkedIn',
     link: '/certificados/Certificado Habilidades humanas en la era de la IA por Microsoft y LinkedIn.pdf',
-    categorias: ['IA General'],
+    categorias: ['Inteligencia Artificial'],
   },
   {
     titulo: 'Fundamentos profesionales en tecnología sostenible',
@@ -58,7 +58,7 @@ const certificados: Certificado[] = [
     titulo: 'Governing AI Agents',
     emisor: 'DeepLearning.ai / Databricks',
     link: 'https://www.deeplearning.ai/accomplishments/836003d5-2594-4e1d-92ab-f772b4cc9462',
-    categorias: ['Agentes de IA'],
+    categorias: ['Inteligencia Artificial'],
   },
   {
     titulo: 'Carbon Aware Computing for GenAI developers',
@@ -70,13 +70,13 @@ const certificados: Certificado[] = [
     titulo: 'Spec-Driven Development with Coding Agents',
     emisor: 'DeepLearning.ai / JetBrains',
     link: 'https://www.deeplearning.ai/accomplishments/dff1a6c1-98c5-4bcc-ad7a-e59629c9bfdf',
-    categorias: ['IA para Desarrollo'],
+    categorias: ['Inteligencia Artificial'],
   },
   {
     titulo: 'AI Code Review',
     emisor: 'DeepLearning.ai / Qodo',
     link: 'https://www.deeplearning.ai/accomplishments/f684711b-6060-4084-9a24-fafb8c4b4bfe',
-    categorias: ['Agentes de IA', 'IA para Desarrollo'],
+    categorias: ['Inteligencia Artificial'],
   },
 ];
 

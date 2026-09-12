@@ -89,9 +89,7 @@ const certificados: Certificado[] = [
  * const porCategoria = agruparPorCategoria(certificados);
  * // Map { "Frontend" => [...], "IA para Desarrollo" => [...] }
  */
-function agruparPorCategoria(
-  certs: Certificado[]
-): Map<string, Certificado[]> {
+function agruparPorCategoria(certs: Certificado[]): Map<string, Certificado[]> {
   const mapa = new Map<string, Certificado[]>();
 
   for (const cert of certs) {
@@ -129,19 +127,14 @@ export default function Certificados() {
 
       <div className="mx-auto mt-10 max-w-3xl space-y-4">
         {Array.from(porCategoria.entries()).map(([categoria, certs]) => (
-          <details
-            key={categoria}
-            className="group border border-white/10 bg-white/3"
-          >
+          <details key={categoria} className="group border border-white/10 bg-white/3">
             <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 font-bold text-white transition hover:bg-white/5">
               <span className="flex items-center gap-3">
                 <span className="text-red-400 transition group-open:rotate-90" aria-hidden="true">
                   &#9654;
                 </span>
                 {categoria}
-                <span className="text-sm font-normal text-gris-claro">
-                  ({certs.length})
-                </span>
+                <span className="text-sm font-normal text-gris-claro">({certs.length})</span>
               </span>
             </summary>
 

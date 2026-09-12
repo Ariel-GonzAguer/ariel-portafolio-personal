@@ -34,12 +34,8 @@ describe('Certificados', () => {
       expect(enlace).toHaveAttribute('target', '_blank');
       expect(enlace).toHaveAttribute('rel', 'noopener noreferrer');
     }
-    const locales = enlaces.filter((e) =>
-      e.getAttribute('href')?.startsWith('/certificados/'),
-    );
-    const externos = enlaces.filter(
-      (e) => !e.getAttribute('href')?.startsWith('/certificados/'),
-    );
+    const locales = enlaces.filter((e) => e.getAttribute('href')?.startsWith('/certificados/'));
+    const externos = enlaces.filter((e) => !e.getAttribute('href')?.startsWith('/certificados/'));
     expect(locales).toHaveLength(8);
     expect(externos).toHaveLength(4);
   });

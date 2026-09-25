@@ -8,9 +8,9 @@ describe('SobreMi', () => {
     expect(screen.getByRole('heading', { level: 2, name: /cómo trabajo/i })).toBeInTheDocument();
   });
 
-  it('menciona el desarrollo asistido por agentes como fortaleza', () => {
+  it('menciona la IA aplicada a producto como fortaleza', () => {
     render(<SobreMi />);
-    expect(screen.getByText(/desarrollo asistido por agentes/i)).toBeInTheDocument();
+    expect(screen.getByText(/ia aplicada con criterio de producto/i)).toBeInTheDocument();
   });
 
   it('incluye el stack con herramientas de IA', () => {

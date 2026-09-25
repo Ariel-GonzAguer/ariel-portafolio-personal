@@ -1,6 +1,6 @@
 const fortalezas = [
   'Frontend moderno con React, TypeScript, Waku y backend serverless',
-  'Desarrollo asistido por agentes: skills propias, workflows y dirección de LLMs',
+  'IA aplicada con criterio de producto: capacidades seguras, evaluables y útiles para la persona usuaria',
   'Accesibilidad como base: productos usables para todas las personas (WCAG 2.2)',
   'Performance como prioridad: peso, estabilidad visual y carga percibida',
   'Comunicación clara y directa con equipos multidisciplinarios',

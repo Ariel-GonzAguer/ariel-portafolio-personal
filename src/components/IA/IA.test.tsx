@@ -18,11 +18,11 @@ vi.mock('waku', async () => {
 });
 
 describe('IA', () => {
-  it('renderiza la sección con el posicionamiento Frontend + IA', () => {
+  it('renderiza la sección con IA aplicada a producto', () => {
     render(<IA />);
-    expect(screen.getByText(/frontend \+ ia/i)).toBeInTheDocument();
+    expect(screen.getByText(/ia aplicada a producto/i)).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 2, name: /ia integrada en productos reales/i }),
+      screen.getByRole('heading', { level: 2, name: /ia que aporta al producto/i }),
     ).toBeInTheDocument();
   });
 

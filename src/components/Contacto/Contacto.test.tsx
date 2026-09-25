@@ -6,7 +6,7 @@ describe('Contacto', () => {
   it('renderiza la sección con heading y mensaje de posicionamiento', () => {
     render(<Contacto />);
     expect(screen.getByRole('heading', { level: 2, name: /hablemos/i })).toBeInTheDocument();
-    expect(screen.getByText(/donde la ia sume al producto/i)).toBeInTheDocument();
+    expect(screen.getByText(/solución segura y evaluable/i)).toBeInTheDocument();
   });
 
   it('muestra los tres canales de contacto', () => {

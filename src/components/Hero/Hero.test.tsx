@@ -8,9 +8,10 @@ describe('Hero', () => {
     expect(screen.getByRole('heading', { level: 1, name: /ariel gonzagüer/i })).toBeInTheDocument();
   });
 
-  it('muestra el posicionamiento Frontend + IA', () => {
+  it('muestra el posicionamiento Frontend / Product Engineer', () => {
     render(<Hero />);
-    expect(screen.getByText(/frontend \/ product engineer \+ ia/i)).toBeInTheDocument();
+    expect(screen.getByText(/frontend \/ product engineer/i)).toBeInTheDocument();
+    expect(screen.getByText(/capacidades de ia seguras y evaluables/i)).toBeInTheDocument();
   });
 
   it('tiene llamados a la acción hacia proyectos y contacto', () => {

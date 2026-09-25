@@ -73,13 +73,15 @@ export default function IA() {
       aria-labelledby="seccion-ia"
     >
       <div className="mx-auto max-w-5xl text-center">
-        <p className="font-semibold uppercase tracking-[0.18em] text-red-400">Frontend + IA</p>
+        <p className="font-semibold uppercase tracking-[0.18em] text-red-400">
+          IA aplicada a producto
+        </p>
         <h2 id="seccion-ia" className="mt-3 text-3xl font-bold md:text-4xl">
-          IA integrada en productos reales
+          IA que aporta al producto
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-gris-claro">
-          No solo uso IA para trabajar más rápido: construyo productos donde la IA es parte del
-          producto. Y dirijo agentes de código como parte de mi flujo de desarrollo diario.
+          Diseño e integro capacidades de IA con criterios de seguridad, evaluación y experiencia de
+          usuario. Los proyectos de abajo muestran cómo las llevo a productos reales.
         </p>
       </div>
       <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">

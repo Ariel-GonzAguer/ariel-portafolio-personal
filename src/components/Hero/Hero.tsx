@@ -17,8 +17,8 @@ export default function Hero() {
       </p>
       <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gris-claro">
         Construyo productos web claros, accesibles y rápidos con React, TypeScript y arquitecturas
-        Jamstack. Integro IA/LLMs en productos reales y dirijo agentes de código en mi flujo de
-        trabajo diario.
+        Jamstack. Integro capacidades de IA seguras y evaluables cuando aportan valor al producto, y
+        uso agentes de código como parte de mi flujo de trabajo diario.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-4">
         <a

@@ -38,8 +38,9 @@ export default function Contacto() {
           Hablemos
         </h2>
         <p className="mx-auto mt-4 text-lg text-gris-claro">
-          Busco roles de Frontend/Product Engineer donde la IA sume al producto, así como puestos de
-          Prompt Engineer. Si tu equipo construye eso, me interesa.
+          Busco roles de Frontend/Product Engineer donde pueda construir productos claros,
+          accesibles y rápidos, e integrar IA cuando sume una solución segura y evaluable. Si tu
+          equipo construye eso, me interesa.
         </p>
         <ul className="mt-8 flex flex-wrap justify-center gap-4">
           {canales.map((canal) => (

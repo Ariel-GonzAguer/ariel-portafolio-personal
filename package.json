@@ -16,6 +16,7 @@
   "dependencies": {
     "@netlify/blobs": "11.0.3",
     "dompurify": "3.4.15",
+    "hono": "^4.13.13",
     "openai": "7.15.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

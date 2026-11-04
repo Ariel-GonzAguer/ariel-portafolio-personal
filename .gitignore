@@ -7,3 +7,4 @@ dist
 planes
 .atl
 .commandcode
+deno.lock

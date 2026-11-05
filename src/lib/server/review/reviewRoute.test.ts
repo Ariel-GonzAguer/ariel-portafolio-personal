@@ -230,7 +230,8 @@ describe('handleReview (streaming)', () => {
     expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
   });
 
-  it('devuelve 429 con Retry-After cuando el rate limit se excede', async () => {
+  it('devuelve 429 con Retry-After, code rate_limit y log de abuso', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     mockRateLimit.mockResolvedValueOnce({
       allowed: false,
       remaining: 0,
@@ -239,8 +240,16 @@ describe('handleReview (streaming)', () => {
     const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.status).toBe(429);
     expect(res.headers.get('Retry-After')).toBe('50400');
-    const data = (await res.json()) as { error: string };
+    const data = (await res.json()) as { error: string; code?: string };
     expect(data.error).toMatch(/rate limit/i);
+    // H3: code estable para que el cliente active el cooldown UX.
+    expect(data.code).toBe('rate_limit');
+    // H3: log de abuso con ip y timestamp.
+    expect(warn).toHaveBeenCalledOnce();
+    const logMessage = warn.mock.calls[0]?.[0] as string;
+    expect(logMessage).toContain('rate limit exceeded');
+    expect(logMessage).toContain('ip=unknown');
+    warn.mockRestore();
   });
 
   it('pasa la IP del header x-nf-client-connection-ip al rate limit', async () => {
@@ -270,5 +279,60 @@ describe('handleReview (streaming)', () => {
     const res = await handleReview(makeRequest('POST', { diff: validDiff, website: false }));
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('text/event-stream');
+  });
+
+  it('honeypot: website con string truthy devuelve 200 sin gastar rate limit (H1)', async () => {
+    const res = await handleReview(makeRequest('POST', { diff: validDiff, website: 'x' }));
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as { ok: boolean };
+    expect(data.ok).toBe(true);
+    expect(mockRateLimit).not.toHaveBeenCalled();
+  });
+
+  it('rechaza Content-Type text/plain con 415 (H5)', async () => {
+    const req = new Request('http://localhost/api/review', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain',
+        Origin: 'http://localhost:3000',
+      },
+      body: JSON.stringify({ diff: validDiff }),
+    });
+    const res = await handleReview(req);
+    expect(res.status).toBe(415);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toMatch(/content-type/i);
+  });
+
+  it('rechaza {"diff": 12345} con 400 en vez de 500 (PoC H1)', async () => {
+    const res = await handleReview(makeRequest('POST', { diff: 12345, website: 0 }));
+    expect(res.status).toBe(400);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toMatch(/diff must be a string/i);
+  });
+
+  it('429 por el límite en memoria con code rate_limit (11ª request en 1 min)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // 10 requests consumen el bucket en memoria (fallan después en
+    // validateDiff con 400; no llegan a OpenAI).
+    for (let i = 0; i < 10; i++) {
+      const res = await handleReview(makeRequest('POST', { diff: 'no es diff' }));
+      expect(res.status).toBe(400);
+    }
+    // La 11ª choca con el límite en memoria (misma IP 'unknown').
+    const res = await handleReview(makeRequest('POST', { diff: 'no es diff' }));
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBeTruthy();
+    const data = (await res.json()) as { error: string; code?: string };
+    expect(data.code).toBe('rate_limit');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('rate limit exceeded'));
+    warn.mockRestore();
+  });
+
+  it('rechaza body que no es objeto JSON con 400', async () => {
+    const res = await handleReview(makeRequest('POST', ['no', 'objeto']));
+    expect(res.status).toBe(400);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toMatch(/must be a JSON object/i);
   });
 });

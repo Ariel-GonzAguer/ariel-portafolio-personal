@@ -12,3 +12,8 @@ export async function POST(request: Request): Promise<Response> {
   const { handleReview } = await import('../../../lib/server/review/reviewRoute');
   return handleReview(request);
 }
+
+export async function OPTIONS(request: Request): Promise<Response> {
+  const { handlePreflight } = await import('../../../lib/server/review/preflight');
+  return handlePreflight(request);
+}

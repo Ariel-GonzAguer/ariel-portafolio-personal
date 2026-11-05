@@ -135,7 +135,7 @@ export default function ReviewForm({
         disabled={isCoolingDown}
       />
       <p id="diff-help" className="text-xs text-gris-claro">
-        Diff en formato unified (lo que produce <code>git diff</code>). Máximo 100 KB.
+        Diff en formato unified (lo que produce <code>git diff</code>). Máximo 50 KB.
       </p>
 
       {/* Checkbox visible: verificación anti-bot amigable. */}

@@ -9,7 +9,18 @@ import type { ReviewErrorCode, ReviewResponse, ReviewState, ReviewUsage } from '
  * bloquear al usuario legítimo que tipeó accidentalmente un patrón.
  */
 const INJECTION_COOLDOWN_MS = 6 * 60 * 1000;
-const INJECTION_COOLDOWN_STORAGE_KEY = 'review:injectionCooldownUntil';
+
+/**
+ * Fallback del cooldown por rate limit cuando la respuesta no trae un
+ * header `Retry-After` válido. Misma duración que el de inyección.
+ */
+const RATE_LIMIT_COOLDOWN_FALLBACK_MS = INJECTION_COOLDOWN_MS;
+
+/**
+ * Clave única del cooldown en localStorage: comparten storage el cooldown
+ * por prompt injection y el por rate limit (es un solo estado de UI).
+ */
+const COOLDOWN_STORAGE_KEY = 'review:injectionCooldownUntil';
 
 /**
  * Hook que maneja el streaming de un review desde /api/review.
@@ -20,8 +31,9 @@ const INJECTION_COOLDOWN_STORAGE_KEY = 'review:injectionCooldownUntil';
  *
  * Seguridad: cuando el server devuelve un error estructurado
  * (HTTP 4xx/5xx con `{ error, code }`), el hook expone el `code` en el
- * state para que la UI reaccione según el tipo. Caso especial:
- * `injection_detected` activa un cooldown de 6 minutos vía `cooldownUntil`.
+ * state para que la UI reaccione según el tipo. Casos especiales con
+ * cooldown vía `cooldownUntil`: `injection_detected` (6 minutos) y
+ * `rate_limit` (dura lo que indique `Retry-After`).
  *
  * Decisión arquitectónica: el cooldown vive en el hook y se persiste
  * en localStorage para sobrevivir refresh. No usa un useEffect del
@@ -115,8 +127,10 @@ export function useReviewStream() {
         // Body no era JSON; mantener el fallback.
       }
       if (isStale()) return;
-      const isInjection = code === 'injection_detected';
-      const cooldownUntil = isInjection ? Date.now() + INJECTION_COOLDOWN_MS : null;
+      // El timestamp se setea acá (no en un effect) porque es el momento
+      // exacto del rechazo, no una reacción a un re-render.
+      const retryAfterSeconds = Number(response.headers.get('Retry-After'));
+      const cooldownUntil = getCooldownUntil(code, retryAfterSeconds);
       if (cooldownUntil !== null) {
         storeInjectionCooldownUntil(cooldownUntil);
       }
@@ -127,9 +141,8 @@ export function useReviewStream() {
         usage: null,
         error: message,
         code,
-        // Activar el cooldown solo si el server rechazó por injection.
-        // El timestamp se setea acá (no en un effect) porque es el
-        // momento exacto del rechazo, no una reacción a un re-render.
+        // Activar el cooldown solo si el server lo indica (inyección o
+        // rate limit): activa la UX de espera existente.
         cooldownUntil,
       });
       return;
@@ -283,12 +296,12 @@ function getStoredInjectionCooldownUntil(): number | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const rawValue = window.localStorage.getItem(INJECTION_COOLDOWN_STORAGE_KEY);
+    const rawValue = window.localStorage.getItem(COOLDOWN_STORAGE_KEY);
     if (rawValue === null) return null;
 
     const cooldownUntil = Number(rawValue);
     if (!Number.isFinite(cooldownUntil) || cooldownUntil <= Date.now()) {
-      window.localStorage.removeItem(INJECTION_COOLDOWN_STORAGE_KEY);
+      window.localStorage.removeItem(COOLDOWN_STORAGE_KEY);
       return null;
     }
 
@@ -302,8 +315,34 @@ function storeInjectionCooldownUntil(cooldownUntil: number): void {
   if (typeof window === 'undefined') return;
 
   try {
-    window.localStorage.setItem(INJECTION_COOLDOWN_STORAGE_KEY, String(cooldownUntil));
+    window.localStorage.setItem(COOLDOWN_STORAGE_KEY, String(cooldownUntil));
   } catch {
     // Si storage no está disponible, el cooldown en memoria sigue activo.
   }
+}
+
+/**
+ * Calcula el timestamp de cooldown según el `code` estructurado del server.
+ *
+ * - `injection_detected`: cooldown fijo de 6 minutos.
+ * - `rate_limit`: dura lo que indique el header `Retry-After` (segundos);
+ *   si no viene o es inválido, cae al fallback de 6 minutos.
+ * - Otros codes: sin cooldown.
+ *
+ * @example
+ * getCooldownUntil('rate_limit', 3600); // Date.now() + 3_600_000
+ * getCooldownUntil('diff_invalid', NaN); // null
+ */
+function getCooldownUntil(code: ReviewErrorCode | null, retryAfterSeconds: number): number | null {
+  if (code === 'injection_detected') {
+    return Date.now() + INJECTION_COOLDOWN_MS;
+  }
+  if (code === 'rate_limit') {
+    const ms =
+      Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+        ? retryAfterSeconds * 1000
+        : RATE_LIMIT_COOLDOWN_FALLBACK_MS;
+    return Date.now() + ms;
+  }
+  return null;
 }

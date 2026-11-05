@@ -400,4 +400,74 @@ describe('useReviewStream (hook)', () => {
     });
     expect(result.current.state.error).toBe('Cancelado');
   });
+
+  it('429 con code rate_limit activa cooldown según Retry-After', async () => {
+    const errorBody = JSON.stringify({ error: 'Rate limit exceeded', code: 'rate_limit' });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(errorBody, {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', 'Retry-After': '3600' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useReviewStream());
+    await act(async () => {
+      await result.current.start('--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b');
+    });
+
+    expect(result.current.state.status).toBe('error');
+    expect(result.current.state.code).toBe('rate_limit');
+    const cooldown = result.current.state.cooldownUntil;
+    expect(cooldown).toBeGreaterThan(Date.now() + 3_500_000);
+    expect(cooldown).toBeLessThanOrEqual(Date.now() + 3_700_000);
+    expect(Number(window.localStorage.getItem('review:injectionCooldownUntil'))).toBe(cooldown);
+  });
+
+  it('429 rate_limit sin Retry-After válido cae al fallback de 6 minutos', async () => {
+    const errorBody = JSON.stringify({ error: 'Too many requests', code: 'rate_limit' });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(errorBody, {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useReviewStream());
+    await act(async () => {
+      await result.current.start('--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b');
+    });
+
+    expect(result.current.state.status).toBe('error');
+    expect(result.current.state.code).toBe('rate_limit');
+    const cooldown = result.current.state.cooldownUntil;
+    expect(cooldown).toBeGreaterThan(Date.now() + 5.5 * 60 * 1000);
+    expect(cooldown).toBeLessThanOrEqual(Date.now() + 6.1 * 60 * 1000);
+  });
+
+  it('429 con code rate_limit bloquea un start() posterior hasta expirar', async () => {
+    const errorBody = JSON.stringify({ error: 'Rate limit exceeded', code: 'rate_limit' });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(errorBody, {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', 'Retry-After': '3600' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { result } = renderHook(() => useReviewStream());
+    await act(async () => {
+      await result.current.start('--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b');
+    });
+
+    fetchMock.mockClear();
+    await act(async () => {
+      await result.current.start('--- a/x\n+++ b/x\n@@ -1 +1 @@\n-a\n+b');
+    });
+
+    // El cooldown persistido bloquea el nuevo envío sin fetch.
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(result.current.state.status).toBe('error');
+  });
 });

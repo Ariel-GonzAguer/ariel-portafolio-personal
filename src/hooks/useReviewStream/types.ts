@@ -67,7 +67,7 @@ export interface ReviewState {
   code: ReviewErrorCode | null;
   /**
    * Timestamp (ms epoch) hasta el cual el envío queda bloqueado por
-   * cooldown de seguridad tras un intento de prompt injection.
+   * cooldown de seguridad (prompt injection o rate limit).
    * `null` = sin cooldown activo.
    */
   cooldownUntil: number | null;

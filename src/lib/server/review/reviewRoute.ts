@@ -9,6 +9,8 @@ import { isOriginAllowed } from './validate-origin';
 import { SSE_HEADERS, jsonError, withSecurityHeaders } from './security-headers';
 import { checkRateLimit, getRetryAfterHeader } from './rate-limit';
 import { checkInMemoryRateLimit } from './in-memory-rate-limit';
+import { parseBody } from './parse-body';
+import { logRateLimitExceeded } from './log-abuse';
 import { REVIEW_MODEL_ID } from '../../../utils/review-cost/review-cost';
 
 const STREAM_TIMEOUT_MS = 60_000;
@@ -26,27 +28,32 @@ const STREAM_TIMEOUT_MS = 60_000;
  *
  * Flujo de seguridad:
  * 1. Validar origen (CSRF allowlist).
- * 2. Honeypot check.
- * 3. Rate limit (3/día por IP, tolerante a errores de Blobs) +
+ * 2. Parseo estricto del body (Content-Type 415, JSON/tipos 400, H1+H5).
+ * 3. Honeypot check.
+ * 4. Rate limit (3/día por IP, tolerante a errores de Blobs) +
  *    rate limit secundario en memoria (10/min) como red de seguridad.
- * 4. Validar estructura del diff.
- * 5. Detectar prompt injection (rechaza + loguea).
- * 6. Sanitizar el diff.
- * 7. Llamar a openai.responses.stream() con timeout.
- * 8. Devolver SSE.
+ * 5. Validar estructura del diff.
+ * 6. Detectar prompt injection (rechaza + loguea).
+ * 7. Sanitizar el diff.
+ * 8. Llamar a openai.responses.stream() con timeout.
+ * 9. Devolver SSE.
  */
 export async function handleReview(request: Request): Promise<Response> {
   if (!isOriginAllowed(request)) {
     return jsonError('Origin not allowed', 403);
   }
 
-  const body = (await request.json().catch(() => null)) as {
-    diff?: string;
-    website?: boolean;
-  } | null;
+  // H1+H5: validación estricta de Content-Type y tipos antes de usar el body.
+  const parsed = await parseBody(request);
+  if (!parsed.ok) {
+    return jsonError(parsed.error, parsed.status);
+  }
+  const body = parsed.body;
 
-  // Honeypot: si el checkbox oculto está marcado, es un bot.
-  if (body?.website) {
+  // Honeypot: si el campo trampa llega con cualquier valor truthy
+  // (true, "string", etc.), es un bot. Se decide por truthiness sobre el
+  // valor CRUDO: normalizarlo rompería la trampa.
+  if (body.website) {
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: withSecurityHeaders({ 'Content-Type': 'application/json' }),
@@ -63,27 +70,25 @@ export async function handleReview(request: Request): Promise<Response> {
 
   const memLimit = checkInMemoryRateLimit(ip);
   if (!memLimit.allowed) {
+    logRateLimitExceeded(request, ip);
     return jsonError('Too many requests', 429, {
       'Retry-After': String(Math.ceil(memLimit.resetInMs / 1000)),
-    });
+    }, 'rate_limit');
   }
 
   try {
     const rateLimit = await checkRateLimit(ip);
     if (!rateLimit.allowed) {
+      logRateLimitExceeded(request, ip);
       return jsonError('Rate limit exceeded', 429, {
         'Retry-After': getRetryAfterHeader(),
-      });
+      }, 'rate_limit');
     }
   } catch (err) {
     console.warn(
       '[reviewRoute] Rate limit no disponible:',
       err instanceof Error ? err.message : 'unknown',
     );
-  }
-
-  if (!body?.diff) {
-    return jsonError('Diff is required', 400);
   }
 
   const diffValidation = validateDiff(body.diff);

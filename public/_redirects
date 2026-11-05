@@ -1,0 +1,11 @@
+# Normalización de URLs: convención canónica SIN slash final. 
+# `!` fuerza la regla aunque el archivo exista, para
+# que la canonicalización no dependa de quién sirva la ruta (CDN o function).
+# Reglas exact-match: no afectan archivos reales como /RSC/<payload>.js.
+# Si un deploy futuro rompe los payloads RSC internos, remover la línea /RSC/.
+/certificados/     /certificados     301!
+/assets/           /assets           301!
+/.well-known/      /.well-known      301!
+/RSC/              /RSC              301!
+/review/           /review           301!
+/REVIEW            /review           301!

@@ -19,8 +19,7 @@ export interface ParsedReviewBody {
 }
 
 export type ParseBodyResult =
-  | { ok: true; body: ParsedReviewBody }
-  | { ok: false; status: 400 | 415; error: string };
+  { ok: true; body: ParsedReviewBody } | { ok: false; status: 400 | 415; error: string };
 
 /**
  * Valida y parsea el body de una request del reviewer.

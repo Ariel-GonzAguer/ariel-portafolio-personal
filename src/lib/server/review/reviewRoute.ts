@@ -71,18 +71,28 @@ export async function handleReview(request: Request): Promise<Response> {
   const memLimit = checkInMemoryRateLimit(ip);
   if (!memLimit.allowed) {
     logRateLimitExceeded(request, ip);
-    return jsonError('Too many requests', 429, {
-      'Retry-After': String(Math.ceil(memLimit.resetInMs / 1000)),
-    }, 'rate_limit');
+    return jsonError(
+      'Too many requests',
+      429,
+      {
+        'Retry-After': String(Math.ceil(memLimit.resetInMs / 1000)),
+      },
+      'rate_limit',
+    );
   }
 
   try {
     const rateLimit = await checkRateLimit(ip);
     if (!rateLimit.allowed) {
       logRateLimitExceeded(request, ip);
-      return jsonError('Rate limit exceeded', 429, {
-        'Retry-After': getRetryAfterHeader(),
-      }, 'rate_limit');
+      return jsonError(
+        'Rate limit exceeded',
+        429,
+        {
+          'Retry-After': getRetryAfterHeader(),
+        },
+        'rate_limit',
+      );
     }
   } catch (err) {
     console.warn(

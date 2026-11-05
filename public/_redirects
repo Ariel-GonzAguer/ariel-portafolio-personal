@@ -1,11 +1,8 @@
-# Normalización de URLs: convención canónica SIN slash final. 
-# `!` fuerza la regla aunque el archivo exista, para
-# que la canonicalización no dependa de quién sirva la ruta (CDN o function).
-# Reglas exact-match: no afectan archivos reales como /RSC/<payload>.js.
-# Si un deploy futuro rompe los payloads RSC internos, remover la línea /RSC/.
-/certificados/     /certificados     301!
-/assets/           /assets           301!
-/.well-known/      /.well-known      301!
-/RSC/              /RSC              301!
-/review/           /review           301!
-/REVIEW            /review           301!
+# Canonización de mayúsculas (H6 del pentest 2026-11-03).
+# ATENCIÓN: Netlify normaliza el trailing slash ANTES de evaluar reglas
+# (matchea con y sin slash indistintamente). Una regla tipo `/x/  /x  301!`
+# redirige un path a sí mismo y produce el bucle infinito documentado en
+# https://docs.netlify.com/manage/routing/redirects/redirect-options/#trailing-slash.
+# NO agregar reglas de slash: la canonicalización de directorios la hace el
+# propio CDN (una sola 301 hacia la forma sin slash, detectado 2026-11-04).
+/REVIEW  /review  301!

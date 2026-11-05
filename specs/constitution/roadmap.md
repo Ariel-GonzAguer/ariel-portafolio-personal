@@ -2,11 +2,11 @@
 
 ## Phase 1 — Correcciones del pentest 2026-11-03
 
-- [ ] Endurecer `/api/review`: validación estricta de entrada (tipos, Content-Type 415, JSON malformado 400) sin romper honeypots (H1, H5).
-- [ ] Manejar `OPTIONS /api/review` con preflight CORS y allowlist de Origin (H4).
-- [ ] Normalizar redirecciones de rutas de directorio y URLs canónicas sin bucles (H2, H6).
-- [ ] Completar rate limit de costos: 429 con `code` estable, cooldown UX en el cliente y log de abuso (H3).
-- [ ] Suite de regresión del pentest en verde (tests + build local, re-test curl contra deploy).
+- [x] Endurecer `/api/review`: validación estricta de entrada (tipos, Content-Type 415, JSON malformado 400) sin romper honeypots (H1, H5).
+- [x] Manejar `OPTIONS /api/review` con preflight CORS y allowlist de Origin (H4).
+- [x] Normalizar redirecciones de rutas de directorio y URLs canónicas sin bucles (H2, H6).
+- [x] Completar rate limit de costos: 429 con `code` estable, cooldown UX en el cliente y log de abuso (H3).
+- [x] Suite de regresión del pentest en verde (tests + build local; el re-test curl contra deploy quedó en Phase 2).
 
 ## Phase 2 — Verificación en producción y costos
 

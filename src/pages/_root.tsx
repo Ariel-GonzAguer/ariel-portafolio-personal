@@ -15,6 +15,7 @@ export default async function RootElement({ children }: { children: ReactNode })
         <meta name="description" content={siteDescription} />
         <meta name="author" content="Ariel GonzAgüer" />
         <meta name="robots" content="index, follow" />
+        <link rel="icon" type="image/png" href="/images/favicon.png" />
         <title>{siteTitle}</title>
 
         <meta property="og:type" content="website" />

@@ -6,3 +6,6 @@
 # NO agregar reglas de slash: la canonicalización de directorios la hace el
 # propio CDN (una sola 301 hacia la forma sin slash, detectado 2026-11-04).
 /REVIEW  /review  301!
+
+# Favicon: evita el 404 de /favicon.ico (no hay .ico; sirve el PNG existente con su content-type)
+/favicon.ico  /images/favicon.png  200

@@ -1,14 +1,16 @@
 /**
- * Tarifas públicas de OpenAI para gpt-5.6-luna, en USD por 1M tokens.
- * Revisar si cambia el modelo o la página de pricing:
- * https://developers.openai.com/api/docs/models/gpt-5.6-luna
+ * Modelo del gateway Infron para el AI Code Reviewer.
+ * Tarifas publicadas por Infron en USD por 1M tokens:
+ * https://infron.ai/models/deepseek/deepseek-v4.1-flash-1017
  */
-export const REVIEW_MODEL_ID = 'gpt-5.6-luna';
+export const REVIEW_MODEL_ID = 'deepseek/deepseek-v4.1-flash-1017';
 
-const INPUT_USD_PER_MILLION_TOKENS = 0.2;
-const CACHED_INPUT_USD_PER_MILLION_TOKENS = 0.02;
-const CACHE_WRITE_INPUT_MULTIPLIER = 1.25;
-const OUTPUT_USD_PER_MILLION_TOKENS = 1.2;
+const INPUT_USD_PER_MILLION_TOKENS = 0.18;
+// Cache read de DeepSeek ($0.006/1M); varía entre providers del gateway.
+const CACHED_INPUT_USD_PER_MILLION_TOKENS = 0.006;
+// DeepSeek cachea de forma automática: la escritura no se factura.
+const CACHE_WRITE_INPUT_MULTIPLIER = 0;
+const OUTPUT_USD_PER_MILLION_TOKENS = 0.72;
 
 interface ReviewCostUsage {
   inputTokens: number;

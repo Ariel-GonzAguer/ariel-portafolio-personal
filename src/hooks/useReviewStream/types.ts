@@ -26,7 +26,7 @@ export interface ReviewResponse {
 }
 
 /**
- * Uso contabilizado por la Responses API al finalizar el stream.
+ * Uso contabilizado por el proveedor al finalizar el stream.
  * `reasoningTokens` es un desglose de `outputTokens`, por lo que no se suma
  * de nuevo a `totalTokens`.
  */

@@ -6,7 +6,7 @@
 | ----------------------- | ----------------------------- | ---------------------------- | ------------------------------- |
 | Página de inicio        | `src/data/proyectos.ts`       | HTML estático (SSG)          | Waku build (`render: 'static'`) |
 | AI Code Reviewer        | `ReviewForm` (cliente)        | `POST /api/review` (Netlify) | fetch + SSE (ReadableStream)    |
-| Stream del modelo       | OpenAI Responses API          | Cliente (`useReviewStream`)  | SSE: `delta` → `usage` → `done` |
+| Stream del modelo       | Infron Chat Completions      | Cliente (`useReviewStream`)  | SSE: `delta` → `usage` → `done` |
 | Métricas de costo/clima | `usage` (evento SSE)          | `ReviewOutput` (UI)          | `review-cost.ts` + `co2.ts`     |
 | Cooldown de seguridad   | Server (`injection_detected`) | `localStorage` (cliente)     | `review:injectionCooldownUntil` |
 
@@ -68,15 +68,17 @@ Componentes renderizan (única fuente de verdad)
    │      │   - Quitar chars de control (ej: NUL, BEL)
    │      │   - Truncar líneas a 2000 chars (anti token-stuffing)
    │
-   │   h. Llamar a OpenAI Responses API (createStream)
-   │      │   - modelo: gpt-5.6-luna (REVIEW_MODEL_ID)
-   │      │   - instructions: SYSTEM_PROMPT
-   │      │   - text.format: json_schema con REVIEW_SCHEMA, strict: true
+   │   h. Llamar a Infron Chat Completions (createStream)
+   │      │   - baseURL: https://llm.onerouter.pro/v1 (SDK openai)
+   │      │   - modelo: deepseek/deepseek-v4.1-flash-1017 (REVIEW_MODEL_ID)
+   │      │   - messages: SYSTEM_PROMPT (system) + diff (user)
+   │      │   - response_format: json_schema con REVIEW_SCHEMA, strict: true
+   │      │   - stream_options.include_usage + usage.include (uso real)
    │      │   - timeout: 60_000 ms (STREAM_TIMEOUT_MS)
    │
    │   i. Devolver SSE response (createSSEResponse)
    │      │   - Eventos: {type:'delta', text} → {type:'usage', usage} → {type:'done'}
-   │      │   - usage viene de response.completed: inputTokens, cachedInputTokens,
+   │      │   - usage viene del último chunk: inputTokens, cachedInputTokens,
    │      │     cacheWriteInputTokens, outputTokens, reasoningTokens, totalTokens
    │      │   - Headers: SSE_HEADERS + SECURITY_HEADERS
    │
@@ -95,7 +97,7 @@ Componentes renderizan (única fuente de verdad)
    │   - Summary: resumen ejecutivo (2-3 oraciones)
    │   - Findings: cards con severity (critical/high/medium/low/info), category, line, title, explanation, fix
    │   - Impacto climático estimado: calculateReviewCO2Range(totalTokens) → rango gCO₂e
-   │   - Costo API estimado: formatReviewApiCostUSD(usage) → USD (tarifas públicas)
+   │   - Costo API estimado: formatReviewApiCostUSD(usage) → USD (tarifas de Infron)
    │   - Botón copy-to-clipboard del review como JSON
    │   - Countdown cooldown si code === 'injection_detected' (6 min)
    │
@@ -118,7 +120,7 @@ Componentes renderizan (única fuente de verdad)
 │   │                 │              │  + sanitize         │
 │   │ 3. fetch POST   │              │  + createStream     │
 │   │                 │              │  + createSSEResponse│
-│   │                 │              │  + OpenAI API       │
+│   │                 │              │  + Infron API       │
 │   ▼                 │              │  ▼                  │
 │ 4. Leer SSE events  │◄─────────────│ 5. Stream response  │
 │    delta/usage/done │              │    + security hdrs  │
@@ -135,4 +137,4 @@ Componentes renderizan (única fuente de verdad)
 - [Arquitectura general](overview.md)
 - [AI Code Reviewer](../features/ai-code-reviewer.md)
 - [Capas de seguridad](../backend/auth.md)
-- [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses)
+- [Infron Docs — OpenAI-compatible API](https://infron.ai/docs/llm-apis/openai-compatible-api/overview)

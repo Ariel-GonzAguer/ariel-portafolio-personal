@@ -1,5 +1,5 @@
 /**
- * Sanitizador del input del usuario antes de enviarlo a OpenAI.
+ * Sanitizador del input del usuario antes de enviarlo al proveedor de IA.
  *
  * El input del usuario es código que va a parar al prompt del LLM.
  * Aunque validate-diff ya rechaza binarios y headers mal formados,

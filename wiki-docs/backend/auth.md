@@ -1,6 +1,6 @@
 # Capas de seguridad
 
-El AI Code Reviewer implementa **7 capas de seguridad en orden**, cada una actúa como filtro antes de pasar al siguiente paso. Si cualquier capa rechaza la request, el proceso se detiene y no se gasta un token de OpenAI.
+El AI Code Reviewer implementa **7 capas de seguridad en orden**, cada una actúa como filtro antes de pasar al siguiente paso. Si cualquier capa rechaza la request, el proceso se detiene y no se gasta un token en el proveedor de IA.
 
 ## Portada: Capa 0 - Origin check (CSRF)
 
@@ -20,7 +20,7 @@ El AI Code Reviewer implementa **7 capas de seguridad en orden**, cada una actú
 **Archivo**: `reviewRoute.ts`
 
 - Checkbox oculto `<input type="checkbox" name="website" tabIndex={-1} autoComplete="off">` (dentro de un `div` con `position: absolute; left: -9999px; aria-hidden="true"`) que los bots marcan pero los humanos no ven.
-- Si el backend recibe `website: true` → devolver `200` silencioso sin gastar tokens de OpenAI.
+- Si el backend recibe `website: true` → devolver `200` silencioso sin gastar tokens del modelo.
 - **Propósito**: disuadir iteración rápida de bots sin el overhead de reCAPTCHA.
 
 ---
@@ -58,7 +58,7 @@ El AI Code Reviewer implementa **7 capas de seguridad en orden**, cada una actú
   2. ≤ 50 KB (`MAX_DIFF_BYTES = 50_000`; reducido de 100 KB para limitar superficie de ataque)
   3. Headers `--- a/` y `+++ b/` presentes (`/^--- a\/.+/m`, `/^\+\+\+ b\/.+/m`)
   4. No es binario (`/^Binary files /m`)
-- **Propósito**: rechazar antes de gastar tokens en OpenAI con input inválido.
+- **Propósito**: rechazar antes de gastar tokens en el LLM con input inválido.
 
 ---
 
@@ -96,15 +96,17 @@ Neutraliza vectores obvios sin romper diffs legítimos:
 
 ---
 
-## Capa 6: OpenAI Responses API con JSON Schema estricto
+## Capa 6: Infron Chat Completions con JSON Schema estricto
 
 **Archivo**: `src/lib/server/review/reviewRoute.ts` (`createStream`)
 
-- Modelo: `gpt-5.6-luna` (`REVIEW_MODEL_ID` de `src/utils/review-cost/review-cost.ts`)
-- System prompt: `SYSTEM_PROMPT` (6 categorías, 5 severidades, reglas anti-genéricas)
-- Input: `text.format: { type: "json_schema", name: "CodeReview", schema: REVIEW_SCHEMA, strict: true }`
+- Gateway: Infron (`baseURL: https://llm.onerouter.pro/v1`) usando el SDK `openai` en modo Chat Completions
+- Modelo: `deepseek/deepseek-v4.1-flash-1017` (`REVIEW_MODEL_ID` de `src/utils/review-cost/review-cost.ts`)
+- System prompt: `SYSTEM_PROMPT` (6 categorías, 5 severidades, reglas anti-genéricas y contrato de salida con las 3 claves obligatorias)
+- Input: `response_format: { type: "json_schema", json_schema: { name: "CodeReview", schema: REVIEW_SCHEMA, strict: true } }`, más `stream_options: { include_usage: true }` y `usage: { include: true }` para recibir el uso real en el chunk final
 - Timeout: 60_000 ms (`STREAM_TIMEOUT_MS`) — evita colgar la request serverless
-- **API key nunca en bundle**: solo `getServerEnv('OPENAI_API_KEY')` server-side (`getEnv(key) ?? process.env[key]`, con trim; error 500 si está vacía)
+- **API key nunca en bundle**: solo `getServerEnv('INFRON_API_KEY')` server-side (`getEnv(key) ?? process.env[key]`, con trim; error 500 si está vacía)
+- **Nota**: Infron no garantiza la aplicación del `strict` del schema. Como red de seguridad, `SYSTEM_PROMPT` declara explícitamente las 3 claves obligatorias (`summary`, `verdict`, `findings`); verificar con un smoke real si se cambia de proveedor (ver `deployment/troubleshooting.md`).
 
 ---
 
@@ -157,7 +159,7 @@ Solicitud entrante (POST /api/review)
     │
     ├──► Sanitize input (Capa 5) → neutraliza vectores ocultos
     │
-    ├──► OpenAI Responses API (Capa 6) → streaming SSE con usage
+    ├──► Infron Chat Completions (Capa 6) → streaming SSE con usage
     │
     └──► Security headers (Capa 7) → todas las responses
 ```
@@ -166,5 +168,5 @@ Solicitud entrante (POST /api/review)
 
 - [Modelos de datos](database.md)
 - [Plan de documentación](../_plan.md)
-- [OpenAI Docs — Responses API](https://platform.openai.com/docs/api-reference/responses)
+- [Infron Docs — OpenAI-compatible API](https://infron.ai/docs/llm-apis/openai-compatible-api/overview)
 - [OWASP Secure Headers Project](https://cheatsheetseries.owasp.org/cheatsheets/Secure_Headers_Cheat_Sheet.html)

@@ -2,15 +2,15 @@
 
 ## Stack resumido
 
-| Tecnología       | Versión                                | Propósito                                                   |
-| ---------------- | -------------------------------------- | ----------------------------------------------------------- |
-| **Waku**         | `1.0.0-beta.9`                         | React Server Components + React 19                          |
-| **React**        | `19.2.8`                               | Framework UI                                                |
-| **TypeScript**   | `6.0.3`                                | Tipado estricto                                             |
-| **Tailwind CSS** | `4.3.3` (v4)                           | Estilizado utility-first                                    |
-| **OpenAI**       | `openai@^7.7.0`, modelo `gpt-5.6-luna` | Responses API para AI Code Reviewer                         |
-| **Netlify**      | —                                      | Despliegue + Functions + Blobs + Edge Functions (CSP nonce) |
-| **Vitest**       | `4.1.11`                               | Suite de tests (181 tests, 27 archivos)                     |
+| Tecnología       | Versión                                                     | Propósito                                                   |
+| ---------------- | ----------------------------------------------------------- | ----------------------------------------------------------- |
+| **Waku**         | `1.0.0-beta.9`                                              | React Server Components + React 19                          |
+| **React**        | `19.2.8`                                                    | Framework UI                                                |
+| **TypeScript**   | `6.0.3`                                                     | Tipado estricto                                             |
+| **Tailwind CSS** | `4.3.3` (v4)                                                | Estilizado utility-first                                    |
+| **Infron**       | `openai@^7.7.0`, modelo `deepseek/deepseek-v4.1-flash-1017` | Gateway Infron (Chat Completions) para AI Code Reviewer     |
+| **Netlify**      | —                                                           | Despliegue + Functions + Blobs + Edge Functions (CSP nonce) |
+| **Vitest**       | `4.1.11`                                                    | Suite de tests (219 tests, 30 archivos)                   |
 
 ## Mapa rápido de documentos
 
@@ -55,15 +55,15 @@ pnpm deploy:netlify   # audit + test + format:fix + lint + deploy a Netlify
 - **Render estático**: todo el sitio se genera en build (`pnpm build`). El AI Code Reviewer es una página estática que llama a la Netlify Function `/api/review` (API route de Waku servida vía `netlify-functions/serve.js`).
 - **Rutas**: `src/pages/` con `_layout.tsx` (skip link, nav sticky, footer) y `_root.tsx` (shell HTML, meta tags, JSON-LD Person). `getConfig({ render: 'static' })` en las páginas.
 - **Data-driven**: los proyectos y repos vienen de `src/data/proyectos.ts` (single source of truth).
-- **Security in layers**: origin check → honeypot → rate limit (memoria 10/min + Blobs 3/día) → validate diff → detect injection (rechaza) → sanitize → OpenAI Responses API → security headers.
-- **Transparencia de costo/clima**: el reviewer muestra costo API estimado (USD, tarifas públicas de `gpt-5.6-luna`) e impacto climático estimado (rango gCO₂e por tokens), calculados con el `usage` real del stream.
+- **Security in layers**: origin check → honeypot → rate limit (memoria 10/min + Blobs 3/día) → validate diff → detect injection (rechaza) → sanitize → Infron Chat Completions → security headers.
+- **Transparencia de costo/clima**: el reviewer muestra costo API estimado (USD, tarifas de Infron para `deepseek/deepseek-v4.1-flash-1017`) e impacto climático estimado (rango gCO₂e por tokens), calculados con el `usage` real del stream.
 - **Accesibilidad**: skip link, foco visible (`focus-visible:outline-red-400`), `aria-label` descriptivos, contraste AA+, `prefers-reduced-motion` respetado.
 - **Tipografía**: `Lexend_Mega` solo en headings/brand; cuerpo usa fuente nativa del sistema.
 - **Sostenibilidad visible**: `Badge` de WebSiteCarbon en la home.
 
 ## Funcionalidades destacadas
 
-- **AI Code Reviewer** ([features/ai-code-reviewer.md](features/ai-code-reviewer.md)): pega un unified diff y recibe un review técnico estructurado con severidad, categoría y fix sugerido. Construido sobre la Responses API de OpenAI con JSON Schema estricto, streaming en vivo, 7 capas de seguridad, costo API y CO₂ estimados.
+- **AI Code Reviewer** ([features/ai-code-reviewer.md](features/ai-code-reviewer.md)): pega un unified diff y recibe un review técnico estructurado con severidad, categoría y fix sugerido. Construido sobre el gateway Infron (Chat Completions) con JSON Schema estricto, streaming en vivo, 7 capas de seguridad, costo API y CO₂ estimados.
 
 ## Variables de entorno
 
@@ -71,7 +71,7 @@ Todas las variables deben configurarse en **Netlify UI** (Site settings > Enviro
 
 | Variable          | Requerido    | Descripción                          |
 | ----------------- | ------------ | ------------------------------------ |
-| `OPENAI_API_KEY`  | **Sí**       | API key de OpenAI (solo server-side) |
+| `INFRON_API_KEY`  | **Sí**       | API key de Infron (solo server-side) |
 | `ALLOWED_ORIGINS` | No (aditivo) | CSV de orígenes adicionales          |
 
 ## Scripts disponibles
@@ -83,7 +83,7 @@ Todas las variables deben configurarse en **Netlify UI** (Site settings > Enviro
 | `pnpm dev:netlify`    | `netlify dev`                                                                               | Simular entorno Netlify localmente   |
 | `pnpm build`          | `waku build`                                                                                | Build estático (SSG) → `dist/public` |
 | `pnpm start`          | `waku start`                                                                                | Servir build localmente              |
-| `pnpm test`           | `vitest --run`                                                                              | Tests (181 tests, 27 archivos)       |
+| `pnpm test`           | `vitest --run`                                                                              | Tests (219 tests, 30 archivos)       |
 | `pnpm lint`           | `eslint . --ext .ts,.tsx --fix`                                                             | ESLint con autofix                   |
 | `pnpm format:fix`     | `prettier --write .`                                                                        | Prettier auto-fix                    |
 | `pnpm deploy:netlify` | `pnpm audit && pnpm test && pnpm format:fix && pnpm lint && bash scripts/deploy-netlify.sh` | Deploy a Netlify                     |

@@ -76,7 +76,7 @@ Todas las variables deben configurarse en **Netlify UI** (Site settings > Enviro
 
 | Variable                | Requerido    | Descripción                                                                | Default      |
 | ----------------------- | ------------ | -------------------------------------------------------------------------- | ------------ |
-| `OPENAI_API_KEY`        | **Sí**       | API key de OpenAI (solo server-side, vía `getServerEnv`)                   | —            |
+| `INFRON_API_KEY`       | **Sí**       | API key de Infron (solo server-side, vía `getServerEnv`)                   | —            |
 | `ALLOWED_ORIGINS`       | No (aditivo) | CSV de orígenes adicionales (los por defecto siempre se permiten)          | `''` (vacío) |
 | `NODE_ENV`              | No           | Entorno de ejecución (la allowlist localhost solo aplica en `development`) | `production` |
 | `NETLIFY_BLOBS_CONTEXT` | No (auto)    | Contexto de Netlify Blobs (se inicializa automáticamente)                  | —            |

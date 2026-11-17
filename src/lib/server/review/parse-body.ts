@@ -1,7 +1,7 @@
 /**
  * Parser estricto del body de POST /api/review (H1 + H5 del pentest 2026-11-03).
  *
- * Rechaza antes de tocar el rate limit u OpenAI:
+ * Rechaza antes de tocar el rate limit o el proveedor de IA:
  * - Content-Type distinto de `application/json` → 415 (H5).
  * - JSON no parseable → 400.
  * - Body que no es objeto plano (número, string, array, null) → 400.

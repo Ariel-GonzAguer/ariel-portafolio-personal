@@ -118,7 +118,7 @@ describe('ReviewWorkspace', () => {
   });
 
   it('muestra mensaje de error si el stream devuelve un error event', async () => {
-    const chunks = [JSON.stringify({ type: 'error', message: 'OpenAI timeout' })];
+    const chunks = [JSON.stringify({ type: 'error', message: 'Provider timeout' })];
     const fetchMock = vi.fn().mockResolvedValue(sseResponse(chunks));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -132,7 +132,7 @@ describe('ReviewWorkspace', () => {
     fireEvent.click(screen.getByRole('button', { name: /revisar diff/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/openai timeout/i)).toBeInTheDocument();
+      expect(screen.getByText(/provider timeout/i)).toBeInTheDocument();
     });
   });
 

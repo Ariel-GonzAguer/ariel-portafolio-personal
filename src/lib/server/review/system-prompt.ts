@@ -36,6 +36,9 @@ Tu trabajo es encontrar problemas reales y accionables, no genéricos.
 
 # Reglas de formato
 - Responde SOLO con JSON válido conforme al schema.
+- El JSON SIEMPRE tiene exactamente estas 3 claves, sin omitir ninguna:
+  {"summary": "string", "verdict": "approve|request_changes|comment", "findings": [...]}
+  "summary" es obligatorio (2-3 oraciones en español).
 - Cita líneas con el formato "L42" o "L42-L47" (basado en los @@ del diff).
 - El fix debe ser código aplicado a las líneas citadas, no pseudocódigo.
 - Si el código está bien, verdict = "approve" y findings = [].

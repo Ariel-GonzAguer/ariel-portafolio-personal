@@ -15,19 +15,20 @@
 | 9   | Error 403 Origin not allowed           | `validate-origin.ts`                     |
 | 10  | Tests fallan tras cambiar dependencias | `package.json`, `pnpm-lock.yaml`         |
 | 11  | Métricas de CO₂/costo no aparecen      | `useReviewStream.ts`, `ReviewOutput.tsx` |
+| 12  | El JSON del review viene sin `summary` | `system-prompt.ts`, `reviewRoute.ts`      |
 
 ## 1. 502 Bad Gateway en `/api/review`
 
 **Síntoma**: La app carga pero `POST /api/review` devuelve 502.
 
-**Causa**: El stream de OpenAI falló al iniciarse (`createStream` lanzó error), o el wrapper de Waku no está sirviendo la API route.
+**Causa**: El stream de Infron falló al iniciarse (`createStream` lanzó error), o el wrapper de Waku no está sirviendo la API route.
 
 **Solución**:
 
 1. Verificar `openai@^7.7.0` y `@netlify/blobs@^11.0.1` en `package.json`.
-2. Verificar que `OPENAI_API_KEY` esté configurada en Netlify UI (Site settings > Environment variables). Si falta, el handler responde 500 (`Service not configured`).
+2. Verificar que `INFRON_API_KEY` esté configurada en Netlify UI (Site settings > Environment variables). Si falta, el handler responde 500 (`Service not configured`).
 3. Verificar que `netlify-functions/serve.js` importe `dist/server/index.js` correctamente (el build debe generar `dist/server`).
-4. Revisar los logs de la function: `console.error('OpenAI error:', message)` aparece cuando `createStream` falla (responde 502).
+4. Revisar los logs de la function: `console.error('Infron error:', message)` aparece cuando `createStream` falla (responde 502).
 
 **Verificación**: `curl -X POST https://site.com/api/review` con un diff válido devuelve un stream SSE (`Content-Type: text/event-stream`, `X-Accel-Buffering: no`).
 
@@ -83,13 +84,13 @@
 
 ## 5. API key filtrada en el bundle de producción
 
-**Síntoma**: `grep -r "sk-" dist/` encuentra la API key de OpenAI.
+**Síntoma**: `grep -r "sk-" dist/` encuentra la API key de Infron.
 
 **Causa**: La API key se está incluyendo erróneamente en el bundle de cliente.
 
 **Solución**:
 
-1. **Nunca** poner `OPENAI_API_KEY` en variables de cliente (nada de `VITE_`/`PUBLIC_` prefijos).
+1. **Nunca** poner `INFRON_API_KEY` en variables de cliente (nada de `VITE_`/`PUBLIC_` prefijos).
 2. La key debe estar solo en variables de entorno server-side de Netlify.
 3. Revisar `getServerEnv()` en `reviewRoute.ts` — usa `getEnv(key) ?? process.env[key]` y retorna `undefined` si está vacío.
 4. El módulo `reviewRoute.ts` es SERVER-ONLY: nunca importarlo desde componentes cliente (`'use client'`).
@@ -180,7 +181,7 @@
 3. Revisar `package.json` y `pnpm-lock.yaml` por versiones conflictivas.
 4. Si se agregó una dependencia nueva, verificar que no rompa tipos TypeScript (`tsc --noEmit`).
 
-**Verificación**: `pnpm audit` debe devolver 0 vulnerabilidades. `pnpm test` debe pasar con 181/181 tests (27 archivos).
+**Verificación**: `pnpm audit` debe devolver 0 vulnerabilidades. `pnpm test` debe pasar con 219/219 tests (30 archivos).
 
 ---
 
@@ -194,9 +195,27 @@
 
 1. Verificar en DevTools (EventStream) que el servidor emite `{type: 'usage', usage: {...}}` después del último `delta`.
 2. `isReviewUsage` exige que `inputTokens`, `cachedInputTokens ?? 0`, `cacheWriteInputTokens ?? 0`, `outputTokens`, `reasoningTokens` y `totalTokens` sean finitos y ≥ 0.
-3. Si el stream se corta antes de `response.completed`, el evento `usage` nunca se emite (el hook deja `usage: null`).
+3. Si el stream se corta antes del chunk final con `usage`, el evento `usage` nunca se emite (el hook deja `usage: null`).
 
 **Verificación**: En `ReviewOutput.tsx`, `co2Range` y `apiCost` son `null` cuando `usage` es `null`; el bloque condicional `{co2Range && ...}` oculta ambas métricas.
+
+---
+
+## 12. El JSON del review viene sin `summary`
+
+**Síntoma**: el review se renderiza pero el resumen está vacío, o el parser falla. Un smoke real contra Infron devolvió `{"verdict": ..., "findings": [...]}` sin `summary`.
+
+**Causa**: Infron **no garantiza la aplicación del `strict`** de `response_format: { type: 'json_schema', json_schema: { strict: true } }`. El modelo a veces omite campos requeridos del schema. Es un gateway más relajado que OpenAI en este punto.
+
+**Solución**:
+
+1. `SYSTEM_PROMPT` (`src/lib/server/review/system-prompt.ts`) declara explícitamente el contrato de salida: las 3 claves obligatorias `{"summary", "verdict", "findings"}` con su tipo. No quitar ese bloque al editar el prompt.
+2. Si vuelve a pasar, validar las 3 claves en el cliente (`useReviewStream` / `ReviewOutput`) y mostrar un error claro en vez de renderizar un `summary` vacío.
+3. Al cambiar de proveedor o modelo, correr un smoke real: mismo payload que `createStream`, repetir 3-4 corridas (el fallo es intermitente).
+
+**Verificación**: smoke con `chat.completions.create` + `SYSTEM_PROMPT` + `REVIEW_SCHEMA`; 4 corridas seguidas con las 3 claves presentes. (El smoke temporal se crea y se borra: no debe quedar en `pnpm test` porque gasta tokens reales.)
+
+**Verificación del flujo normal**: en DevTools (EventStream), el `delta` final debe ser JSON parseable con las 3 claves.
 
 ---
 

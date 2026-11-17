@@ -4,7 +4,7 @@
  * Antes de este módulo, `OPTIONS /api/review` no estaba exportado en la
  * route de Waku y terminaba en 500. Ahora responde preflight bajo la MISMA
  * allowlist de Origin que POST: un origen no permitido recibe 403, igual
- * que un POST malicioso. El preflight no consume rate limit ni toca OpenAI.
+ * que un POST malicioso. El preflight no consume rate limit ni toca el proveedor de IA.
  */
 
 import { isOriginAllowed } from './validate-origin';

@@ -56,8 +56,8 @@ describe('ReviewOutput', () => {
     );
 
     expect(screen.getByText(/impacto climático estimado: 0\.03–0\.6g CO₂e/i)).toBeInTheDocument();
-    expect(screen.getByText(/costo api estimado: \$0\.00012 usd/i)).toBeInTheDocument();
-    expect(screen.getByText(/el costo usa tarifas públicas de openai/i)).toBeInTheDocument();
+    expect(screen.getByText(/costo api estimado: \$0\.00007 usd/i)).toBeInTheDocument();
+    expect(screen.getByText(/el costo usa las tarifas publicadas por infron/i)).toBeInTheDocument();
   });
 
   it('renderiza un FindingCard por cada finding', () => {

@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import type { ChatCompletionCreateParamsStreaming } from 'openai/resources/chat/completions';
 import { getEnv } from 'waku';
 import { REVIEW_SCHEMA } from './review-schema';
 import { SYSTEM_PROMPT } from './system-prompt';
@@ -16,15 +17,21 @@ import { REVIEW_MODEL_ID } from '../../../utils/review-cost/review-cost';
 const STREAM_TIMEOUT_MS = 60_000;
 
 /**
+ * Gateway Infron: protocolo nativo de OpenAI v1 Chat Completions.
+ * @example "https://llm.onerouter.pro/v1"
+ */
+const INFRON_BASE_URL = 'https://llm.onerouter.pro/v1';
+
+/**
  * Handler del AI Code Reviewer para POST /api/review.
  *
- * SERVER-ONLY: este módulo accede a OPENAI_API_KEY y a Netlify Blobs.
+ * SERVER-ONLY: este módulo accede a INFRON_API_KEY y a Netlify Blobs.
  * Solo se importa desde API routes de Waku (`src/pages/_api/...`).
  * Nunca importar desde componentes cliente (`src/components/...`)
  * o desde hooks cliente (`'use client'`).
  *
- * Sanitiza el input antes de enviarlo a OpenAI y responde con
- * Server-Sent Events (streaming con Responses API).
+ * Sanitiza el input antes de enviarlo a Infron y responde con
+ * Server-Sent Events (streaming con Chat Completions).
  *
  * Flujo de seguridad:
  * 1. Validar origen (CSRF allowlist).
@@ -35,7 +42,7 @@ const STREAM_TIMEOUT_MS = 60_000;
  * 5. Validar estructura del diff.
  * 6. Detectar prompt injection (rechaza + loguea).
  * 7. Sanitizar el diff.
- * 8. Llamar a openai.responses.stream() con timeout.
+ * 8. Llamar a chat.completions.create() con timeout.
  * 9. Devolver SSE.
  */
 export async function handleReview(request: Request): Promise<Response> {
@@ -124,20 +131,20 @@ export async function handleReview(request: Request): Promise<Response> {
   }
   const safeDiff = sanitizeDiff(body.diff);
 
-  const apiKey = getServerEnv('OPENAI_API_KEY');
+  const apiKey = getServerEnv('INFRON_API_KEY');
   if (!apiKey) {
-    console.error('OPENAI_API_KEY is not set');
+    console.error('INFRON_API_KEY is not set');
     return jsonError('Service not configured', 500);
   }
 
-  const client = new OpenAI({ apiKey });
+  const client = new OpenAI({ apiKey, baseURL: INFRON_BASE_URL });
 
   let upstream: Awaited<ReturnType<typeof createStream>>;
   try {
     upstream = await createStream(client, safeDiff);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('OpenAI error:', message);
+    console.error('Infron error:', message);
     return jsonError('Failed to start review stream', 502);
   }
 
@@ -146,38 +153,52 @@ export async function handleReview(request: Request): Promise<Response> {
 
 /**
  * Lee una variable de entorno del servidor usando waku primero, luego process.env.
- * @example getServerEnv("OPENAI_API_KEY")
+ * @example getServerEnv("INFRON_API_KEY")
  */
 function getServerEnv(key: string): string | undefined {
   const value = getEnv(key) ?? process.env[key];
   return value?.trim() || undefined;
 }
 
+/**
+ * Abre el stream de Chat Completions contra Infron.
+ *
+ * Usa `response_format: json_schema` con `strict: true` para que el
+ * modelo devuelva JSON conforme a REVIEW_SCHEMA. Para recibir el usage
+ * real en el último chunk envía los dos flags que documenta Infron:
+ * `stream_options.include_usage` (estándar OpenAI) y `usage.include`.
+ *
+ * @param client Cliente OpenAI apuntando a INFRON_BASE_URL
+ * @param diff Diff ya sanitizado
+ * @example await createStream(client, sanitizedDiff)
+ */
 async function createStream(client: OpenAI, diff: string) {
-  return client.responses.stream(
-    {
-      model: REVIEW_MODEL_ID,
-      instructions: SYSTEM_PROMPT,
-      input: [
-        {
-          role: 'user',
-          content: `Analiza el siguiente unified diff y devuelve un review técnico estructurado conforme al schema.\n\nDiff:\n\`\`\`\n${diff}\n\`\`\``,
-        },
-      ],
-      text: {
-        format: {
-          type: 'json_schema',
-          name: 'CodeReview',
-          schema: REVIEW_SCHEMA,
-          strict: true,
-        },
+  const params: ChatCompletionCreateParamsStreaming & { usage?: { include: boolean } } = {
+    model: REVIEW_MODEL_ID,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content: `Analiza el siguiente unified diff y devuelve un review técnico estructurado conforme al schema.\n\nDiff:\n\`\`\`\n${diff}\n\`\`\``,
+      },
+    ],
+    response_format: {
+      type: 'json_schema',
+      json_schema: {
+        name: 'CodeReview',
+        schema: REVIEW_SCHEMA,
+        strict: true,
       },
     },
-    {
-      // Evita colgar la request serverless si el modelo no responde.
-      timeout: STREAM_TIMEOUT_MS,
-    },
-  );
+    stream: true,
+    stream_options: { include_usage: true },
+    usage: { include: true },
+  };
+
+  return client.chat.completions.create(params, {
+    // Evita colgar la request serverless si el modelo no responde.
+    timeout: STREAM_TIMEOUT_MS,
+  });
 }
 
 function createSSEResponse(upstream: Awaited<ReturnType<typeof createStream>>): Response {
@@ -190,26 +211,26 @@ function createSSEResponse(upstream: Awaited<ReturnType<typeof createStream>>): 
       };
 
       try {
-        for await (const event of upstream) {
-          if (event.type === 'response.output_text.delta') {
-            send({ type: 'delta', text: event.delta });
-          } else if (event.type === 'response.completed') {
-            const usage = event.response.usage;
-            if (usage) {
-              const inputTokenDetails = usage.input_tokens_details as
-                { cached_tokens?: number; cache_write_tokens?: number } | undefined;
-              send({
-                type: 'usage',
-                usage: {
-                  inputTokens: usage.input_tokens,
-                  cachedInputTokens: inputTokenDetails?.cached_tokens ?? 0,
-                  cacheWriteInputTokens: inputTokenDetails?.cache_write_tokens ?? 0,
-                  outputTokens: usage.output_tokens,
-                  reasoningTokens: usage.output_tokens_details.reasoning_tokens,
-                  totalTokens: usage.total_tokens,
-                },
-              });
-            }
+        for await (const chunk of upstream) {
+          const delta = chunk.choices[0]?.delta?.content;
+          if (delta) {
+            send({ type: 'delta', text: delta });
+          }
+          // Con stream_options.include_usage el último chunk trae el
+          // usage real y choices vacío.
+          if (chunk.usage) {
+            const usage = chunk.usage;
+            send({
+              type: 'usage',
+              usage: {
+                inputTokens: usage.prompt_tokens,
+                cachedInputTokens: usage.prompt_tokens_details?.cached_tokens ?? 0,
+                cacheWriteInputTokens: usage.prompt_tokens_details?.cache_write_tokens ?? 0,
+                outputTokens: usage.completion_tokens,
+                reasoningTokens: usage.completion_tokens_details?.reasoning_tokens ?? 0,
+                totalTokens: usage.total_tokens,
+              },
+            });
           }
         }
         send({ type: 'done' });

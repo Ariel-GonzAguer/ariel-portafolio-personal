@@ -1,9 +1,9 @@
 /**
- * JSON Schema estricto para la respuesta de OpenAI.
+ * JSON Schema estricto para la respuesta del modelo.
  *
  * El modelo DEBE devolver un JSON conforme a este schema.
- * `strict: true` en Responses API garantiza que el modelo lo respeta
- * o devuelve un error.
+ * `strict: true` en `response_format: json_schema` pide al gateway
+ * que el modelo lo respete o devuelva un error.
  */
 export const REVIEW_SCHEMA = {
   type: 'object',

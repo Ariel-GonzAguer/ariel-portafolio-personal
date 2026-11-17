@@ -1,17 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { calculateReviewApiCostUSD, formatReviewApiCostUSD } from './review-cost';
+import { REVIEW_MODEL_ID, calculateReviewApiCostUSD, formatReviewApiCostUSD } from './review-cost';
 
 describe('review-cost', () => {
-  it('calcula costo con tokens de entrada y salida de gpt-5.6-luna', () => {
+  it('usa el modelo deepseek de Infron', () => {
+    expect(REVIEW_MODEL_ID).toBe('deepseek/deepseek-v4.1-flash-1017');
+  });
+
+  it('calcula costo con las tarifas de Infron (0.18 input / 0.72 output)', () => {
     expect(
       calculateReviewApiCostUSD({
         inputTokens: 1000,
         outputTokens: 1000,
       }),
-    ).toBeCloseTo(0.0014);
+    ).toBeCloseTo(0.0009);
   });
 
-  it('usa tarifa reducida para input cacheado y multiplicador para cache writes', () => {
+  it('cobra cache read y no cobra cache writes', () => {
     expect(
       calculateReviewApiCostUSD({
         inputTokens: 3000,
@@ -19,10 +23,10 @@ describe('review-cost', () => {
         cacheWriteInputTokens: 1000,
         outputTokens: 1000,
       }),
-    ).toBeCloseTo(0.00167);
+    ).toBeCloseTo(0.000906);
   });
 
   it('formatea costos pequeños sin redondearlos a cero', () => {
-    expect(formatReviewApiCostUSD({ inputTokens: 120, outputTokens: 80 })).toBe('$0.00012 USD');
+    expect(formatReviewApiCostUSD({ inputTokens: 120, outputTokens: 80 })).toBe('$0.00008 USD');
   });
 });

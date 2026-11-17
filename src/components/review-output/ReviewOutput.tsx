@@ -70,8 +70,8 @@ export default function ReviewOutput({ review, usage = null }: ReviewOutputProps
             </p>
           )}
           <p className="text-red-200 text-xs">
-            Rango conservador basado en los tokens procesados por la API. El costo usa tarifas
-            públicas de OpenAI y no incluye impuestos.
+            Rango conservador basado en los tokens procesados por la API. El costo usa las tarifas
+            publicadas por Infron y no incluye impuestos.
           </p>
         </div>
       )}

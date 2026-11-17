@@ -13,7 +13,7 @@
  *
  * El sanitize posterior neutraliza backticks, control chars y líneas
  * largas. Si el input no pasa esta validación, se rechaza antes de
- * gastar tokens en OpenAI.
+ * gastar tokens en el proveedor de IA.
  */
 
 const MAX_DIFF_BYTES = 50_000;

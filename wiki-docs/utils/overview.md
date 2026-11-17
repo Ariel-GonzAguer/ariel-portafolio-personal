@@ -32,10 +32,10 @@ export function calculateReviewCO2Range(totalTokens: number): string {
 
 **Detalles**:
 
-- `totalTokens`: uso final reportado por la Responses API en el evento `usage`; incluye entrada, salida y los tokens de razonamiento que el proveedor contabiliza dentro de la salida.
+- `totalTokens`: uso final reportado por Infron en el evento `usage`; incluye entrada, salida y los tokens de razonamiento que el proveedor contabiliza dentro de la salida.
 - `formatGrams(grams)`: `grams < 0.1 ? grams.toFixed(2) : grams.toFixed(1)`.
-- Es un **rango proxy conservador** para inferencia de LLM con infraestructura completa (gCO₂e por mil tokens), no una medición de OpenAI ni del modelo desplegado.
-- El extremo alto (`2.85`) se redondea de la estimación de ciclo de vida publicada por Mistral para una respuesta de 400 tokens (`1.14` gCO₂e). El extremo bajo conserva un escenario de serving eficiente con infraestructura. Debe revisarse si OpenAI publica factores propios.
+- Es un **rango proxy conservador** para inferencia de LLM con infraestructura completa (gCO₂e por mil tokens), no una medición del proveedor ni del modelo desplegado.
+- El extremo alto (`2.85`) se redondea de la estimación de ciclo de vida publicada por Mistral para una respuesta de 400 tokens (`1.14` gCO₂e). El extremo bajo conserva un escenario de serving eficiente con infraestructura. Debe revisarse si el proveedor publica factores propios.
 - El resultado se muestra en `ReviewOutput.tsx` dentro de `<p aria-label="Impacto climático estimado">`.
 
 ---
@@ -43,12 +43,12 @@ export function calculateReviewCO2Range(totalTokens: number): string {
 ## `src/utils/review-cost/review-cost.ts` — Estimación de costo API
 
 ```typescript
-export const REVIEW_MODEL_ID = 'gpt-5.6-luna';
+export const REVIEW_MODEL_ID = 'deepseek/deepseek-v4.1-flash-1017';
 
-const INPUT_USD_PER_MILLION_TOKENS = 0.2;
-const CACHED_INPUT_USD_PER_MILLION_TOKENS = 0.02;
-const CACHE_WRITE_INPUT_MULTIPLIER = 1.25;
-const OUTPUT_USD_PER_MILLION_TOKENS = 1.2;
+const INPUT_USD_PER_MILLION_TOKENS = 0.18;
+const CACHED_INPUT_USD_PER_MILLION_TOKENS = 0.006;
+const CACHE_WRITE_INPUT_MULTIPLIER = 0;
+const OUTPUT_USD_PER_MILLION_TOKENS = 0.72;
 
 export function calculateReviewApiCostUSD(usage: ReviewCostUsage): number;
 export function formatReviewApiCostUSD(usage: ReviewCostUsage): string;
@@ -56,21 +56,21 @@ export function formatReviewApiCostUSD(usage: ReviewCostUsage): string;
 
 **Interface `ReviewCostUsage`** (subconjunto de `ReviewUsage`):
 
-| Campo                   | Tipo     | Descripción                                       |
-| ----------------------- | -------- | ------------------------------------------------- |
-| `inputTokens`           | `number` | Tokens de entrada reportados por la Responses API |
-| `outputTokens`          | `number` | Tokens de salida reportados por la Responses API  |
-| `cachedInputTokens`     | `number` | Opcional. Tokens de entrada servidos desde cache  |
-| `cacheWriteInputTokens` | `number` | Opcional. Tokens de entrada escritos a cache      |
+| Campo                   | Tipo     | Descripción                                      |
+| ----------------------- | -------- | ------------------------------------------------ |
+| `inputTokens`           | `number` | Tokens de entrada reportados por Infron          |
+| `outputTokens`          | `number` | Tokens de salida reportados por Infron           |
+| `cachedInputTokens`     | `number` | Opcional. Tokens de entrada servidos desde cache |
+| `cacheWriteInputTokens` | `number` | Opcional. Tokens de entrada escritos a cache     |
 
-**Cálculo** (tarifas públicas de `gpt-5.6-luna` por 1M tokens):
+**Cálculo** (tarifas de Infron por 1M tokens, `0.18` input / `0.72` output / `0.006` cache read):
 
 ```
 standardInput = max(0, inputTokens - cachedInput - cacheWrite)
-costo = standardInput * 0.20
-      + cachedInput  * 0.02
-      + cacheWrite   * 0.20 * 1.25
-      + output       * 1.20
+costo = standardInput * 0.18
+      + cachedInput  * 0.006
+      + cacheWrite   * 0        // DeepSeek cachea de forma automática: sin cargo
+      + output       * 0.72
 ```
 
 - `cachedInputTokens` se acota a `min(cached, inputTokens)`; `cacheWriteInputTokens` a `min(cacheWrite, inputTokens - cached)`.

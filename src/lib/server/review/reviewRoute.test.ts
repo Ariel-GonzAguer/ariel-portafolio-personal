@@ -4,19 +4,17 @@ import { _resetInMemoryRateLimit } from './in-memory-rate-limit';
 const mockStream = {
   [Symbol.asyncIterator]: async function* () {
     // Simula 3 deltas de un JSON que se va construyendo pieza por pieza.
-    yield { type: 'response.output_text.delta', delta: '{"summary":' };
-    yield { type: 'response.output_text.delta', delta: '"test",' };
-    yield { type: 'response.output_text.delta', delta: '"verdict":"approve","findings":[]}' };
+    yield { choices: [{ delta: { content: '{"summary":' } }] };
+    yield { choices: [{ delta: { content: '"test",' } }] };
+    yield { choices: [{ delta: { content: '"verdict":"approve","findings":[]}' } }] };
     yield {
-      type: 'response.completed',
-      response: {
-        usage: {
-          input_tokens: 120,
-          input_tokens_details: { cached_tokens: 20, cache_write_tokens: 10 },
-          output_tokens: 80,
-          total_tokens: 200,
-          output_tokens_details: { reasoning_tokens: 40 },
-        },
+      choices: [],
+      usage: {
+        prompt_tokens: 120,
+        prompt_tokens_details: { cached_tokens: 20, cache_write_tokens: 10 },
+        completion_tokens: 80,
+        completion_tokens_details: { reasoning_tokens: 40 },
+        total_tokens: 200,
       },
     };
   },
@@ -25,8 +23,10 @@ const mockStream = {
 
 vi.mock('openai', () => {
   class FakeOpenAI {
-    responses = {
-      stream: vi.fn().mockReturnValue(mockStream),
+    chat = {
+      completions: {
+        create: vi.fn().mockReturnValue(mockStream),
+      },
     };
   }
   return { default: FakeOpenAI };
@@ -73,7 +73,7 @@ const makeRequest = (method: string, body?: unknown, origin = 'http://localhost:
 
 describe('handleReview (streaming)', () => {
   beforeEach(() => {
-    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.INFRON_API_KEY = 'test-key';
     // Los tests asumen entorno de dev para que localhost sea un origin válido.
     process.env.NODE_ENV = 'development';
     _resetInMemoryRateLimit();
@@ -100,8 +100,8 @@ describe('handleReview (streaming)', () => {
     expect(res.status).toBe(400);
   });
 
-  it('devuelve 500 si OPENAI_API_KEY no está seteada', async () => {
-    delete process.env.OPENAI_API_KEY;
+  it('devuelve 500 si INFRON_API_KEY no está seteada', async () => {
+    delete process.env.INFRON_API_KEY;
     const res = await handleReview(makeRequest('POST', { diff: validDiff }));
     expect(res.status).toBe(500);
   });
@@ -197,7 +197,7 @@ describe('handleReview (streaming)', () => {
     warn.mockRestore();
   });
 
-  it('sanitiza triple backticks antes de enviar a OpenAI', async () => {
+  it('sanitiza triple backticks antes de enviar a Infron', async () => {
     const diffWithFences = `--- a/x
 +++ b/x
 @@ -1 +1 @@
@@ -271,7 +271,7 @@ describe('handleReview (streaming)', () => {
     expect(res.status).toBe(200);
     const data = (await res.json()) as { ok: boolean };
     expect(data.ok).toBe(true);
-    // No debe llamar al rate limit ni a OpenAI.
+    // No debe llamar al rate limit ni al proveedor de IA.
     expect(mockRateLimit).not.toHaveBeenCalled();
   });
 
@@ -314,7 +314,7 @@ describe('handleReview (streaming)', () => {
   it('429 por el límite en memoria con code rate_limit (11ª request en 1 min)', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     // 10 requests consumen el bucket en memoria (fallan después en
-    // validateDiff con 400; no llegan a OpenAI).
+    // validateDiff con 400; no llegan al proveedor de IA).
     for (let i = 0; i < 10; i++) {
       const res = await handleReview(makeRequest('POST', { diff: 'no es diff' }));
       expect(res.status).toBe(400);

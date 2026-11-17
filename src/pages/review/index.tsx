@@ -7,8 +7,8 @@ import ViewTransitionBoundary from '../../components/ViewTransitionBoundary';
  * Server component: prerenderiza el shell (heading, copy).
  * El workspace interactivo es un client component separado (ReviewWorkspace).
  *
- * FASE 1: UI completa con mock de respuesta. Aún no llama a OpenAI.
- * FASE 2: el handler real en /api/review llamará a Responses API.
+ * FASE 1: UI completa con mock de respuesta.
+ * FASE 2: el handler real en /api/review llama a Infron Chat Completions.
  * FASE 4: streaming con useReviewStream.
  */
 export default function ReviewPage() {
@@ -18,7 +18,7 @@ export default function ReviewPage() {
         <title>AI Code Reviewer | Ariel GonzAgüer</title>
         <meta
           name="description"
-          content="Pega un unified diff y recibe review técnico estructurado con severidad, categoría y fix sugerido, generado con la Responses API de OpenAI."
+          content="Pega un unified diff y recibe review técnico estructurado con severidad, categoría y fix sugerido, generado con el gateway Infron."
         />
       </>
       <main id="main" className="px-6 py-20">
@@ -31,8 +31,7 @@ export default function ReviewPage() {
           </ViewTransitionBoundary>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-gris-claro">
             Pega un diff y recibe feedback técnico estructurado: severidad, categoría, explicación y
-            fix concreto. Streaming en vivo desde la Responses API de OpenAI con JSON Schema
-            estricto.
+            fix concreto. Streaming en vivo desde el gateway Infron con JSON Schema estricto.
           </p>
           <aside
             aria-label="Aviso de seguridad y privacidad"
@@ -46,7 +45,7 @@ export default function ReviewPage() {
               literal del diff no se loguea.
             </p>
             <p className="mt-2 text-xs text-white/50">
-              El diff completo se envía a OpenAI únicamente para generar el review y no se conserva
+              El diff completo se envía al proveedor de IA únicamente para generar el review y no se conserva
               en este servicio más allá de la respuesta.
             </p>
           </aside>
@@ -56,11 +55,11 @@ export default function ReviewPage() {
             </summary>
 
             <p className="mt-2 text-center text-gris-claro">
-              Este AI Code Reviewer utiliza el modelo GPT 5.6 Luna de OpenAI. Podés usarla un máximo
-              de 3 veces por día. Te dará retroalimentación enfocada en cinco categorías: seguridad,
-              performance, type-safety, mantenibilidad y accesibilidad, y te dirá si hay riesgos,
-              catalogándolos como <code>critical</code>, <code>high</code>, <code>medium</code>,{' '}
-              <code>low</code>, <code>info</code>.
+              Este AI Code Reviewer utiliza el modelo DeepSeek V4.1 Flash a través del gateway
+              Infron. Podés usarla un máximo de 3 veces por día. Te dará retroalimentación enfocada
+              en seis categorías: seguridad, performance, type-safety, accesibilidad, corrección y
+              mantenibilidad, y te dirá si hay riesgos, catalogándolos como <code>critical</code>,{' '}
+              <code>high</code>, <code>medium</code>, <code>low</code>, <code>info</code>.
             </p>
             <p className="mt-2 text-center text-gris-claro">
               Para poder usarla, necesitás marcar la casilla que dice `Los gatos son geniales`.

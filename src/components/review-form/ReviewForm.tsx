@@ -79,7 +79,7 @@ function useTickingNow(): number {
  * - Visible: "Los gatos son geniales" (requerido para enviar).
  * - Oculto: checkbox con name="website" que los bots marcan pero los
  *   humanos no ven. Si el backend recibe `website: true`, devuelve
- *   200 silencioso sin gastar tokens de OpenAI.
+ *   200 silencioso sin gastar tokens del modelo.
  *
  * FASE 5 (seguridad): el botón se deshabilita durante el cooldown que
  * activa el padre cuando el server detecta prompt injection. El

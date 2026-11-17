@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-08T16:15:00Z",
-  "command": "complete-documentation",
-  "gitHead": "03392357b9b236eb3bb1e11cba5a5f7d85f2abe2",
+  "updatedAt": "2026-11-16T18:10:00Z",
+  "command": "update-documentation",
+  "gitHead": "379775f07647fc53443827d04e9886ae1a2c12c4",
   "filesCreated": 0,
-  "filesUpdated": 14,
+  "filesUpdated": 12,
   "directoriesCreated": 0
 }

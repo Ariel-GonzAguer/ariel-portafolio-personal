@@ -69,7 +69,7 @@ export interface RepoOpenSource {
 | `monthly-cat-friend` | Monthly Cat Friend            | Producto con IA     | OpenAI SDK, Waku, Firebase, PWA                           | (privado)                                            |
 | `mandarino`          | Mandarino                     | Chatbot LLM         | OpenAI API, Netlify Functions, React                      | https://gatorojolab.com                              |
 | `skills-agentes`     | Skills y workflows de agentes | Workflow de agentes | OpenCode, CommandCode, Skills, MCP                        | https://github.com/Ariel-GonzAguer/skills-and-agents |
-| `ai-code-reviewer`   | AI Code Reviewer              | Producto con IA     | OpenAI Responses API, Waku, Netlify Functions, TypeScript | https://arielgonzaguer.gatorojolab.com/review        |
+| `ai-code-reviewer`   | AI Code Reviewer              | Producto con IA     | Infron, Waku, Netlify Functions, TypeScript                | https://arielgonzaguer.gatorojolab.com/review        |
 | `patchwork`          | Patchwork - WebMCP            | Producto con IA     | WebMCP, OpenAI, Google, Michi-Router                      | https://patchwork-webmcp-challenge.netlify.app/      |
 
 #### `openSource` (4 repositorios públicos verificables)
@@ -148,7 +148,7 @@ type ReviewErrorCode =
 
 Codes estables que el server puede devolver en `{ error, code }`. El cliente los usa para reaccionar distinto según el tipo (ej. prompt injection → alert + vaciar textarea + cooldown vs error genérico). Actualmente solo `injection_detected` se emite explícitamente desde `reviewRoute.ts`.
 
-### `ReviewResponse` (schema JSON devuelto por OpenAI)
+### `ReviewResponse` (schema JSON devuelto por el modelo)
 
 ```typescript
 interface ReviewResponse {
@@ -190,20 +190,20 @@ export function calculateReviewCO2Range(totalTokens: number): string {
 }
 ```
 
-`totalTokens` incluye entrada, salida y los tokens de razonamiento que el proveedor contabiliza dentro de la salida. Es un rango proxy conservador para inferencia de LLM con infraestructura completa (el extremo alto se redondea de la estimación de Mistral), no una medición de OpenAI.
+`totalTokens` incluye entrada, salida y los tokens de razonamiento que el proveedor contabiliza dentro de la salida. Es un rango proxy conservador para inferencia de LLM con infraestructura completa (el extremo alto se redondea de la estimación de Mistral), no una medición del proveedor.
 
 ### Flujo de costo API
 
-El costo estimado se calcula en el cliente con el mismo `usage` (`src/utils/review-cost/review-cost.ts`), separando entrada, entrada cacheada, cache writes y salida. Para `gpt-5.6-luna`, las tarifas públicas son:
+El costo estimado se calcula en el cliente con el mismo `usage` (`src/utils/review-cost/review-cost.ts`), separando entrada, entrada cacheada, cache writes y salida. Para `deepseek/deepseek-v4.1-flash-1017`, las tarifas de Infron son:
 
 | Componente   | Tarifa USD / 1M tokens |
 | ------------ | ---------------------- |
-| Input        | `$0.20`                |
-| Cached input | `$0.02`                |
-| Cache write  | `$0.20 × 1.25`         |
-| Output       | `$1.20`                |
+| Input        | `$0.18`                |
+| Cached input | `$0.006`               |
+| Cache write  | `$0` (auto-cache)      |
+| Output       | `$0.72`                |
 
-La UI lo muestra como estimación porque usa tarifas públicas en código, no el ledger de facturación de OpenAI ni impuestos.
+La UI lo muestra como estimación porque usa tarifas en código, no el ledger de facturación de Infron ni impuestos.
 
 ---
 

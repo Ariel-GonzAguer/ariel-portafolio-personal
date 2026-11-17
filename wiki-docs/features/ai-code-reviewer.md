@@ -1,12 +1,12 @@
 # AI Code Reviewer
 
-Pega un unified diff y recibe un review técnico estructurado con severidad, categoría y fix sugerido, construido sobre la Responses API de OpenAI con JSON Schema estricto y streaming en vivo. Es el producto prioritario #1 del portafolio y demuestra criterio de ingeniería real, no "llamar a ChatGPT".
+Pega un unified diff y recibe un review técnico estructurado con severidad, categoría y fix sugerido, construido sobre el gateway Infron (Chat Completions) con JSON Schema estricto y streaming en vivo. Es el producto prioritario #1 del portafolio y demuestra criterio de ingeniería real, no "llamar a ChatGPT".
 
 ## ¿Qué es y por qué está aquí?
 
 **Contexto de negocio**: El AI Code Reviewer es el proyecto prioritario #1 del portafolio personal de Ariel GonzAgüer. Fue implementado para demostrar criterio de ingeniería real al revisar código — no simplemente "llamar a ChatGPT", sino construir un sistema completo con patrones de seguridad adecuados, validación de input, streaming SSE y manejo de edge cases. Es 100% nuevo en el portafolio: no hay nada similar en la sección IA actual. Reutiliza los patrones de seguridad ya establecidos en el proyecto (honeypot, rate limit, injection detection, sanitization, origin check, security headers). El output visualmente impactante (findings con badges de color, verdict estilo GitHub) lo hace ideal para demos en vivo.
 
-**Además de la transparencia de costo y clima**: desde los commits `61afc15`–`e423868`, la UI muestra el **costo API estimado en USD** (tarifas públicas del modelo) y el **impacto climático estimado en gCO₂e** (rango proxy por tokens), calculados con el uso real que la Responses API reporta al final del stream. Esto alinea la demo con el posicionamiento de sostenibilidad del portafolio.
+**Además de la transparencia de costo y clima**: desde los commits `61afc15`–`e423868`, la UI muestra el **costo API estimado en USD** (tarifas de Infron para el modelo) y el **impacto climático estimado en gCO₂e** (rango proxy por tokens), calculados con el uso real que Infron reporta al final del stream. Esto alinea la demo con el posicionamiento de sostenibilidad del portafolio.
 
 ## Cómo funciona (flujo técnico)
 
@@ -45,7 +45,7 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
    │
    │   g. Sanitizar input (sanitize.ts): escape triple backticks, quitar chars de control, truncar líneas a 2000 chars
    │
-   │   h. Llamar a OpenAI Responses API: gpt-5.6-luna, SYSTEM_PROMPT, REVIEW_SCHEMA (json_schema, strict: true)
+   │   h. Llamar a Infron Chat Completions: deepseek/deepseek-v4.1-flash-1017, SYSTEM_PROMPT, REVIEW_SCHEMA (json_schema, strict: true)
    │
    │   i. Devolver SSE: eventos delta → usage (tokens) → done, con security headers
    │
@@ -75,8 +75,8 @@ Diagrama ASCII del flujo completo, desde el trigger hasta el resultado:
 
 | Archivo                                          | Rol en esta funcionalidad                                                                                                           |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `src/lib/server/review/reviewRoute.ts`           | Handler principal (`handleReview`) con SSE y 7 capas de seguridad; emite evento `usage` desde `response.completed`                  |
-| `src/lib/server/review/system-prompt.ts`         | System prompt del revisor (6 categorías, 5 severidades, reglas anti-genéricas)                                                      |
+| `src/lib/server/review/reviewRoute.ts`           | Handler principal (`handleReview`) con SSE y 7 capas de seguridad; emite evento `usage` desde el último chunk del stream            |
+| `src/lib/server/review/system-prompt.ts`         | System prompt del revisor (6 categorías, 5 severidades, reglas anti-genéricas, contrato de salida de 3 claves)                      |
 | `src/lib/server/review/review-schema.ts`         | JSON Schema estricto (CodeReview: summary, findings, verdict)                                                                       |
 | `src/lib/server/review/validate-diff.ts`         | Valida estructura del diff: vacío, ≤50 KB, headers `--- a/` / `+++ b/`, no binario                                                  |
 | `src/lib/server/review/sanitize.ts`              | Neutraliza vectores: escape ```, quita chars de control, trunca líneas a 2000 chars                                                 |
@@ -143,8 +143,8 @@ interface ReviewUsage {
 }
 ```
 
-- `reasoningTokens` es un desglose de `outputTokens` (`usage.output_tokens_details.reasoning_tokens`), por lo que NO se suma de nuevo a `totalTokens`.
-- El evento SSE `usage` llega desde `response.completed` en `reviewRoute.ts`.
+- `reasoningTokens` es un desglose de `outputTokens` (`usage.completion_tokens_details.reasoning_tokens`), por lo que NO se suma de nuevo a `totalTokens`.
+- El evento SSE `usage` llega desde el último chunk del stream (`stream_options.include_usage` + `usage.include`).
 - El hook valida con `isReviewUsage()` que todos los campos sean finitos y ≥ 0.
 
 ### `ReviewForm` props
@@ -197,7 +197,7 @@ interface Finding {
 
 | Librería         | Versión        | Propósito                                                         |
 | ---------------- | -------------- | ----------------------------------------------------------------- |
-| `openai`         | `^7.7.0`       | Cliente oficial OpenAI (Responses API, streaming)                 |
+| `openai`         | `^7.7.0`       | SDK de OpenAI usado como cliente compatible con el gateway Infron (Chat Completions, streaming) |
 | `@netlify/blobs` | `^11.0.1`      | Almacenamiento para rate limit diario (rate-limit.ts)             |
 | `shiki`          | `^4.4.3`       | Syntax highlighting del fix en la UI (CodeBlock)                  |
 | `dompurify`      | `^3.4.14`      | Sanitización del HTML de shiki antes de `dangerouslySetInnerHTML` |
@@ -207,8 +207,9 @@ interface Finding {
 
 ## Limitaciones y consideraciones
 
-- **Costo de OpenAI**: modelo `gpt-5.6-luna`; la UI muestra costo estimado con tarifas públicas y tokens reales reportados por la API. El rate limit de 3 requests/día por IP evita gastos descontrolados en demo pública.
-- **Cálculo de CO₂**: rango proxy basado en tokens (`0.15–2.85` gCO₂e por mil tokens), no una medición de OpenAI. El extremo alto se redondea de la estimación de Mistral. Debe revisarse si OpenAI publica factores propios.
+- **Costo de Infron**: modelo `deepseek/deepseek-v4.1-flash-1017` (`0.18` input / `0.72` output por 1M tokens); la UI muestra costo estimado con esas tarifas y tokens reales reportados por la API. El rate limit de 3 requests/día por IP evita gastos descontrolados en demo pública.
+- **Schema no garantizado por el gateway**: Infron no aplica el `strict` del `response_format: json_schema`. `SYSTEM_PROMPT` declara explícitamente las 3 claves obligatorias (`summary`, `verdict`, `findings`) como red de seguridad; verificar con un smoke real al cambiar de modelo o proveedor.
+- **Cálculo de CO₂**: rango proxy basado en tokens (`0.15–2.85` gCO₂e por mil tokens), no una medición del proveedor. El extremo alto se redondea de la estimación de Mistral. Debe revisarse si el proveedor publica factores propios.
 - **Timeout de Netlify**: el stream tiene timeout de 60_000 ms en el cliente (`STREAM_TIMEOUT_MS`). Si el review es muy largo, el modelo puede cortar antes del límite del plan de Netlify.
 - **CSP**: la edge function `netlify/edge-functions/csp-nonce.ts` incluye `connect-src 'self'`, que cubre el fetch a `/api/review` desde el mismo origen.
 - **Prompt injection**: las 7 patrones con `flex()` toleran `snake_case`, `kebab-case` y separadores variables. El handler ahora RECHAZA la request (400 + `injection_detected`) en vez de solo loguear. Aun así, no se puede garantizar al 100% que un usuario no intente inyectar instrucciones.
@@ -220,8 +221,8 @@ interface Finding {
 
 ## Referencias
 
-- [OpenAI Docs — Responses API](https://platform.openai.com/docs/api-reference/responses)
-- [OpenAI Cookbook — Structured outputs](https://cookbook.openai.com/examples/structured_outputs_intro)
+- [Infron Docs — OpenAI-compatible API](https://infron.ai/docs/llm-apis/openai-compatible-api/overview)
+- [Infron Docs — Streaming](https://infronai.gitbook.io/docs/llm-apis/api-guides/streaming)
 - [Netlify Docs — Streaming function responses](https://docs.netlify.com/build/functions/streaming-functions/)
 - [Netlify Docs — Blobs storage](https://docs.netlify.com/build/data-and-storage/netlify-blobs/)
 - [OWASP Input Validation Cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)

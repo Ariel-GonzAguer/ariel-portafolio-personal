@@ -17,7 +17,7 @@ Para ver el sitio de mi estudio de Desarrollo web visite → [gatorojolab.com](h
 - Tailwind CSS v4
 - Vitest + Testing Library (149 tests)
 - Netlify Functions + Netlify Blobs
-- OpenAI Responses API (streaming SSE)
+- Infron (Chat Completions, streaming SSE)
 
 ## Secciones
 
@@ -36,7 +36,7 @@ Para ver el sitio de mi estudio de Desarrollo web visite → [gatorojolab.com](h
 
 Producto público en [/review](https://arielgonzaguer.gatorojolab.com/review): pega un unified diff y recibe review técnico estructurado con severidad, categoría y fix sugerido.
 
-**Stack**: OpenAI Responses API (`gpt-5.6-luna`) + JSON Schema estricto + streaming SSE.
+**Stack**: Infron (`deepseek/deepseek-v4.1-flash-1017`) + JSON Schema estricto + streaming SSE.
 
 **Seguridad**:
 
